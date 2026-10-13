@@ -1,0 +1,1111 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Operator - Assign Akta PF {% endblock %}
+
+{% block content %}
+
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Perubahan Fidusia</a></li>
+                            <li class="breadcrumb-item active">Akta Notaris PF</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-md-6 col-12 mb-2">
+                                        <h4 class="mb-2">Akta Notaris PF</h4>
+                                        {% if not is_notaris and not is_warkah %}
+                                        <button id="btnGenerateAkta" class="btn btn-primary px-4">Generate Akta</button>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="d-flex flex-wrap align-items-center justify-content-md-end gap-2">
+                                            <div class="d-flex flex-column">
+                                                <label for="startDate" class="form-label mb-1">Start Date</label>
+                                                <input type="date" id="startDate" class="form-control" style="max-width: 180px;">
+                                            </div>
+                                            <div class="d-flex flex-column ml-2">
+                                                <label for="endDate" class="form-label mb-1">End Date</label>
+                                                <input type="date" id="endDate" class="form-control" style="max-width: 180px;">
+                                            </div>
+                                            <div class="d-flex flex-column justify-content-end ml-1">
+                                                <label class="form-label invisible mb-1">.</label> <!-- spacer -->
+                                                <button id="btnExport" class="btn btn-primary">Unduh</button>
+                                            </div>
+                                            {% if not is_notaris and not is_warkah %}
+                                            <div class="d-flex flex-column justify-content-end ml-1">
+                                                <label class="form-label invisible mb-1">.</label> <!-- spacer -->
+                                                <button id="btnExportAll" class="btn btn-primary">Unduh Template</button>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-body"> 
+                                    <div id="loading-overlay" style="display: none;position: fixed;top: 0;left: 0;width: 100vw;height: 100vh;background: rgba(255, 255, 255, 0.6);z-index: 1050; cursor: wait;"></div>
+                                    
+                                    <!-- Spinner loading (sudah kamu punya) -->
+                                    <div id="loading-message" style="display: none;position: fixed;z-index: 1060;top: 50%;left: 50%;transform: translate(-50%, -50%);text-align: center;display: flex;flex-direction: column;align-items: center;">
+                                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                                        <div style="margin-top: 10px; font-weight: bold;">Loading data...</div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table id="consumerTable" class="display table table-striped">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Aksi</th>
+                                                    <th>Notaris</th>
+                                                    <th>Nomor Perjanjian</th>
+                                                    <th>Nama Debitur</th>
+                                                    <th>Nomor Akta</th>
+                                                    <th>Tanggal Akta</th>
+                                                    <th>Waktu Akta</th>
+                                                    <th>Kode Voucher</th>
+                                                    <th>Nomor Sertifikat</th>
+                                                    <th>Tanggal Sertifikat</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Diisi otomatis via DataTables -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="modalCreate" tabindex="-1" aria-labelledby="modalCreateLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Tambah Konsumen</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                                </div>
+                                                <div class="modal-body" id="modalCreateBody">
+                                                    <!-- Form dinamis akan dimasukkan via JS -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- View Modal -->
+                                    <div class="modal fade" id="modalView" tabindex="-1" aria-labelledby="modalViewLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-info text-white">
+                                                    <h5 class="modal-title" id="modalViewLabel"><i class="fas fa-eye"></i> Detail Data Konsumen</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body" id="modalViewBody">
+                                                    <!-- Data detail akan dimuat lewat JS -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Modal Generate Akta -->
+                                    <div class="modal fade" id="modalGenerateAkta" tabindex="-1" role="dialog" aria-labelledby="generateAktaLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Generate Akta</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="formGenerateAkta">
+                                                        <input type="hidden" id="legalDocId">
+                                                        <input type="hidden" id="consumerId">
+                                                        
+                                                        <div class="form-group">
+                                                            <label for="notaris">Notaris</label>
+                                                            <select id="notaris" class="form-control">
+                                                                <option value="">Pilih Notaris</option>
+                                                                <!-- Populate dengan JS -->
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="form-group">
+                                                            <label for="nomorAwal">Nomor Awal Akta</label>
+                                                            <input type="text" id="nomorAwal" class="form-control" placeholder="Nomor Awal Akta">
+                                                        </div>
+                                                        
+                                                        <div class="form-group">
+                                                            <label for="nomorAkhir">Nomor Akhir Akta</label>
+                                                            <input type="text" id="nomorAkhir" class="form-control" placeholder="Nomor Akhir Akta">
+                                                        </div>
+                                                        
+                                                        <div class="form-group">
+                                                            <label for="jamMulai">Jam Mulai</label>
+                                                            <input type="time" id="jamMulai" class="form-control">
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-primary" id="generateAktaBtn">
+                                                        <i class="fa fa-power-off"></i> Generate Akta
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Edit Modal -->
+                                    <div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-warning">
+                                                    <h5 class="modal-title" id="modalEditLabel"><i class="fas fa-pencil-alt"></i> Edit Data</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body" id="modalEditBody">
+                                                    <!-- Form edit akan dimuat lewat JS -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Revisi Modal -->
+                                    <div class="modal fade" id="modalRevisi" tabindex="-1" aria-labelledby="modalRevisiLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-scrollable">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-primary text-white">
+                                                    <h5 class="modal-title" id="modalRevisiLabel"><i class="fas fa-arrow-rotate-left"></i> Revisi Data</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body" id="modalRevisiBody">
+                                                    <!-- Form atau info revisi -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Dokumen Modal -->
+                                    <div class="modal fade" id="modalDokumen" tabindex="-1" aria-labelledby="modalDokumenLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-scrollable">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-secondary text-white">
+                                                    <h5 class="modal-title" id="modalDokumenLabel"><i class="fas fa-right-left"></i> Dokumen</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body" id="modalDokumenBody">
+                                                    <!-- Data dokumen -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="modalDelete" tabindex="-1" aria-labelledby="modalDeleteLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title" id="modalDeleteLabel"><i class="fas fa-trash"></i> Konfirmasi Hapus</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body" id="modalDeleteBody">
+                                                    Apakah Anda yakin ingin menghapus data ini?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                    <button type="button" class="btn btn-danger" id="btnConfirmDelete">Hapus</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> <!-- end card-body -->
+                            </div> <!-- end card -->
+                        </div> <!-- end col -->
+                    </div> <!-- end row -->
+                </section>
+            </div>
+        </div>
+    </div>
+    
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+
+{% endblock %}
+
+    {% block script %}
+    <script>
+        var dataTable;
+        window.forceIgnoreNotaryName = window.forceIgnoreNotaryName ?? false;
+        let fallbackSummary = null; 
+        
+        $(document).ready(() => {
+            const csrftoken = getCookie('csrftoken');
+            
+            const today = new Date().toISOString().slice(0, 10);
+            $('#startDate').val(today);
+            $('#endDate').val(today);
+            
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let cookie of cookies) {
+                        cookie = cookie.trim();
+                        if (cookie.startsWith(name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            
+            function loadNotarisOptions(selectedId = null) {
+                console.log('🚀 Loading notaris options...');
+                $.ajax({
+                    url: '/assignakta-pf/notaris/',
+                    method: 'GET',
+                    success: function (data) {
+                        console.log("📦 Notaris Loaded:", data);
+                        const $select = $('#notaris');
+                        $select.empty();
+                        $select.append('<option value="">Pilih Notaris</option>');
+                        data.forEach(item => {
+                            $select.append(`<option value="${item.id}">${item.firm_name}</option>`);
+                        });
+                        if (selectedId) {
+                            $select.val(selectedId); // ✅ ini menyetel ulang yang dipilih
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Gagal memuat daftar notaris.', 'error');
+                    }
+                });
+            }
+            
+            // Inisialisasi DataTable
+            if (!$.fn.DataTable.isDataTable('#consumerTable')) {
+                dataTable = $('#consumerTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    deferRender: true,
+                    scrollX: true,
+                    scrollY: "500px",
+                    ajax: function (data, callback, settings) {
+                        const notaryName = $('#notaris').val();
+                        // const mockDate = $('#mockDate').val() || new Date().toISOString().split('T')[0];
+                        const startDate = $('#startDate').val();
+                        const endDate = $('#endDate').val();
+                        
+                        const encodedName = encodeURIComponent(notaryName || '');
+                        
+                        // ambil nilai search & order dari DataTables
+                        const searchValue = (data.search && data.search.value) ? data.search.value : '';
+                        const orderColIdx = (data.order && data.order[0]) ? data.order[0].column : 0;
+                        const orderDir    = (data.order && data.order[0]) ? data.order[0].dir    : 'desc';
+                        const orderColKey = (data.columns && data.columns[orderColIdx])
+                        ? data.columns[orderColIdx].data : 'id';
+                        
+                        // mock_date=${mockDate}&notary_name=${encodedName}` +
+                        const url = `/api/assignakta-json-pf/?notary_name=${encodedName}` +
+                        `&start_date=${encodeURIComponent(startDate || '')}` + // <-- BARIS BARU
+                        `&end_date=${encodeURIComponent(endDate || '')}` +
+                        `&draw=${encodeURIComponent(data.draw)}` +
+                        `&start=${encodeURIComponent(data.start)}` +
+                        `&length=${encodeURIComponent(data.length)}` +
+                        `&search=${encodeURIComponent(searchValue)}` +          // ⬅️ penting
+                        `&order_col=${encodeURIComponent(orderColKey)}` +       // ⬅️ opsional tapi bagus
+                        `&order_dir=${encodeURIComponent(orderDir)}`;           // ⬅️ opsional tapi bagus
+                        
+                        $.ajax({
+                            url: url,
+                            method: 'GET',
+                            success: function (response) {
+                                if (response && typeof response === 'object' && 'data' in response &&
+                                'recordsTotal' in response && 'recordsFiltered' in response && 'draw' in response) {
+                                    callback(response);
+                                    return;
+                                }
+                                const rows = Array.isArray(response) ? response : (response && response.data) || [];
+                                callback({ draw: data.draw, recordsTotal: rows.length, recordsFiltered: rows.length, data: rows });
+                            },
+                            error: function (xhr) {
+                                // Tetap berikan data kosong ke DataTable
+                                callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+                                console.error("❌ Error loading data:", xhr);
+                                
+                                // HANYA tampilkan popup jika errornya BUKAN 'Not Found' (404)
+                                if (xhr.status !== 404) {
+                                    Swal.fire('Gagal', 'Terjadi kesalahan saat memuat data dari server.', 'error');
+                                }
+                            }
+                        });
+                    },
+                    dataSrc: 'data',
+                    columns: [
+                    { data: 'id' },
+                    {
+                        data: null,
+                        render: function (data) {
+                            return `
+            <div class="d-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
+              <button type="button" class='btn btn-sm btn-success btn-print' data-id='${data.id}' title="Print-Akta"><i class="fas fa-print"></i></button>
+              <button class='btn btn-sm btn-info btn-export' data-id='${data.id}' title="Print-Salinan-Akta"><i class="fas fa-solid fa-feather-pointed"></i></button>
+            </div>
+          `;
+                        }
+                    },
+                    { data: 'director_notary_name' },
+                    { data: 'agreement_number' },
+                    { data: 'debtor_name' },
+                    { data: 'deed_number' },
+                    { data: 'deed_date' },
+                    { data: 'document_time' },
+                    { data: 'voucher_code' },
+                    { data: 'certificate_number' },
+                    { data: 'certificate_date' }
+                    ],
+                    
+                    createdRow: async function (row, data) {
+                        try {
+                            const res = await fetch(`/api/check-akta-download/pf/?agreement_number=${encodeURIComponent(data.agreement_number)}`);
+                            const json = await res.json();
+                            if (json.already_downloaded) {
+                                $(row).find('.btn-print')
+                                .prop('disabled', true)
+                                .attr('title', 'Akta sudah pernah dicetak');
+                            }
+                        } catch (e) {
+                            console.error('Gagal cek status download:', e);
+                        }
+                    },
+                    
+                    order: [[0, 'desc']],
+                    fixedHeader: true,
+                    scrollX: true,
+                    scrollY: "500px",
+                    columnDefs: [],
+                    language: { emptyTable: "Tidak ada data yang tersedia hari ini" }
+                });
+                
+                dataTable.on('xhr.dt', function () {
+                    $('#loading-overlay').hide();
+                    $('#loading-message').hide();
+                });
+            } else {
+                $('#consumerTable').DataTable().ajax.reload(null, false);
+            }
+            
+            $(document).on('click', '.btn-print, .btn-export', async function() {
+                const $btn = $(this);
+                const row = $btn.closest('tr');
+                const agreementNumber = row.find('td:nth-child(4)').text().trim();
+                
+                try {
+                    const res = await fetch(`/api/check-akta-download/pf/?agreement_number=${encodeURIComponent(agreementNumber)}`);
+                    const json = await res.json();
+                    
+                    if (json.already_downloaded) {
+                        $btn.prop('disabled', true).attr('title', 'Akta sudah pernah dicetak');
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Sudah Pernah Dicetak',
+                            text: 'Akta ini sudah pernah dicetak sebelumnya.',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                    }
+                    
+                    console.log('Lanjutkan proses download untuk', agreementNumber);
+                    
+                } catch (err) {
+                    console.error('Gagal memeriksa status unduhan:', err);
+                    Swal.fire('Error', 'Tidak dapat memeriksa status unduhan.', 'error');
+                }
+            });
+            
+            // Handle Print button
+            $('#consumerTable').off('click', '.btn-print').on('click', '.btn-print', function ()  {
+                const id = $(this).data('id');
+                
+                fetch(`/api/assignakta/pf/${id}/documents/akta/download/`, {
+                    method: 'GET',
+                })
+                .then(async (res) => {
+                    if (!res.ok) {
+                        const err = await res.json();
+                        alert(err.message || 'Gagal mengunduh dokumen.');
+                        return;
+                    }
+                    const cd = res.headers.get('Content-Disposition') || '';
+                    let filename = `DraftAkta_${id}.docx`;
+                    const match = cd.match(/filename="?([^"]+)"?/);
+                    if (match && match[1]) {
+                        filename = match[1];
+                    }
+                    
+                    const blob = await res.blob();
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                })
+                .catch(() => {
+                    alert('Terjadi kesalahan jaringan atau server.');
+                });
+            });
+            
+            // Handle Export button
+            $('#consumerTable').off('click', '.btn-export').on('click', '.btn-export', function () {
+                const id = $(this).data('id');
+                
+                fetch(`/api/assignakta/pf/${id}/documents/salinan/download/`, {
+                    method: 'GET',
+                })
+                .then(async (res) => {
+                    if (!res.ok) {
+                        const err = await res.json();
+                        alert(err.message || 'Gagal mengunduh dokumen.');
+                        return;
+                    }
+                    const cd = res.headers.get('Content-Disposition') || '';
+                    let filename = `DraftSalinanAkta_${id}.docx`;
+                    const match = cd.match(/filename="?([^"]+)"?/);
+                    if (match && match[1]) {
+                        filename = match[1];
+                    }
+                    
+                    const blob = await res.blob();
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                })
+                .catch(() => {
+                    alert('Terjadi kesalahan jaringan atau server.');
+                });
+            });
+            
+            // CREATE BUTTON - Show Modal
+            $('#btnAddConsumer').on('click', () => {
+                Swal.fire({
+                    title: 'Tambah Data',
+                    text: 'Membuka form tambah data baru',
+                    icon: 'info',
+                    timer: 800,
+                    showConfirmButton: false,
+                    didClose: () => {
+                        $('#modalCreate').modal('show');
+                        
+                        const fields = [
+                        'branch_code', 'branch_name', 'fiducia_provider', 'customer_type',
+                        'name_on_bpkb', 'bpkb_birth_date', 'bpkb_birth_place', 'bpkb_occupation',
+                        'bpkb_nationality', 'bpkb_address', 'bpkb_rt', 'bpkb_rw',
+                        'bpkb_subdistrict', 'bpkb_district', 'bpkb_city', 'bpkb_province',
+                        'bpkb_postal_code', 'bpkb_ktp', 'debtor_name', 'gender', 'marital_status',
+                        'birth_place', 'birth_date', 'occupation', 'nationality', 'id_type',
+                        'id_number', 'address', 'rt_rw', 'subdistrict', 'district', 'city',
+                        'province', 'postal_code', 'company_type', 'company_npwp', 'deed_number',
+                        'deed_date', 'company_director_name', 'decree_date', 'director_gender',
+                        'director_status', 'director_birth_place', 'director_birth_date',
+                        'director_nationality', 'director_id_type', 'director_id_number',
+                        'director_address', 'director_rt_rw', 'director_subdistrict',
+                        'director_district', 'director_city', 'director_province',
+                        'director_occupation', 'director_position', 'director_notary_name',
+                        'notary_city', 'agreement_type', 'agreement_name', 'agreement_number',
+                        'agreement_date', 'spb_date', 'principal_loan', 'guarantee_value',
+                        'installment_start_date', 'tenor', 'vehicle_condition', 'brand', 'type',
+                        'color', 'assembly_year', 'production_year', 'chassis_number',
+                        'engine_number', 'bpkb_number', 'otr_value', 'pnbp_fee', 'service_fee',
+                        'npwp_provider', 'installment_end_date', 'bpkb_id_number',
+                        'bpkb_npwp_number', 'phone_number', 'receipt_name', 'spouse_name',
+                        'uploader_company', 'upload_group', 'st_process', 'is_st_used',
+                        'house_number', 'rw', 'bpkb_name', 'status', 'upload_date',
+                        'document_status', 'invoice_st', 'over_credit', 'sync', 'uploader'
+                        ];
+                        
+                        let formHtml = fields.map(key => {
+                            const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                            return `
+                        <div class="mb-2">
+                            <label class="form-label">${label}</label>
+                            <input type="text" name="${key}" class="form-control">
+                        </div>`;
+                        }).join('');
+                        
+                        $('#modalCreateBody').html(`
+                    <form id="createForm">
+                        <div style="max-height: 500px; overflow-y: auto;">
+                            ${formHtml}
+                        </div>
+                        <div class="mt-3 text-end">
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                    `);
+                    }
+                });
+            });
+            
+            // Ambil input date
+            const $inputDate = $('input[type="date"]');
+            
+            // Export berdasarkan tanggal terpilih
+            $('#btnExport').off('click').on('click', async function () {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                if (!startDate || !endDate) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Tanggal belum lengkap!',
+                        text: 'Mohon isi kedua tanggal terlebih dahulu.',
+                    });
+                    return;
+                }
+                
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const diffDays = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+                
+                // ✅ Batas maksimal 7 hari
+                if (diffDays > 6) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Batas Waktu Terlampaui!',
+                        text: 'Rentang tanggal maksimal untuk download ini adalah 7 hari.',
+                    });
+                    return;
+                }
+                
+                const url = `/export_excel_by_date_range_pf/?start_date=${startDate}&end_date=${endDate}`;
+                
+                try {
+                    const response = await fetch(url, { method: 'GET' });
+                    
+                    if (response.status === 200) {
+                        const blob = await response.blob();
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = `Export_${startDate}_to_${endDate}.xlsx`;
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                    } else {
+                        const message = await response.text();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Export gagal',
+                            text: message || 'Terjadi kesalahan saat mengunduh file.',
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Export error',
+                        text: 'Terjadi kesalahan jaringan atau server.',
+                    });
+                    console.error('Export error:', error);
+                }
+            });
+            
+            $('#btnExportAll').off('click').on('click', async function () {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                if (!startDate || !endDate) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Tanggal belum lengkap!',
+                        text: 'Mohon isi kedua tanggal terlebih dahulu.',
+                    });
+                    return;
+                }
+                
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const diffDays = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+                
+                // ✅ Batas maksimal 31 hari
+                if (diffDays > 6) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Batas Waktu Terlampaui!',
+                        text: 'Rentang tanggal maksimal untuk download ini adalah 7 hari.',
+                    });
+                    return;
+                }
+                
+                const url = `/export_template_filtered_pf/?start_date=${startDate}&end_date=${endDate}`;
+                
+                try {
+                    const response = await fetch(url);
+                    
+                    if (response.status === 200) {
+                        const blob = await response.blob();
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = `ExportAll_${startDate}_to_${endDate}.xlsx`;
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                    } else {
+                        const message = await response.text();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Export gagal',
+                            text: message || 'Terjadi kesalahan saat mengunduh file.',
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Export error',
+                        text: 'Terjadi kesalahan jaringan atau server.',
+                    });
+                    console.error('Export all error:', error);
+                }
+            });
+            
+            // CREATE FORM SUBMIT
+            $('#modalCreateBody').on('submit', '#createForm', function (e) {
+                e.preventDefault();
+                const formData = Object.fromEntries(new FormData(this).entries());
+                
+                $.ajax({
+                    url: '/assignakta-pf/',
+                    type: 'POST',
+                    headers: { 'X-CSRFToken': window.csrfToken },
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: () => {
+                        $('#modalCreate').modal('hide');
+                        Swal.fire('Berhasil', 'Data berhasil ditambahkan.', 'success');
+                        dataTable.ajax.reload(null, false);
+                    },
+                    error: (xhr) => {
+                        const errorMsg = xhr.responseJSON ? JSON.stringify(xhr.responseJSON, null, 2) : 'Gagal menyimpan data.';
+                        Swal.fire('Error', errorMsg, 'error');
+                    }
+                });
+            });
+            
+            function getToday() {
+                const d = new Date();
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
+            
+            // Saat buka modal generate
+            $('#btnGenerateAkta').off('click').on('click', function () {
+                $('#formGenerateAkta')[0].reset();
+                $('#legalDocId, #consumerId').val('');
+                $('#generateAktaBtn').html('<i class="fa fa-power-off"></i> Generate Akta');
+                loadNotarisOptions();
+                
+                const $tgl = $('#tanggalAkta');
+                if ($tgl.length && !$tgl.val()) $tgl.val(getToday());
+                
+                ['#notaris','#nomorAwal','#nomorAkhir','#jamMulai','#tanggalAkta'].forEach(sel => $(sel).removeClass('is-invalid'));
+                $('#modalGenerateAkta').modal('show');
+            });
+            
+            // Submit Generate / Update Akta
+            $('#generateAktaBtn').off('click').on('click', () => {
+                const notaris     = ($('#notaris').val()     || '').trim();
+                const nomor_awal  = ($('#nomorAwal').val()   || '').trim();
+                const nomor_akhir = ($('#nomorAkhir').val()  || '').trim();
+                const jam_mulai   = ($('#jamMulai').val()    || '').trim();
+                
+                // ⬇️ fallback: kalau #tanggalAkta tidak ada / kosong, pakai today
+                let tanggal = '';
+                if ($('#tanggalAkta').length) {
+                    tanggal = ($('#tanggalAkta').val() || '').trim();
+                }
+                if (!tanggal) {
+                    tanggal = getToday();
+                    // optional: isi balik ke input kalau ada
+                    if ($('#tanggalAkta').length) $('#tanggalAkta').val(tanggal);
+                }
+                
+                // highlight field kosong (kecuali tanggal karena sudah di‑fallback)
+                const fields = {
+                    '#notaris': notaris,
+                    '#nomorAwal': nomor_awal,
+                    '#nomorAkhir': nomor_akhir,
+                    '#jamMulai': jam_mulai
+                };
+                let missing = [];
+                Object.entries(fields).forEach(([sel,val])=>{
+                    if (!val) { $(sel).addClass('is-invalid'); missing.push(sel); }
+                    else { $(sel).removeClass('is-invalid'); }
+                });
+                if (missing.length) {
+                    console.warn('❗ Field kosong:', missing.join(', '));
+                    Swal.fire('Validasi Gagal', 'Semua field wajib diisi.', 'warning');
+                    return;
+                }
+                
+                const payload = { notaris, nomor_awal, nomor_akhir, jam_mulai, tanggal };
+                if (window.forceIgnoreNotaryName) payload.ignore_notary_name = true;
+                
+                $.ajax({
+                    url: '/assignakta-pf/generate/',
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': window.csrfToken },
+                    contentType: 'application/json',
+                    data: JSON.stringify(payload),
+                    success: function (response) {
+                        $('#modalGenerateAkta').modal('hide');
+                        window.forceIgnoreNotaryName = false;
+                        Swal.fire('Berhasil', response.message, 'success');
+                        if (dataTable) dataTable.ajax.reload(null, false);
+                    },
+                    error: function (xhr) {
+                        const msg = xhr.responseJSON ? JSON.stringify(xhr.responseJSON, null, 2) : 'Terjadi kesalahan.';
+                        Swal.fire('Gagal', msg, 'error');
+                    }
+                });
+            });
+            
+            // Ambil data akta jika notaris dipilih
+            // Saat ganti notaris, langsung ambil data Consumer yang st_process=0 & is_st_used=1
+            $('#notaris').on('change', function () {
+                const notaryId = $(this).val();
+                if (!notaryId) return;
+                
+                // reset flag global untuk POST nanti (ignore_notary_name)
+                window.forceIgnoreNotaryName = false;
+                
+                const reloadTable = () => {
+                    if (typeof dataTable !== 'undefined' && dataTable) {
+                        dataTable.ajax.reload(null, false);
+                    }
+                };
+                
+                const setBtnGenerate = (isUpdate = false) => {
+                    $('#generateAktaBtn').html(
+                    isUpdate ? '<i class="fa fa-save"></i> Update Akta'
+                    : '<i class="fa fa-power-off"></i> Generate Akta'
+                    );
+                };
+                
+                const resetPreview = () => {
+                    $('#nomorAwal').val('');
+                    $('#jamMulai').val('');
+                    $('#legalDocId').val('');
+                    $('#consumerId').val('');
+                    setBtnGenerate(false);
+                };
+                
+                // ---- helper: cek notaris punya data?
+                const checkNotaryHasData = (id) => new Promise((resolve) => {
+                    $.ajax({
+                        url: `/assignakta-pf/generate/?notary=${encodeURIComponent(id)}`,
+                        method: 'GET'
+                    }).done((data) => {
+                        const hasDocs = Array.isArray(data) && data.length > 0;
+                        const hasConsumers = !!(data && Array.isArray(data.consumers) && data.consumers.length > 0);
+                        const count = hasDocs ? data.length : (hasConsumers ? data.consumers.length : 0);
+                        resolve({ id, ok: hasDocs || hasConsumers, count });
+                    }).fail(() => resolve({ id, ok: false, count: 0 }));
+                });
+                
+                // ---- GET normal
+                $.ajax({
+                    url: `/assignakta-pf/generate/?notary=${encodeURIComponent(notaryId)}`,
+                    method: 'GET',
+                    success: function (data) {
+                        if (Array.isArray(data) && data.length > 0) {
+                            // ✅ Ada dokumen
+                            const d = data[0] || {};
+                            $('#nomorAwal').val(d.document_number || '');
+                            $('#jamMulai').val(d.document_time || '');
+                            $('#legalDocId').val(d.id || '');
+                            $('#consumerId').val(d.consumer_id || '');
+                            setBtnGenerate(true);
+                        } else if (data && data.consumers) {
+                            // ✅ Belum ada dokumen tapi ada calon consumer
+                            resetPreview();
+                        } else {
+                            // ❌ Kosong
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Tidak Ada Data',
+                                text: 'Tidak ditemukan dokumen / consumer untuk notaris ini.'
+                            });
+                            $('#formGenerateAkta')[0].reset();
+                            setBtnGenerate(false);
+                        }
+                        
+                        reloadTable();
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 404) {
+                            // ---- fallback
+                            $.ajax({
+                                url: `/assignakta-pf/generate/?notary=${encodeURIComponent(notaryId)}&fallback=1`,
+                                method: 'GET',
+                                success: async function (res) {
+                                    window.forceIgnoreNotaryName = true;
+                                    
+                                    // ambil nama notaris terpilih
+                                    const $opt = $('#notaris option:selected');
+                                    const notaryName = ($opt.data('name') || $opt.text() || '').trim() || 'Notaris tidak diketahui';
+                                    const notaryIdShown = $opt.val() || '';
+                                    
+                                    // ringkas per cabang; jika cabang kosong → pakai nama notaris sebagai key
+                                    const consumers = Array.isArray(res?.consumers) ? res.consumers : [];
+                                    const groups = {};
+                                    consumers.forEach(c => {
+                                        const key = (c.branch_code ?? c.branch_id ?? notaryName);
+                                        groups[key] = (groups[key] || 0) + 1;
+                                    });
+                                    
+                                    const listHtml = Object.keys(groups).length
+                                    ? Object.entries(groups).map(([k, v]) => `• ${k} (${v})`).join('<br>')
+                                    : '-';
+                                    
+                                    // === NEW: cari notaris-notaris lain yang ada datanya (scan cepat, max 30) ===
+                                    const otherOpts = $('#notaris option').not(':selected').toArray().slice(0, 30);
+                                    const checks = await Promise.all(
+                                    otherOpts.map(o => checkNotaryHasData($(o).val()))
+                                    );
+                                    
+                                    const notariesWithData = checks
+                                    .filter(r => r.ok)
+                                    .map(r => {
+                                        const $o = $(`#notaris option[value="${r.id}"]`);
+                                        const nm = ($o.data('name') || $o.text() || '').trim() || r.id;
+                                        return { id: r.id, name: nm, count: r.count };
+                                    });
+                                    
+                                    const hasAnyOther = notariesWithData.length > 0;
+                                    const otherHtml = hasAnyOther
+                                    ? notariesWithData
+                                    .map(n => `• ${n.name} (${n.count})`)
+                                    .join('<br>')
+                                    : '<em>Tidak ditemukan notaris lain yang punya data (dari 30 pertama).</em>';
+                                    // === END NEW ===
+                                    
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: notaryName
+                                        ? `Tidak ada data untuk: <br><span class="fw-bold">${notaryName}</span>`
+                                        : 'Tidak ada data untuk notaris ini',
+                                        html: `
+                                            <div class="text-start">
+                                            <hr>
+                                            <p class="mb-1"><b>Notaris yang tersedia :</b></p>
+                                            <div>${otherHtml}</div>
+                                            </div>
+                                        `,
+                                        confirmButtonText: 'Lanjut (Paksa)',
+                                        showCancelButton: true,
+                                        cancelButtonText: 'Batal'
+                                    }).then(r => {
+                                        if (!r.isConfirmed) {
+                                            window.forceIgnoreNotaryName = false;
+                                            return;
+                                        }
+                                        // reset preview kosong → user isi manual
+                                        resetPreview();
+                                        reloadTable();
+                                    });
+                                },
+                                error: function () {
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: 'Gagal Memuat Data',
+                                        text: 'Fallback juga gagal diambil.'
+                                    });
+                                    $('#formGenerateAkta')[0].reset();
+                                    setBtnGenerate(false);
+                                }
+                            });
+                        } else {
+                            let errorMsg = 'Terjadi kesalahan.';
+                            if (xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.error)) {
+                                errorMsg = xhr.responseJSON.message || xhr.responseJSON.error;
+                            }
+                            Swal.fire({ icon: 'warning', title: 'Gagal Memuat Data', text: errorMsg });
+                            $('#formGenerateAkta')[0].reset();
+                            setBtnGenerate(false);
+                        }
+                    }
+                });
+            });
+            
+            $('#consumerTable').on('click', '.btn-upload-additional', function () {
+                const id = $(this).data('id');
+                const icon = $(this).find('i').attr('class');
+                
+                if (icon.includes('fa-eye')) {
+                    Swal.fire({
+                        title: 'Lihat Data',
+                        text: `Sedang menampilkan data untuk ID: ${id}`,
+                        icon: 'info',
+                        timer: 800,
+                        showConfirmButton: false,
+                        didClose: () => {
+                            $('#modalView').modal('show');
+                            $('#modalViewBody').html(`<div class="text-muted">Loading detail untuk ID: ${id}...</div>`);
+                            $.get(`/assign-pf/${id}/`, (res) => {
+                                let html = '<table class="table table-sm table-striped table-bordered">';
+                                    for (const [key, val] of Object.entries(res)) {
+                                        const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                                        html += `<tr><th style="width: 30%">${label}</th><td>${val ?? '-'}</td></tr>`;
+                                    }
+                                    html += '</table>';
+                                    $('#modalViewBody').html(html);
+                                }).fail(() => {
+                                    $('#modalViewBody').html(`<div class="alert alert-danger">Gagal memuat data detail.</div>`);
+                                });
+                            }
+                        });
+                    } else if (icon.includes('fa-pencil')) {
+                        Swal.fire({
+                            title: 'Edit Data',
+                            text: `Membuka form edit untuk ID: ${id}`,
+                            icon: 'warning',
+                            timer: 800,
+                            showConfirmButton: false,
+                            didClose: () => {
+                                $('#modalEdit').modal('show').find('#modalEditBody').html(`<div class="text-muted">Memuat form edit untuk ID: ${id}...</div>`);
+                                $.get(`/assign-pf/${id}/`, (res) => {
+                                    let html = `<form id="editForm" data-id="${id}">`;
+                                        for (const [key, val] of Object.entries(res)) {
+                                            if (['id', 'created_at', 'updated_at'].includes(key)) continue;
+                                            const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                                            html += `
+                                            <div class="mb-2">
+                                                <label class="form-label">${label}</label>
+                                                <input type="text" name="${key}" value="${val ?? ''}" class="form-control">
+                                            </div>`;
+                                        }
+                                        html += `<button type="submit" class="btn btn-primary">Simpan Semua</button></form>`;
+                                        $('#modalEditBody').html(html);
+                                    }).fail(() => {
+                                        $('#modalEditBody').html(`<div class="alert alert-danger">Gagal memuat data untuk edit.</div>`);
+                                    });
+                                }
+                            });
+                        } else if (icon.includes('fa-trash')) {
+                            Swal.fire({
+                                title: 'Konfirmasi Hapus',
+                                text: `Apakah kamu yakin ingin menghapus ID: ${id}?`,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Ya, Hapus',
+                                cancelButtonText: 'Batal'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    $('#btnConfirmDelete').data('id', id).trigger('click');
+                                }
+                            });
+                        }
+                    });
+                    
+                    // 🔧 Fungsi bantu format tanggal ke YYYY-MM-DD
+                    function formatDateInput(value) {
+                        if (!value) return null;
+                        const date = new Date(value);
+                        if (isNaN(date)) return null;
+                        const yyyy = date.getFullYear();
+                        const mm = String(date.getMonth() + 1).padStart(2, '0');
+                        const dd = String(date.getDate()).padStart(2, '0');
+                        return `${yyyy}-${mm}-${dd}`;
+                    }
+                    
+                    // 🔧 Fungsi bantu parsing integer dari float-string
+                    function safeParseIntFromFloatStr(val) {
+                        if (!val || val === '' || isNaN(val)) return null;
+                        return parseInt(parseFloat(val));
+                    }
+                    
+                    // ✅ HANDLE UPDATE (SUBMIT EDIT FORM)
+                    $('#modalEditBody').on('submit', '#editForm', function (e) {
+                        e.preventDefault();
+                        const id = $(this).data('id');
+                        const rawData = Object.fromEntries(new FormData(this).entries());
+                        
+                        // ✅ Format semua field yang merupakan tanggal
+                        const dateFields = [
+                        'deed_date', 'decree_date', 'director_birth_date', 'installment_start_date',
+                        'upload_date', 'birth_date', 'bpkb_birth_date', 'agreement_date', 'spb_date',
+                        'installment_end_date'
+                        ];
+                        dateFields.forEach(field => {
+                            if (rawData[field]) rawData[field] = formatDateInput(rawData[field]);
+                            else rawData[field] = null;
+                        });
+                        
+                        // ✅ Konversi ke integer (jika string float: "35215298.62" → 35215298)
+                        const integerFields = [
+                        'assembly_year', 'is_st_used', 'over_credit', 'sync', 'tenor',
+                        'pnbp_fee', 'otr_value', 'service_fee', 'principal_loan', 'guarantee_value'
+                        ];
+                        integerFields.forEach(field => {
+                            if (rawData[field]) {
+                                rawData[field] = safeParseIntFromFloatStr(rawData[field]);
+                            } else {
+                                rawData[field] = null;
+                            }
+                        });
+                        
+                        // ✅ Kirim PUT request ke backend
+                        $.ajax({
+                            url: `/assign-pf/${id}/`,
+                            type: 'PUT',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken'),
+                                'Content-Type': 'application/json'
+                            },
+                            data: JSON.stringify(rawData),
+                            success: () => {
+                                $('#modalEdit').modal('hide');
+                                Swal.fire('Berhasil', 'Data berhasil diperbarui.', 'success');
+                                dataTable.ajax.reload(null, false);
+                            },
+                            error: (xhr) => {
+                                const errorMsg = xhr.responseJSON ? JSON.stringify(xhr.responseJSON, null, 2) : 'Gagal memperbarui data.';
+                                Swal.fire('Error', errorMsg, 'error');
+                            }
+                        });
+                    });
+                    $(document).on('click', '#btnConfirmDelete', function () {
+                        const id = $(this).data('id');
+                        
+                        $.ajax({
+                            url: `/assign-pf/${id}/`,
+                            type: 'DELETE',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            success: function () {
+                                Swal.fire('Terhapus', 'Data berhasil dihapus.', 'success');
+                                dataTable.ajax.reload(null, false);
+                            },
+                            error: function (xhr) {
+                                const errMsg = xhr.responseJSON ? JSON.stringify(xhr.responseJSON, null, 2) : 'Gagal menghapus data.';
+                                Swal.fire('Error', errMsg, 'error');
+                            }
+                        });
+                    });
+                });
+            </script>
+            {% endblock %}

@@ -1,0 +1,666 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Warkah - Dokument OC {% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/warkah-dokument.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Over Credit</a></li>
+                            <li class="breadcrumb-item active">Dokumen Warkah OC</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h4>Dokumen Warkah OC</h4>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Filter Form -->
+                                <div class="card shadow-sm mb-4 border-0">
+                                    <div class="card-body">
+                                        <form id="filterForm">
+                                            <div class="row g-3">
+                                                <!-- Tanggal Assign Akta -->
+                                                <div class="col-lg-3 col-md-6">
+                                                    <label for="fromDate" class="form-label text-secondary fw-semibold">Tanggal Assign Akta</label>
+                                                    <input type="date" class="form-control" id="fromDate" placeholder="hh/bb/tttt">
+                                                </div>
+                                                
+                                                <!-- No Perjanjian -->
+                                                <div class="col-lg-3 col-md-6">
+                                                    <label for="noPerjanjian" class="form-label text-secondary fw-semibold">No Perjanjian</label>
+                                                    <input type="text" class="form-control" id="noPerjanjian" placeholder="Masukkan nomor perjanjian">
+                                                </div>
+                                                
+                                                <!-- Notaris -->
+                                                <div class="col-lg-3 col-md-6">
+                                                    <label for="notarySelect" class="form-label text-secondary fw-semibold">Notaris</label>
+                                                    <select class="form-control" id="notarySelect">
+                                                        <option selected disabled>-- Pilih Notaris --</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Tombol Search -->
+                                                <div class="col-lg-3 col-md-6 d-flex align-items-end">
+                                                    <button type="button" id="btnSearch" class="btn btn-primary w-100">
+                                                        <i class="fas fa-magnifying-glass me-2"></i> Cari
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Download Area -->
+                                            <div class="row mt-4">
+                                                <!-- Download Satuan -->
+                                                <div class="col-md-6 download-section">
+                                                    <h5>Download Data Satuan</h5>
+                                                    <p class="text-muted small mb-3">Download data berdasarkan nomor perjanjian yang dimasukkan</p>
+                                                    <div class="d-flex gap-2">
+                                                        <button type="button" id="btnDownloadSingleImage" class="btn btn-outline-warning">
+                                                            <i class="fas fa-image me-2"></i> Download Warkah
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Download Batch -->
+                                                <div class="col-md-6 download-section">
+                                                    <h5>Download Data Batch</h5>
+                                                    <p class="text-muted small mb-3">Download data dalam jumlah banyak berdasarkan rentang</p>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label for="rowRange" class="form-label text-secondary fw-semibold">Rentang Data</label>
+                                                            <select class="form-control" id="rowRange">
+                                                                {% for start, end in range_options %}
+                                                                <option value="{{ start }}-{{ end }}">{{ start }}-{{ end }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6 d-flex align-items-end">
+                                                            <div class="d-flex gap-2 w-100">
+                                                                {% comment %} <button type="button" id="btnDownloadExcel" class="btn btn-success flex-grow-1">
+                                                                    <i class="fas fa-file-excel me-2"></i> Excel
+                                                                </button> {% endcomment %}
+                                                                <button type="button" id="btnDownloadImage" class="btn btn-warning flex-grow-1">
+                                                                    <i class="fas fa-images me-2"></i> Warkah
+                                                                </button>
+                                                                <button type="button" id="btnUploadExcel" class="btn btn-primary flex-grow-1">
+                                                                    <i class="fas fa-upload me-2"></i> Upload Excel
+                                                                </button>
+                                                                <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display: none;">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                
+                                <!-- Overlay yang menutupi seluruh layar saat loading -->
+                                <div id="loading-overlay" style="display: none;position: fixed;top: 0;left: 0;width: 100vw;height: 100vh;background: rgba(255, 255, 255, 0.6);z-index: 1050; /* pastikan di atas modal tapi di bawah spinner */cursor: wait;"></div>
+                                
+                                <!-- Spinner loading (sudah kamu punya) -->
+                                <div id="loading-message" style="display: none;position: fixed;z-index: 1060;top: 50%;left: 50%;transform: translate(-50%, -50%);text-align: center;display: flex;flex-direction: column;align-items: center;">
+                                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                                    <div style="margin-top: 10px; font-weight: bold;">Loading data...</div>
+                                </div>
+                                
+
+                                <!-- DataTable -->
+                                <div class="card shadow-sm border-0 mt-4 w-100">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Data Dokumen Warkah OC</h5>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <!-- Bootstrap 5 responsive table wrapper -->
+                                        <div class="table-responsive-xl">
+                                            <table id="consumerTable" class="display table table-striped w-100">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Kode Cabang</th>
+                                                        <th>Nama Konsumen</th>
+                                                        <th>No Perjanjian</th>
+                                                        <th>No Akta</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Diisi otomatis via DataTables -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card -->
+                    </div> <!-- end col -->
+                </div> <!-- end row -->
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+{% block scripts %}
+<script src="{% static 'js/sweetalert2.all.min.js' %}"></script>
+<script>
+    function initConsumerTable(params = "") {
+        const token = localStorage.getItem('access_token');
+        
+        if (!token && location.hostname === '127.0.0.1') {
+            console.warn('⚠️ Local mode: JWT dilewati, pakai session');
+        }
+        
+        const tableElement = $('#consumerTable');
+        
+        if ($.fn.DataTable.isDataTable('#consumerTable')) {
+            tableElement.DataTable().clear().destroy();
+        }
+        
+        console.group("🔍 Memuat DataTable");
+        console.log("🔗 Endpoint URL:", "{% url 'warkah_document_data_oc' %}" + (params ? "?" + params : ""));
+        
+        tableElement.DataTable({
+            processing: true,
+            serverSide: true,
+            fixedHeader: true,
+            scrollX: true,
+            scrollCollapse: true,
+            responsive: {
+                details: {
+                    type: 'column',
+                    target: 'tr'
+                }
+            },
+            autoWidth: true,
+            dom: '<"row g-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row g-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+            stripeClasses: [],
+            ajax: {
+                url: "{% url 'warkah_document_data_oc' %}" + (params ? "?" + params : ""),
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                type: 'GET',
+                beforeSend: function () {
+                    $('#loading-message').show();
+                    $('#loading-overlay').show();
+                },
+                complete: function () {
+                    $('#loading-message').hide();
+                    $('#loading-overlay').hide();
+                },
+                
+                dataSrc: function(json) {
+                    console.log("✅ Data diterima:", json);
+                    console.log("📊 Jumlah baris:", json.data ? json.data.length : 0);
+                    if (json.data && json.data.length > 0) {
+                        console.log("🧪 Sample data baris pertama:", json.data[0]);
+                    }
+                    return json.data;
+                },
+                error: function(xhr, status, error) {
+                    console.error("❌ AJAX Error:", error);
+                    console.warn("❗ Status:", status);
+                    console.warn("❗ Response body:", xhr.responseText);
+                    $('#loading-message').hide();
+                    $('#loading-overlay').hide();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Memuat Data',
+                        text: 'Terjadi kesalahan saat mengambil data tabel.',
+                    });
+                }
+            },
+            columns: [
+                { 
+                    data: 'branch_code', 
+                    render: data => data || '-', 
+                    className: 'text-center align-middle',
+                    width: '15%'
+                },
+                { 
+                    data: 'consumer', 
+                    render: data => data || '-', 
+                    className: 'text-center align-middle',
+                    width: '35%'
+                },
+                { 
+                    data: 'agreement_number', 
+                    render: data => data || '-', 
+                    className: 'text-center align-middle',
+                    width: '25%'
+                },
+                { 
+                    data: 'document_number', 
+                    render: data => data || '-', 
+                    className: 'text-center align-middle',
+                    width: '25%'
+                }
+            ],
+            columnDefs: [
+                { responsivePriority: 1, targets: 2 }, // No Perjanjian is most important
+                { responsivePriority: 2, targets: 3 }, // No Akta is second most important
+                { responsivePriority: 3, targets: 1 }, // Nama Konsumen is third most important
+                { responsivePriority: 4, targets: 0 }  // Kode Cabang is least important
+            ],
+            language: {
+                processing: "Memproses...",
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ data",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                infoFiltered: "(disaring dari _MAX_ data keseluruhan)",
+                infoPostFix: "",
+                loadingRecords: "Memuat data...",
+                zeroRecords: "Tidak ditemukan data yang sesuai",
+                emptyTable: "Tidak ada data tersedia",
+                paginate: {
+                    first: "Pertama",
+                    previous: "Sebelumnya",
+                    next: "Selanjutnya",
+                    last: "Terakhir"
+                },
+                aria: {
+                    sortAscending: ": aktifkan untuk mengurutkan kolom ke atas",
+                    sortDescending: ": aktifkan untuk mengurutkan kolom ke bawah"
+                }
+            }
+        });
+        
+        console.groupEnd();
+    }
+    
+    $(document).ready(function () {
+        const token = localStorage.getItem('access_token');
+        
+        // Load notary list
+        fetch("{% url 'api_notaris_list' %}", {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(data => {
+            const $sel = $('#notarySelect');
+            $sel.empty().append('<option value="">-- Pilih Notaris --</option>');
+            data.forEach(item => {
+                $sel.append(`<option value="${item.firm_name}">${item.firm_name}</option>`);
+            });
+            if (data.length === 1) {
+                $sel.val(data[0].firm_name).prop('disabled', true);
+            } else {
+                $sel.prop('disabled', false);
+            }
+        })
+        .catch(err => console.error('Notary load error:', err));
+        
+        // Load awal
+        initConsumerTable();
+        
+        // Tombol Search
+        $('#btnSearch').on('click', function () {
+            const fromDate = $('#fromDate').val();
+            const notary = $('#notarySelect').val();
+            const docNumber = $('#noPerjanjian').val();
+            
+            const params = new URLSearchParams();
+            if (fromDate) params.append('from_date', fromDate);
+            if (notary) params.append('firm_name', notary);
+            if (docNumber) params.append('agreement_number', docNumber);
+            
+            initConsumerTable(params.toString());
+        });
+        
+        // Download Excel
+        $('#btnDownloadExcel').on('click', function () {
+            const fromDate = $('#fromDate').val();
+            const notary = $('#notarySelect').val();
+            const docNumber = $('#noPerjanjian').val();
+            const range = $('#rowRange').val();
+            
+            if (!range) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Rentang Data Kosong',
+                    text: 'Silakan pilih rentang data terlebih dahulu.',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+            
+            const params = new URLSearchParams();
+            if (fromDate) params.append('from_date', fromDate);
+            if (notary) params.append('firm_name', notary);
+            if (docNumber) params.append('agreement_number', docNumber);
+            
+            const [start, end] = range.split('-').map(Number);
+            params.append('limit', end - start + 1);
+            params.append('offset', start - 1);
+            
+            const downloadUrl = `{% url 'warkah_document_data_oc' %}?` + params.toString() + '&download=excel';
+            console.log("⬇️ Download URL:", downloadUrl);
+            window.open(downloadUrl, '_blank');
+        });
+        
+        // Download Gambar
+        $('#btnDownloadImage').on('click', async function () {
+            const fromDate = $('#fromDate').val();
+            const notary = $('#notarySelect').val();
+            const docNumber = $('#noPerjanjian').val(); // optional
+            const range = $('#rowRange').val();
+            
+            // ✅ Tambahan validasi: Notaris wajib dipilih
+            if (!notary || notary === '-- Pilih Notaris --') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Notaris belum dipilih',
+                    text: 'Silakan pilih notaris terlebih dahulu sebelum melanjutkan unduhan.',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+            
+            if (!range) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Rentang Kosong',
+                    text: 'Silakan pilih range data terlebih dahulu.',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+            
+            const parts = range.split('-').map(s => Number(s.trim()));
+            if (parts.length !== 2 || parts.some(n => !Number.isInteger(n)) || parts[0] <= 0 || parts[1] < parts[0]) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Range tidak valid',
+                    text: 'Format range harus seperti "1-50" dan angka awal ≤ angka akhir.',
+                });
+                return;
+            }
+            
+            const [start, end] = parts;
+            
+            const params = new URLSearchParams();
+            if (fromDate) params.append('from_date', fromDate);
+            if (notary) params.append('firm_name', notary);
+            if (docNumber) params.append('agreement_number', docNumber); // optional
+            params.append('limit', end - start + 1);
+            params.append('offset', start - 1);
+            params.append('download', 'image');
+            
+            const downloadUrl = `{% url 'warkah_document_data_oc' %}?` + params.toString();
+            console.log('⬇️ Download ZIP Gambar URL:', downloadUrl);
+            
+            const $btn = $(this);
+            $btn.prop('disabled', true);
+            const originalHtml = $btn.html();
+            $btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Mengunduh...');
+            
+            try {
+                const res = await fetch(downloadUrl, {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                });
+                
+                const contentType = res.headers.get('content-type') || '';
+                
+                // ✅ Tambahan: jika data kosong / sudah habis
+                if (res.status === 204) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Data sudah habis',
+                        text: 'Tidak ada data tersisa untuk tanggal atau filter yang dipilih.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+                
+                // ✅ Jika respon 200 tapi kosong (misal file size 0 byte)
+                if (res.ok && (res.headers.get('Content-Length') === '0' || !contentType)) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Data sudah habis',
+                        text: 'Tidak ada data lagi untuk diunduh.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+                
+                if (res.status === 400 && contentType.includes('application/json')) {
+                    const data = await res.json().catch(() => ({}));
+                    const msg = data?.error || 'Gagal mengunduh data.';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Tidak dapat mengunduh',
+                        text: msg,
+                    });
+                    return;
+                }
+                
+                if (!res.ok) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: `Unduhan gagal (${res.status}). Silakan coba lagi.`,
+                    });
+                    return;
+                }
+                
+                if (contentType.includes('application/zip') || contentType.includes('application/octet-stream')) {
+                    const blob = await res.blob();
+                    if (blob.size === 0) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Data sudah habis',
+                            text: 'Tidak ada data yang bisa diunduh.',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                    }
+                    
+                    let filename = 'warkah.zip';
+                    const cd = res.headers.get('Content-Disposition') || res.headers.get('content-disposition');
+                    if (cd && cd.includes('filename=')) {
+                        const match = cd.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+                        if (match && match[1]) {
+                            filename = decodeURIComponent(match[1].replace(/"/g, ''));
+                        }
+                    }
+                    
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                    return;
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Format tidak dikenali',
+                    text: 'Server mengembalikan format yang tidak dikenali.',
+                });
+                
+            } catch (err) {
+                console.error('Download error:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan Jaringan',
+                    text: 'Tidak dapat terhubung ke server. Periksa koneksi Anda.',
+                });
+            } finally {
+                $btn.prop('disabled', false);
+                $btn.html(originalHtml);
+            }
+        });
+        // Download Gambar Satuan
+        $('#btnDownloadSingleImage').on('click', function () {
+            const docNumber = $('#noPerjanjian').val();
+            
+            if (!docNumber) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nomor Perjanjian Kosong',
+                    text: 'Silakan masukkan nomor perjanjian yang ingin diunduh.',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+            
+            const fromDate = $('#fromDate').val();
+            const notary = $('#notarySelect').val();
+            
+            const params = new URLSearchParams();
+            if (fromDate) params.append('from_date', fromDate);
+            if (notary) params.append('firm_name', notary);
+            params.append('agreement_number', docNumber);
+            params.append('download', 'image');
+            
+            const downloadUrl = `{% url 'warkah_document_data_oc' %}?` + params.toString();
+            console.log("⬇️ Download Satuan Gambar URL:", downloadUrl);
+            window.open(downloadUrl, '_blank');
+        });
+        
+        // Upload Excel button click handler
+        $('#btnUploadExcel').on('click', function() {
+            // Trigger the hidden file input
+            $('#excelFileInput').click();
+        });
+        
+        // File input change handler
+        $('#excelFileInput').on('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Check file extension
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            if (fileExt !== 'xls' && fileExt !== 'xlsx') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Format File Tidak Valid',
+                    text: 'Silakan pilih file Excel (.xls atau .xlsx).',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+            
+            // Show loading indicator
+            $('#loading-message').show();
+            $('#loading-overlay').show();
+            
+            // Create FormData and append the file
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            // Get CSRF token using the function from base.html
+            const csrftoken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            // Send the file to the server
+            fetch('/api/upload-excel-warkah-oc', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Server returned ' + response.status);
+                }
+                
+                // Get filename from Content-Disposition header if available
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'hasil_upload.xlsx';
+                
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                    if (filenameMatch && filenameMatch[1]) {
+                        filename = filenameMatch[1];
+                    }
+                }
+                
+                return response.blob().then(blob => ({ blob, filename }));
+            })
+            .then(({ blob, filename }) => {
+                // Hide loading indicator
+                $('#loading-message').hide();
+                $('#loading-overlay').hide();
+                
+                // Create a download link and trigger it
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                // Reset the file input
+                $('#excelFileInput').val('');
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: 'File berhasil diproses dan diunduh.',
+                    confirmButtonText: 'OK'
+                });
+            })
+            .catch(error => {
+                console.error("❌ Upload Error:", error);
+                
+                // Hide loading indicator
+                $('#loading-message').hide();
+                $('#loading-overlay').hide();
+                
+                // Reset the file input
+                $('#excelFileInput').val('');
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Upload',
+                    text: 'Terjadi kesalahan saat mengupload file. Silakan coba lagi.',
+                    confirmButtonText: 'OK'
+                });
+            });
+        });
+        
+    });
+</script>
+{% endblock %}
+{% endblock %}

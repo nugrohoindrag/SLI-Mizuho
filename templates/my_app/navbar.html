@@ -1,0 +1,134 @@
+{% load static %}
+
+<nav class="header-navbar navbar-expand-md navbar navbar-with-menu fixed-top navbar-semi-dark navbar-shadow">
+    <div class="navbar-wrapper">
+        <div class="navbar-header">
+            <ul class="nav navbar-nav flex-row">
+                <li class="nav-item mobile-menu d-md-none mr-auto">
+                    <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#">
+                        <i class="feather fa-solid fa-bars"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="navbar-brand" href="{% url 'dashboard' %}">
+                        <img class="brand-logo" alt="stack admin logo" src="{% static 'images/SLI-icon.png' %}" style="height: 40px; width: auto; object-fit: contain; border-radius: 20%;">
+                        <h2 class="brand-text">SLI Fiducia</h2>
+                    </a>
+                </li>
+                <li class="nav-item d-md-none">
+                    <a class="nav-link open-navbar-container" data-toggle="collapse" data-target="#navbar-mobile">
+                        <i class="fa fa-ellipsis-v"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-container content">
+            <div class="collapse navbar-collapse" id="navbar-mobile">
+                <ul class="nav navbar-nav mr-auto float-left">
+                    <li class="nav-item d-none d-md-block">
+                        <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#">
+                            <i class="ficon feather fa-solid fa-bars"></i>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav float-right">
+                    <li class="dropdown dropdown-user nav-item">
+                        <a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
+                            <div class="avatar avatar-online">
+                                {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="Profile Picture" style="height: 40px; border-radius: 50%;">
+                                {% else %}
+                                <img src="" alt="Default Avatar" style="height: 40px; border-radius: 50%;">
+                                {% endif %}
+                                <i></i>
+                            </div>
+                            <span class="user-name">
+                                {% if user.get_full_name %}
+                                {{ user.get_full_name }}
+                                {% else %}
+                                {{ user.username }}
+                                {% endif %}
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="{% url 'profile' %}">
+                                <i class="feather icon-user"></i> Edit Profile
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <form method="POST" action="{% url 'logout_api' %}" id="logoutForm">
+                                {% csrf_token %}
+                                <button class="dropdown-item" type="submit"> <i class="feather icon-power"></i> Logout </button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const logoutForm = document.getElementById("logoutForm");
+        
+        if (logoutForm) {
+            logoutForm.addEventListener("submit", function () {
+                // 🔥 HAPUS CACHE SIDEBAR SEBELUM LOGOUT
+                localStorage.removeItem("sidebar_menu_cache");
+                
+                // OPTIONAL kalau mau bersih total
+                // localStorage.clear();
+            });
+        }
+    });
+</script>
+
+{% comment %} <script>
+    function getCSRFToken() {
+    let csrfToken = document.cookie
+    .split("; ")
+    .find(row => row.startsWith("csrftoken="))
+    ?.split("=")[1];
+    return csrfToken || "";
+    }    
+    
+    async function logoutUser() {
+    try {
+    await fetch("/api/get-csrf-token/", { credentials: "include" });
+    
+    const response = await fetch("/api/logout/", {
+    method: "POST",
+    headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + localStorage.getItem("access_token"),
+    "X-CSRFToken": getCSRFToken()
+    },
+    credentials: "include"
+    });
+    
+    const isJson = response.headers.get("content-type")?.includes("application/json");
+    const resJson = isJson ? await response.json() : null;
+    
+    if (response.ok) {
+    localStorage.removeItem("access_token");
+    // Remove sidebar menu cache on logout
+    localStorage.removeItem("sidebar_menu_cache");
+    window.location.href = "/login/?logout=success";
+    } else {
+    Swal.fire({
+    icon: "error",
+    title: "Gagal Logout",
+    text: resJson?.detail || resJson?.error || "Terjadi kesalahan saat logout.",
+    });
+    }
+    
+    } catch (error) {
+    console.error("❌ Error logout:", error);
+    Swal.fire({
+    icon: "error",
+    title: "Gagal Logout",
+    text: "Terjadi kesalahan saat logout.",
+    });
+    }
+    }
+</script> {% endcomment %}

@@ -1,0 +1,182 @@
+/* Custom styles for Warkah Document page */
+
+/* Form styling */
+.form-control, .form-select, .btn {
+    height: 38px;
+    border-radius: 0.25rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-label {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Card styling */
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    border: none;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    padding: 1rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Download section styling */
+.download-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.download-section h5 {
+    margin-bottom: 1rem;
+    color: #495057;
+    font-weight: 600;
+}
+
+/* DataTables overrides */
+/* Full width and responsive behavior */
+.dataTables_wrapper {
+    width: 100% !important;
+    margin: 0 !important;
+    max-width: none !important;
+}
+
+.table-responsive {
+    width: 100% !important;
+    margin: 0 !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* Make sure the table takes full width of its container */
+table.dataTable {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin: 0 !important;
+    table-layout: auto !important;
+}
+
+/* Header styling */
+table.dataTable thead th {
+    background-color: #f8f9fa !important;
+    color: #495057 !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    padding: 0.75rem !important;
+    border-bottom: 2px solid #dee2e6 !important;
+    white-space: nowrap !important;
+}
+
+/* Cell styling */
+table.dataTable tbody td {
+    padding: 0.75rem !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* DataTables controls styling */
+.dataTables_wrapper .dataTables_length, 
+.dataTables_wrapper .dataTables_filter, 
+.dataTables_wrapper .dataTables_info, 
+.dataTables_wrapper .dataTables_processing, 
+.dataTables_wrapper .dataTables_paginate {
+    color: #495057 !important;
+    margin: 1rem 0 !important;
+    width: 100% !important;
+}
+
+/* Ensure filter and length controls are responsive */
+@media (max-width: 767.98px) {
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        text-align: left !important;
+        float: none !important;
+        display: block !important;
+        margin-bottom: 0.5rem !important;
+        width: 100% !important;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+        width: 100% !important;
+        margin-left: 0 !important;
+        display: block !important;
+        margin-top: 0.25rem !important;
+    }
+}
+
+/* Pagination styling */
+.dataTables_wrapper .dataTables_paginate {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    text-align: center !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.375rem 0.75rem !important;
+    margin-left: 0.25rem !important;
+    border-radius: 0.25rem !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #0d6efd !important;
+    color: white !important;
+    border: 1px solid #0d6efd !important;
+}
+
+/* Responsive DataTables specific styling */
+table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before,
+table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
+    background-color: #0d6efd !important;
+    border: 1.5px solid white !important;
+}
+
+/* Fix for horizontal scrolling on mobile */
+.dataTables_scrollBody {
+    overflow-x: auto !important;
+    width: 100% !important;
+}
+
+/* Button styling */
+.btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    padding: 0.375rem 0.75rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn i {
+    font-size: 0.875rem !important;
+}
+
+/* Loading overlay */
+#loading-overlay {
+    background: rgba(255, 255, 255, 0.8) !important;
+}
+
+#loading-message {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}

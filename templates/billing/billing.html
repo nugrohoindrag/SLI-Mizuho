@@ -1,0 +1,211 @@
+{% extends "../base.html" %}
+{% load static %}
+{% load format_filters %}
+
+{% block title %} Billing {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Reguler</a></li>
+                            <li class="breadcrumb-item active">Billing</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        {% if error_message %}
+                        <div class="alert alert-warning">{{ error_message }}</div>
+                        {% endif %}
+
+                        <form method="get" id="filterForm" class="row g-2 mb-3 align-items-end">
+                            <div class="col-auto">
+                                <label for="tgl_inv_from" class="form-label mb-0 fw-bold">Tanggal Invoice</label>
+                                <input type="date" id="tgl_inv_from" name="tgl_inv_from" value="{{ tgl_inv_from }}" class="form-control">
+                            </div>
+                            <div class="col-auto">
+                                <label for="tgl_inv_to" class="form-label mb-0 fw-bold">s/d</label>
+                                <input type="date" id="tgl_inv_to" name="tgl_inv_to" value="{{ tgl_inv_to }}" class="form-control">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filter</button>
+                                <a href="{% url 'billing-list' %}" class="btn btn-secondary"><i class="fas fa-undo"></i> Semua Outstanding</a>
+                            </div>
+                        </form>
+
+                        <div class="row g-2 mb-3 align-items-center">
+                            <div class="col-auto">
+                                <a id="exportBtn" class="btn btn-success" href="{% url 'billing-export' %}?tgl_inv_from={{ tgl_inv_from }}&tgl_inv_to={{ tgl_inv_to }}">
+                                    <i class="fas fa-file-excel"></i> Export Excel
+                                </a>
+                            </div>
+                            {% if can_upload %}
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-warning" id="btnUploadPayment">
+                                    <i class="fas fa-upload"></i> Upload Pembayaran
+                                </button>
+                            </div>
+                            {% endif %}
+                            <div class="col-auto">
+                                <a href="{% url 'billing-history' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-clock-rotate-left"></i> History Pembayaran
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Tagihan Outstanding</h4>
+                                <div class="small text-muted">
+                                    {{ totals.count }} kontrak dari {{ totals.invoices }} invoice &middot;
+                                    Biaya Jasa {{ totals.service_fee|rupiah }} &middot; PNBP {{ totals.pnbp_fee|rupiah }} &middot;
+                                    <b>Total {{ totals.total|rupiah }}</b>
+                                </div>
+                            </div>
+                            <div class="card-content collapse show">
+                                <div class="card-body card-dashboard">
+                                    <div class="table-responsive">
+                                        <table id="billingTable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>No. Invoice</th>
+                                                    <th>Tanggal Invoice</th>
+                                                    <th>Kode Cabang</th>
+                                                    <th>Nama Cabang</th>
+                                                    <th>No. Kontrak</th>
+                                                    <th>Nama Debitur</th>
+                                                    <th>No. Akta</th>
+                                                    <th>Tanggal Akta</th>
+                                                    <th>No. Sertifikat</th>
+                                                    <th>Tanggal Sertifikat</th>
+                                                    <th>Biaya Jasa</th>
+                                                    <th>PNBP</th>
+                                                    <th>Total</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in rows %}
+                                                <tr>
+                                                    <td>{{ item.no_invoice }}</td>
+                                                    <td data-order="{{ item.tgl_inv|date:'Y-m-d' }}">{{ item.tgl_inv|date:"d-m-Y" }}</td>
+                                                    <td>{{ item.branch_code }}</td>
+                                                    <td>{{ item.branch_name }}</td>
+                                                    <td>{{ item.agreement_number }}</td>
+                                                    <td>{{ item.debtor_name }}</td>
+                                                    <td>{{ item.document_number }}</td>
+                                                    <td>{{ item.document_date|date:"d-m-Y" }}</td>
+                                                    <td>{{ item.certificate_number }}</td>
+                                                    <td>{{ item.certificate_date|date:"d-m-Y" }}</td>
+                                                    <td>{{ item.service_fee|rupiah }}</td>
+                                                    <td>{{ item.pnbp_fee|rupiah }}</td>
+                                                    <td>{{ item.total|rupiah }}</td>
+                                                    <td><span class="badge bg-warning text-dark">Outstanding</span></td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if can_upload %}
+                        <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form id="uploadForm" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="uploadModalLabel">Upload Pembayaran</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <ol class="small ps-3 mb-2">
+                                                <li>Export Excel tagihan dari halaman ini.</li>
+                                                <li>Isi kolom <b>TANGGAL BAYAR</b> (DD-MM-YYYY) pada kontrak yang sudah dibayar.</li>
+                                                <li>Upload kembali. Kontrak yang tanggal bayarnya kosong tetap outstanding.</li>
+                                            </ol>
+                                            <input class="form-control" type="file" name="excel_file" accept=".xlsx" required>
+                                            <div id="uploadResult" class="mt-3"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                            <button type="submit" class="btn btn-primary">Upload</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+{% block script %}
+<script>
+    $('#billingTable').DataTable({
+        language: { emptyTable: "Tidak ada tagihan outstanding." },
+        order: [[1, 'asc']]
+    });
+
+    $('#btnUploadPayment').on('click', function () {
+        $('#uploadForm')[0].reset();
+        $('#uploadResult').empty();
+        $('#uploadModal').modal('show');
+    });
+
+    $('#uploadForm').on('submit', function (e) {
+        e.preventDefault();
+        const esc = (v) => $('<span>').text(v ?? '').html();
+        const list = (items, label) => (items && items.length)
+            ? `<div class="small mt-1"><b>${label}:</b> ${items.map(i => `${esc(i.no_invoice)} / ${esc(i.agreement_number)}`).join(', ')}</div>` : '';
+        const btn = $(this).find('button[type=submit]').prop('disabled', true);
+        $('#uploadResult').html('<div class="text-muted">Memproses...</div>');
+
+        $.ajax({
+            url: "{% url 'billing-upload' %}",
+            type: "POST",
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        }).done(function (res) {
+            const s = res.summary || {};
+            $('#uploadResult').html(`
+                <div class="alert alert-info mb-0">
+                    <div>Dibayar (pindah ke History): <b>${s.paid || 0}</b></div>
+                    <div>Belum dibayar (tetap outstanding): <b>${s.unpaid || 0}</b></div>
+                    <div>Sudah dibayar sebelumnya: <b>${s.already_paid || 0}</b></div>
+                    <div>Tidak ditemukan: <b>${s.not_found || 0}</b></div>
+                    ${list(res.already_paid, 'Sudah dibayar sebelumnya')}
+                    ${list(res.not_found, 'Tidak ditemukan')}
+                </div>`);
+            $('#uploadModal').one('hidden.bs.modal', () => location.reload());
+        }).fail(function (xhr) {
+            const body = xhr.responseJSON || {};
+            const errs = (body.errors || []).map(e => `<li>${esc(e)}</li>`).join('');
+            $('#uploadResult').html(`<div class="alert alert-danger mb-0">${esc(body.message || 'Upload gagal.')}${errs ? `<ul class="mb-0 mt-1 small">${errs}</ul>` : ''}</div>`);
+        }).always(function () {
+            btn.prop('disabled', false);
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

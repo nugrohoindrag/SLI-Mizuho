@@ -1,0 +1,778 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Admin-Users {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Admin</a></li>
+                            <li class="breadcrumb-item active">Users</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h4>Users</h4>
+                                    <a class="btn btn-primary" href="/admin/users/create/">
+                                        <i class="feather fa-regular fa-square-plus mr-1"></i>Tambah Data
+                                    </a>                                    
+                                </div>
+                            </div>
+                            <div class="card-content collapse show">
+                                <div class="card-body card-dashboard">
+                                    <div class="table-responsive">
+                                        <table id="menuTable" class="display table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nama</th>
+                                                    <th>Email</th>
+                                                    <th class="text-center">Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="viewModalLabel">Detail Users</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <table class="table table-bordered">
+                                                    <tr><th>id</th><td id="id"></td></tr>
+                                                    <tr><th>Nama</th><td id="modalMenuName"></td></tr>
+                                                    <tr><th>Email</th><td id="modalMenuLink"></td></tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="editUserModal" aria-labelledby="editUserModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-xl" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Edit User</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <!-- SALIN ISI FORM KAMU DI SINI (Tanpa <form> baru) -->
+                                                    <form id="editUserForm" novalidate>
+                                                        <div class="row">
+                                                            <div class="col-12 col-sm-6">
+                                                                <div class="form-group">
+                                                                    <div class="controls">
+                                                                        <label>Username</label>
+                                                                        <input type="text" id="username" class="form-control" placeholder="Username" required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <div class="controls">
+                                                                        <label>Name</label>
+                                                                        <input type="text" id="name" class="form-control" placeholder="Name" required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <div class="controls">
+                                                                        <label>Email</label>
+                                                                        <input type="email" id="email" class="form-control" placeholder="example@gmail.com" required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <div class="controls">
+                                                                        <label>Alamat</label>
+                                                                        <input type="text" id="address" class="form-control" placeholder="Alamat lengkap" required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>Role</label>
+                                                                    <select class="form-control" id="role">
+                                                                        <option value="">-- Pilih Role --</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>Cabang</label>
+                                                                    <select class="form-control select2 branch-multi-select" id="branch_code" multiple data-placeholder="Cari dan pilih cabang">
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-sm-6">
+                                                                <div class="form-group">
+                                                                    <div class="controls">
+                                                                        <label>No. KTP</label>
+                                                                        <input type="number" id="national_id" class="form-control" placeholder="16 digit" maxlength="16">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>Tempat, Tanggal Lahir:</label>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" id="tempatLahir" class="form-control" placeholder="Contoh: Jakarta">
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="date" id="tanggalLahir" class="form-control" required>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <div class="controls">
+                                                                        <label for="password">Password</label>
+                                                                        <input type="password" id="password" class="form-control" placeholder="******" required>
+                                                                        
+                                                                        <!-- Indikator kekuatan password -->
+                                                                        <div id="password-strength" class="mt-2 text-muted small d-none">
+                                                                            <div class="row">
+                                                                                <div class="col-md-6">
+                                                                                    <ul class="list-unstyled mb-0">
+                                                                                        <li id="len" class="text-danger mb-1">❌ Minimal 8 karakter</li>
+                                                                                        <li id="upper" class="text-danger mb-1">❌ Huruf besar (A-Z)</li>
+                                                                                        <li id="lower" class="text-danger mb-1">❌ Huruf kecil (a-z)</li>
+                                                                                    </ul>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <ul class="list-unstyled mb-0">
+                                                                                        <li id="num" class="text-danger mb-1">❌ Angka (0-9)</li>
+                                                                                        <li id="sym" class="text-danger mb-1">❌ Simbol (!@#$% dll)</li>
+                                                                                    </ul>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <div class="controls">
+                                                                        <label for="confirm_password">Confirm Password</label>
+                                                                        <input type="password" id="confirm_password" class="form-control" placeholder="******" required>
+                                                                        <small id="confirm-error" class="text-danger d-none">❌ Password tidak cocok</small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 d-flex flex-sm-row flex-column justify-content-end mt-1">
+                                                                <button type="submit" class="btn btn-primary glow mb-1 mb-sm-0 mr-0 mr-sm-1">Simpan Perubahan</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+
+{% block script %}
+{{ user_id|json_script:"user-id-data" }}
+<script>
+    window.userId = JSON.parse(document.getElementById('user-id-data').textContent);
+    
+    $(document).ready(function () {
+        const viewModalEl = document.getElementById('viewModal');
+        const viewModal = viewModalEl ? new bootstrap.Modal(viewModalEl) : null;
+
+        const editModalEl = document.getElementById('editUserModal');
+        const editModal = editModalEl ? new bootstrap.Modal(editModalEl) : null;
+
+        let dataTable;
+        let optionsReady;                 // pastikan dropdown siap
+        const BRANCH_MAP = new Map();     // kode -> nama cabang (fallback)
+
+        function selectedRoleName($roleSelect) {
+            return String($roleSelect.find('option:selected').text() || '').trim().toLowerCase();
+        }
+
+        function initBranchMultiSelect($select, dropdownParent, isStaffCabang = false) {
+            if (!$.fn.select2 || !$select.length) return;
+            if ($select.hasClass('select2-hidden-accessible')) {
+                $select.select2('destroy');
+            }
+            $select.select2({
+                placeholder: 'Cari dan pilih cabang',
+                allowClear: true,
+                closeOnSelect: !isStaffCabang,
+                maximumSelectionLength: isStaffCabang ? 0 : 1,
+                width: '100%',
+                dropdownParent: dropdownParent || $(document.body)
+            });
+        }
+
+        function syncBranchInputForRole() {
+            const $role = $('#editUserForm #role');
+            const $branch = $('#editUserForm #branch_code');
+            const roleName = selectedRoleName($role);
+            const isHo = ['ho', 'head office', 'head-office', 'head_office'].includes(roleName);
+            const isStaffCabang = roleName === 'staff_cabang';
+
+            $branch.closest('.form-group').toggle(!isHo);
+            if (isHo) $branch.val([]).trigger('change');
+            if (!isStaffCabang && ($branch.val() || []).length > 1) {
+                $branch.val([$branch.val()[0]]).trigger('change');
+            }
+            initBranchMultiSelect($branch, $('#editUserModal'), isStaffCabang);
+        }
+
+        $('#editUserForm #role').on('change.branchScope', syncBranchInputForRole);
+        
+        // 🔐 Ambil CSRF
+        function getCSRFToken() {
+            let token = null;
+            document.cookie.split(";").forEach(cookie => {
+                const [name, value] = cookie.trim().split("=");
+                if (name === "csrftoken") token = decodeURIComponent(value);
+            });
+            return token;
+        }
+        
+        // 📥 Load dropdown Role dan Cabang
+        async function loadOptions() {
+            try {
+                const headers = {
+                    "Authorization": "Bearer " + localStorage.getItem("access_token"),
+                    "X-CSRFToken": window.csrfToken
+                };
+                
+                const [rolesRes, branchesRes] = await Promise.all([
+                fetch("/api/roles/", { headers, credentials: "include" }),
+                fetch("/api/branches/", { headers, credentials: "include" })
+                ]);
+                
+                if (!rolesRes.ok) throw new Error("Gagal load roles");
+                if (!branchesRes.ok) throw new Error("Gagal load branches");
+                
+                const roles = await rolesRes.json();
+                const branches = await branchesRes.json();
+                
+                // Roles
+                $('#role, #editUserForm #role').html('<option value="">-- Pilih Role --</option>');
+                roles.forEach(role => {
+                    $('#role, #editUserForm #role').append(`<option value="${role.id}">${role.name}</option>`);
+                });
+                
+                // Branches (normalize -> string & trim)
+                $('#branch_code, #editUserForm #branch_code').html('');
+                BRANCH_MAP.clear();
+                branches.forEach(b => {
+                    const code = String(b.branch_code ?? '').trim();
+                    const name = b.branch_name;
+                    BRANCH_MAP.set(code, name);
+                    $('#branch_code, #editUserForm #branch_code').append(
+                    `<option value="${code}">${name}</option>`
+                    );
+                });
+                syncBranchInputForRole();
+            } catch (err) {
+                console.error("❌ Gagal load dropdown:", err);
+                Swal.fire('Gagal', 'Gagal memuat role atau cabang.', 'error');
+            }
+        }
+        
+        // 🧍 Load Data User tunggal (jika diperlukan)
+        async function loadUserDetail() {
+            if (!window.userId) return;
+            try {
+                await optionsReady;
+                
+                const res = await fetch(`/api/users/${window.userId}/`, {
+                    headers: {
+                        "Authorization": "Bearer " + localStorage.getItem("access_token"),
+                        "X-CSRFToken": window.csrfToken
+                    },
+                    credentials: "include"
+                });
+                
+                if (!res.ok) throw new Error("Gagal fetch detail user");
+                
+                const user = await res.json();
+                $('#name').val(user.name || '');
+                $('#email').val(user.email || '');
+                $('#username').val(user.username || '');
+                $('#national_id').val(user.national_id || '');
+                $('#address').val(user.address || '');
+                
+                const [rawTempat = '', rawTanggal = ''] = (user.birth_info || '').split(',');
+                $('#tempatLahir').val(rawTempat.trim());
+                $('#tanggalLahir').val(rawTanggal.trim()); // yyyy-mm-dd
+                
+                // Branch (robust set)
+                const branchCodes = getUserBranchCodes(user);
+                setBranchValue($('#editUserForm #branch_code'), branchCodes);
+                
+                // Role
+                let firstRoleId = '';
+                if (Array.isArray(user.roles) && user.roles.length > 0) {
+                    firstRoleId = typeof user.roles[0] === 'object' ? user.roles[0].id : user.roles[0];
+                }
+                $('#role').val(firstRoleId).trigger('change');
+            } catch (err) {
+                console.error("❌ Gagal load detail user:", err);
+                Swal.fire('Gagal', 'Tidak bisa memuat data user.', 'error');
+            }
+        }
+        
+        // 🧾 Load Users ke Tabel
+        async function loadUsers(page = 1, pageSize = 20, search = '', ordering = 'id') {
+            const $table = $('#menuTable');
+            
+            // jika sudah ter-init, cukup reload (atau ubah page size)
+            if ($.fn.DataTable.isDataTable($table)) {
+                const dt = $table.DataTable();
+                if (pageSize && dt.page.len() !== pageSize) {
+                    dt.page.len(pageSize).draw(false);
+                } else {
+                    dt.ajax.reload(null, false);
+                }
+                return;
+            }
+            
+            // init DataTable server-side
+            $table.DataTable({
+                processing: true,
+                serverSide: true,
+                searching: true,
+                ordering: true,
+                paging: true,
+                
+                // tampilkan "Tampilkan N data"
+                lengthChange: true,
+                pageLength: pageSize,
+                lengthMenu: [[10, 20, 50, 100], [10, 20, 50, 100]],
+                stateSave: true,          // opsional: simpan pilihan user
+                
+                autoWidth: false,
+                responsive: true,
+                
+                ajax: function (data, callback) {
+                    const length = data.length || pageSize;
+                    const start  = data.start  || 0;
+                    const pageNo = Math.floor(start / length) + 1;
+                    
+                    // mapping ordering DT -> DRF
+                    let ord = ordering || 'id';
+                    if (data.order && data.order.length > 0) {
+                        const o = data.order[0];
+                        const colName = data.columns[o.column].name; // set di columns.name
+                        if (['id', 'name', 'email'].includes(colName)) {
+                            ord = (o.dir === 'desc' ? '-' : '') + colName;
+                        }
+                    }
+                    
+                    const q = (data.search && data.search.value || '').trim();
+                    
+                    const params = new URLSearchParams({
+                        page: String(pageNo),
+                        page_size: String(length),
+                        ordering: ord
+                    });
+                    if (q) params.set('search', q);
+                    
+                    fetch(`/api/users/?${params.toString()}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+                            "X-CSRFToken": window.csrfToken
+                        },
+                        credentials: 'include'
+                    })
+                    .then(r => r.ok ? r.json() : r.text().then(t => { throw new Error(t || 'HTTP error'); }))
+                    .then(json => {
+                        const results = json.results || [];
+                        const rows = results.map(u => ({
+                            id: u.id,
+                            name: u.name || '',
+                            email: u.email || '',
+                            raw: u,
+                            actions: `
+            <div class="d-flex justify-content-center gap-1">
+              <button class="btn btn-sm btn-info btn-view"><i class="fa fa-eye"></i></button>
+              <button class="btn btn-sm btn-warning btn-edit"><i class="fa fa-pen"></i></button>
+              <button class="btn btn-sm btn-danger btn-delete"><i class="fa fa-trash"></i></button>
+            </div>`
+                        }));
+                        
+                        callback({
+                            draw: data.draw,
+                            recordsTotal: json.count || 0,
+                            recordsFiltered: json.count || 0,
+                            data: rows
+                        });
+                    })
+                    .catch(err => {
+                        console.error('❌ Error loadUsers:', err);
+                        Swal.fire('Gagal', 'Tidak bisa memuat daftar user.', 'error');
+                        callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+                    });
+                },
+                
+                // mapping kolom untuk sorting/searching
+                columns: [
+                { data: 'name',  name: 'name',  title: 'Name'  },
+                { data: 'email', name: 'email', title: 'Email' },
+                { data: 'actions', orderable: false, searchable: false, title: 'Actions' }
+                ],
+                
+                // isi atribut data-* pada <tr> agar handler tombol tetap jalan
+                    createdRow: function (row, data) {
+                        const u  = data.raw || {};
+                        const branchCodes = getUserBranchCodes(u);
+                        const key = branchCodes.join(',');
+                        const bn  = branchCodes.map(code => BRANCH_MAP?.get?.(code) || code).join(', ');
+                        
+                        $(row)
+                        .attr('data-id', u.id)
+                        .attr('data-name', u.name || '')
+                        .attr('data-email', u.email || '')
+                        .attr('data-branch-code', key)
+                        .attr('data-branch-name', bn);
+                    },
+                    
+                    language: {
+                        search: "Cari:",
+                        lengthMenu: "Tampilkan _MENU_ data",
+                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                        paginate: { previous: "Previous", next: "Next" },
+                        zeroRecords: "Tidak ditemukan data yang sesuai",
+                        processing: "Memuat..."
+                    }
+                });
+            }
+            
+            // 👁️ View
+            $('#menuTable').on('click', '.btn-view', function () {
+                const row = $(this).closest('tr');
+                $('#id').text(row.data('id'));
+                $('#modalMenuName').text(row.data('name'));
+                $('#modalMenuLink').text(row.data('email'));
+                if (viewModal) {
+                    viewModal.show();
+                }
+            });
+            
+            // ✏️ Edit dari Tabel
+            $('#menuTable').on('click', '.btn-edit', async function () {
+                const userId = $(this).closest('tr').data('id');
+                
+                try {
+                    await optionsReady;
+                    
+                    const res = await fetch(`/api/users/${userId}/`, {
+                        headers: {
+                            "Authorization": "Bearer " + localStorage.getItem("access_token"),
+                            "X-CSRFToken": window.csrfToken
+                        },
+                        credentials: "include"
+                    });
+                    
+                    if (!res.ok) throw new Error("Gagal fetch user by id");
+                    
+                    const user = await res.json();
+                    
+                    $('#editUserForm').attr('data-user-id', user.id);
+                    $('#editUserForm #username').val(user.username || '');
+                    $('#editUserForm #name').val(user.name || '');
+                    $('#editUserForm #email').val(user.email || '');
+                    $('#editUserForm #address').val(user.address || '');
+                    $('#editUserForm #national_id').val(user.national_id || '');
+                    
+                    const [rawTempat = '', rawTanggal = ''] = (user.birth_info || '').split(',');
+                    $('#editUserForm #tempatLahir').val(rawTempat.trim());
+                    $('#editUserForm #tanggalLahir').val(rawTanggal.trim()); // yyyy-mm-dd
+                    
+                    // Branch (robust set)
+                    const branchCodes = getUserBranchCodes(user);
+                    setBranchValue($('#editUserForm #branch_code'), branchCodes);
+                    
+                    // Role
+                    let firstRoleId = '';
+                    if (Array.isArray(user.roles) && user.roles.length > 0) {
+                        firstRoleId = typeof user.roles[0] === 'object' ? user.roles[0].id : user.roles[0];
+                    }
+                    const $roleSel = $('#editUserForm #role');
+                    $roleSel.val(firstRoleId);
+                    if ($roleSel.hasClass('select2-hidden-accessible')) $roleSel.trigger('change');
+                    
+                    // Reset password fields
+                    $('#editUserForm #password').val('');
+                    $('#editUserForm #confirm_password').val('');
+                    $('#confirm-error').addClass('d-none');
+                    
+                    if (editModal) {
+                        editModal.show();
+                    }
+                    
+                    // re-assert setelah modal benar2 tampil (cover transisi/Select2)
+                    $('#editUserModal').one('shown.bs.modal', function () {
+                        setBranchValue($('#editUserForm #branch_code'), branchCodes);
+                    });
+                    
+                } catch (err) {
+                    console.error("❌ Gagal buka modal edit:", err);
+                    Swal.fire('Gagal', 'Tidak bisa memuat data user.', 'error');
+                }
+            });
+            
+            // 💾 Submit Form Modal Edit
+            $('#editUserForm').on('submit', async function (e) {
+                e.preventDefault();
+                
+                const userId = $(this).attr('data-user-id');
+                const password = $('#editUserForm #password').val();
+                const confirm = $('#editUserForm #confirm_password').val();
+                const national_id = $('#editUserForm #national_id').val();
+                const tempat = $('#editUserForm #tempatLahir').val().trim();
+                const tanggal = $('#editUserForm #tanggalLahir').val(); // yyyy-mm-dd
+                
+                if (password && password !== confirm) {
+                    $('#confirm-error').removeClass('d-none');
+                    return;
+                } else {
+                    $('#confirm-error').addClass('d-none');
+                }
+                if (password) {
+                    const hasUpper = /[A-Z]/.test(password);
+                    const hasLower = /[a-z]/.test(password);
+                    const hasNumber = /[0-9]/.test(password);
+                    const hasSymbol = /[\W_]/.test(password);
+                    const isLong = password.length >= 8;
+                    if (!isLong || !hasUpper || !hasLower || !hasNumber || !hasSymbol) {
+                        Swal.fire('Invalid', 'Password harus minimal 8 karakter dan mengandung huruf besar, huruf kecil, angka, dan simbol.', 'warning');
+                        return;
+                    }
+                }
+                
+                const birth_info = `${tempat}, ${tanggal}`;
+                const branchCodes = $('#editUserForm #branch_code').val() || [];
+                
+                const payload = {
+                    username: $('#editUserForm #username').val(),
+                    name: $('#editUserForm #name').val(),
+                    email: $('#editUserForm #email').val(),
+                    address: $('#editUserForm #address').val(),
+                    national_id: national_id,
+                    branch_codes: branchCodes,
+                    role_ids: [$('#editUserForm #role').val()],
+                    birth_info: birth_info
+                };
+                if (password) payload.password = password;
+                
+                try {
+                    const res = await fetch(`/api/users/${userId}/`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + localStorage.getItem("access_token"),
+                            "X-CSRFToken": window.csrfToken
+                        },
+                        credentials: "include",
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        Swal.fire('Sukses', 'Data user berhasil diperbarui.', 'success');
+                        if (editModal) {
+                            editModal.hide();
+                        }
+                        loadUsers();
+                    } else {
+                        // --- BLOK PENANGANAN ERROR YANG BARU ---
+                        const contentType = res.headers.get("content-type");
+                        let errorHtml = `<strong>Error ${res.status}: ${res.statusText}</strong><br>`;
+
+                        if (contentType && contentType.indexOf("application/json") !== -1) {
+                            // Jika responsnya JSON, kita tampilkan dengan rapi
+                            const err = await res.json();
+                            errorHtml += `<pre style="text-align: left; font-size: 0.8em;">${JSON.stringify(err, null, 2)}</pre>`;
+                        } else {
+                            // Jika responsnya HTML (seperti kasus Anda), kita log ke console
+                            // dan beri pesan yang jelas di SweetAlert
+                            const errText = await res.text();
+                            console.error("Server returned an HTML error page:", errText);
+                            errorHtml += "Server mengembalikan halaman error HTML. Cek tab 'Console' dan 'Network' di browser untuk detail lengkap.";
+                        }
+
+                        Swal.fire({
+                            title: 'Update Gagal!',
+                            html: errorHtml,
+                            icon: 'error'
+                        });
+                        // --- AKHIR BLOK PENANGANAN ERROR ---
+                    }
+                } catch (err) {
+                    console.error("❌ Error update:", err);
+                    Swal.fire('Error Koneksi', 'Terjadi kesalahan jaringan atau koneksi.', 'error');
+                }
+            });
+            
+            // 🗑️ Delete
+            $('#menuTable').on('click', '.btn-delete', async function () {
+                const row = $(this).closest('tr');
+                const userId = row.data('id');
+                const userName = row.data('name');
+                
+                Swal.fire({
+                    title: `Hapus ${userName}?`,
+                    text: "Data yang sudah dihapus tidak dapat dikembalikan.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, hapus!'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const res = await fetch(`/api/users/${userId}/`, {
+                                method: "DELETE",
+                                headers: {
+                                    "Authorization": "Bearer " + localStorage.getItem("access_token"),
+                                    "X-CSRFToken": window.csrfToken
+                                },
+                                credentials: "include"
+                            });
+                            
+                            if (res.ok) {
+                                Swal.fire('Dihapus!', 'User berhasil dihapus.', 'success');
+                                loadUsers();
+                            } else {
+                                let errMsg = 'Gagal menghapus user.';
+                                try {
+                                    const err = await res.json();
+                                    errMsg = err.message || err.detail || errMsg;
+                                } catch (_) {}
+                                Swal.fire('Gagal', errMsg, 'error');
+                            }
+                        } catch (err) {
+                            console.error("❌ Gagal hapus:", err);
+                            Swal.fire('Gagal', 'Terjadi kesalahan saat menghapus.', 'error');
+                        }
+                    }
+                });
+            });
+            
+            // 🔁 Reset form saat modal edit ditutup
+            $('#editUserModal').on('hidden.bs.modal', function () {
+                $('#editUserForm')[0].reset();
+                $('#confirm-error').addClass('d-none');
+                $('#editUserForm #role').val('').trigger('change');
+                $('#editUserForm #branch_code').val([]).trigger('change');
+                $('#editUserForm').removeAttr('data-user-id');
+                
+                $('#password-strength').addClass('d-none');
+                updateStrength('#len', false, 'Minimal 8 karakter');
+                updateStrength('#upper', false, 'Huruf besar (A-Z)');
+                updateStrength('#lower', false, 'Huruf kecil (a-z)');
+                updateStrength('#num', false, 'Angka (0-9)');
+                updateStrength('#sym', false, 'Simbol (!@#$% dll)');
+
+                // --- Force Clear Modal When it Closed ---
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+                $('body').css({ 'overflow': '', 'padding-right': '' });
+                // --- End of Force Clear Modal When it Closed ---
+            });
+            
+            // Bootstrap awal
+            optionsReady = loadOptions().then(() => {
+                loadUsers();
+                // loadUserDetail(); // aktifkan kalau butuh form tunggal di halaman ini
+            });
+            
+            // 🔁 Validasi real-time kekuatan password
+            $('#password').on('input', function () {
+                const password = $(this).val();
+                const isLong = password.length >= 8;
+                const hasUpper = /[A-Z]/.test(password);
+                const hasLower = /[a-z]/.test(password);
+                const hasNumber = /[0-9]/.test(password);
+                const hasSymbol = /[\W_]/.test(password);
+                
+                $('#password-strength').removeClass('d-none');
+                updateStrength('#len', isLong, 'Minimal 8 karakter');
+                updateStrength('#upper', hasUpper, 'Huruf besar (A-Z)');
+                updateStrength('#lower', hasLower, 'Huruf kecil (a-z)');
+                updateStrength('#num', hasNumber, 'Angka (0-9)');
+                updateStrength('#sym', hasSymbol, 'Simbol (!@#$% dll)');
+            });
+            
+            // 🔄 Indikator kekuatan password
+            function updateStrength(selector, condition, defaultText) {
+                if (condition) {
+                    $(selector).removeClass('text-danger').addClass('text-success').text('✅ ' + defaultText);
+                } else {
+                    $(selector).removeClass('text-success').addClass('text-danger').text('❌ ' + defaultText);
+                }
+            }
+            
+            // 🔧 Fallback: pastikan option cabang ada sebelum set value
+            function ensureBranchOptionExists($select, code) {
+                const v = (code ?? '').toString().trim();
+                if (!v) return;
+                if ($select.find(`option[value="${v}"]`).length === 0) {
+                    const name = BRANCH_MAP.get(v) || v;
+                    $select.append(new Option(name, v, false, false));
+                }
+            }
+            
+            // 🔧 Setter robust untuk branch (normalize + trigger + retry)
+            function getUserBranchCodes(user) {
+                if (Array.isArray(user.branches) && user.branches.length) {
+                    return user.branches.map(b => String(b.branch_code ?? '').trim()).filter(Boolean);
+                }
+                const single = user.branch_code || user.branch?.branch_code || '';
+                return single ? [String(single).trim()] : [];
+            }
+
+            function setBranchValue($select, codes) {
+                const values = (Array.isArray(codes) ? codes : [codes])
+                    .map(code => (code ?? '').toString().trim())
+                    .filter(Boolean);
+                if (!values.length) { $select.val([]).trigger('change'); return; }
+                
+                values.forEach(code => ensureBranchOptionExists($select, code));
+                
+                $select.val(values);
+                values.forEach(code => $select.find(`option[value="${code}"]`).prop('selected', true));
+                
+                if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.trigger('change.select2');
+                } else {
+                    $select.trigger('change');
+                }
+                
+                // retry microtask (cover transisi modal / init select2)
+                setTimeout(() => {
+                    const current = $select.val() || [];
+                    if (current.length !== values.length) {
+                        $select.val(values).trigger($select.hasClass('select2-hidden-accessible') ? 'change.select2' : 'change');
+                    }
+                }, 0);
+            }
+        });
+    </script>
+    {% endblock %}
+    
+    {% endblock %}

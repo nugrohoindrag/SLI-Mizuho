@@ -1,0 +1,53 @@
+<!-- BEGIN: Main Menu -->
+<div class="main-menu menu-fixed menu-dark menu-accordion menu-shadow" data-scroll-to-active="true">
+    
+    <div class="main-menu-content" style="overflow-y: auto;">
+        
+        <!-- Sidebar Menu Dynamic Placeholder -->
+        <ul class="navigation navigation-main nav flex-column sidebar-dynamic-wrapper" id="main-menu-navigation" data-menu="menu-navigation">
+            <!-- Placeholder loading sementara -->
+            <li class="nav-item text-muted p-2 loading-placeholder">Memuat menu...</li>
+        </ul>
+    </div>
+    
+    <!-- Fallback jika JavaScript dinonaktifkan -->
+    <noscript>
+        <div class="p-2 text-danger">
+            Menu tidak dapat dimuat. Harap aktifkan JavaScript.
+        </div>
+    </noscript>
+</div>
+<!-- END: Main Menu -->
+
+<!-- CSS: Scrollbar dengan garis tipis -->
+<style>
+    
+    .nav-link[aria-expanded="true"] i.fa-chevron-down {
+        transform: rotate(180deg);
+        transition: transform 0.2s ease;
+    }
+    /* Webkit-based browser (Chrome, Edge, Safari) */
+    .main-menu-content::-webkit-scrollbar {
+        width: 8px;
+        background-color: transparent;
+    }
+    
+    .main-menu-content::-webkit-scrollbar-thumb {
+        background-color: transparent;
+        border-left: 1px solid rgba(255, 255, 255, 0.2); /* Garis tipis transparan */
+        border-radius: 4px;
+    }
+    
+    .main-menu-content::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+    
+    /* Firefox */
+    .main-menu-content {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    }
+    /* Ensure dynamic sidebar submenu visibility is consistent */
+    .main-menu .sidebar-dynamic-wrapper li.has-sub > ul.menu-content { display: none; }
+    .main-menu .sidebar-dynamic-wrapper li.has-sub.open > ul.menu-content { display: block; }
+</style>

@@ -1,0 +1,7 @@
+.editable[type="date"] {
+    width: 140px !important;
+}
+
+.editable[type="text"] {
+    width: 230px !important;
+}

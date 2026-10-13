@@ -1,0 +1,22 @@
+.otp-container input {
+    width: 45px;
+    height: 55px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 10px;
+    border: 2px solid #dee2e6;
+    transition: 0.2s;
+}
+
+.otp-container input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 5px rgba(13,110,253,.5);
+}
+
+.card {
+    border-radius: 18px;
+}
+
+.btn-success {
+    border-radius: 12px;
+}

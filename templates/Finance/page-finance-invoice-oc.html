@@ -1,0 +1,733 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Finance - Invoice OC{% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Finance</a></li>
+                            <li class="breadcrumb-item active">Invoice OC</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-md-6 col-12 mb-2">
+                                        <h4 class="mb-2">Invoice OC</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body"> 
+                                <div id="loading-overlay" style="display: none;position: fixed;top: 0;left: 0;width: 100vw;height: 100vh;background: rgba(255, 255, 255, 0.6);z-index: 1050; cursor: wait;"></div>
+                                
+                                <!-- Spinner loading (sudah kamu punya) -->
+                                <div id="loading-message" style="display: none;position: fixed;z-index: 1060;top: 50%;left: 50%;transform: translate(-50%, -50%);text-align: center;display: flex;flex-direction: column;align-items: center;">
+                                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                                    <div style="margin-top: 10px; font-weight: bold;">Loading data...</div>
+                                </div>
+                                
+                                <form id="invoiceForm" method="post">
+                                    {% csrf_token %}
+                                    
+                                    <div class="row mb-3 mt-1">
+                                        {% comment %} <div class="col-md-3">
+                                            <label for="startDate">Tanggal Awal:</label>
+                                            <input type="date" id="startDate" class="form-control">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="endDate">Tanggal Akhir:</label>
+                                            <input type="date" id="endDate" class="form-control">
+                                        </div> {% endcomment %}
+                                        <div class="col-md-3 align-self-end">
+                                            <label for="numin">Nomor Invoice:</label>
+                                            <input type="text" id="numin" class="form-control">
+                                        </div>
+                                        <div class="col-md-3 align-self-end mt-1">
+                                            <button type="button" id="filterBtn" class="btn btn-secondary">Filter</button>
+                                            <button type="button" id="resetBtn" class="btn btn-outline-secondary">Atur Ulang</button>
+                                            <button type="button" id="downloadInvoiceBtn" class="btn btn-primary">Unduh Invoice</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="branchSelect" class="form-label">Pilih Cabang</label>
+                                            <select class="form-select select2" id="branchSelect" name="branch_code" required>
+                                                <option value="" selected disabled>-- Pilih Cabang --</option>
+                                                {% for branch in branches %}
+                                                <option value="{{ branch.branch_code }}">
+                                                    {{ branch.branch_code }} || {{ branch.branch_name }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 align-self-end mt-1">
+                                            <button type="button" id="generate" class="btn btn-secondary">Generate Invoice</button>
+                                            <button type="button" id="blmgnrt" class="btn btn-info">Data Yang Belum Di Generate</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <table id="invoiceTable" class="display table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th><input type="checkbox" id="selectAll" /></th>
+                                                <th>Kode Cabang</th>
+                                                <th>Nama Cabang</th>
+                                                <th>No Akta</th>
+                                                <th>Tgl Akta</th>
+                                                <th>No Perjanjian</th>
+                                                <th>Nama Debitur</th>
+                                                <th>Kd Voucher</th>
+                                                <th>No Sertifikat</th>
+                                                <th>Tgl Sertifikat</th>
+                                                <th>Nilai Penjaminan</th>
+                                                <th>Nominal PNBP</th>
+                                                <th>Jasa</th>
+                                                <th>Nama Notaris</th>
+                                                <th>Tanggal Pembayaran</th>
+                                                <th>Nomor Invoice</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </form>
+                            </div> <!-- end card-body -->
+                            <div class="modal fade" id="generateInvoiceModal" tabindex="-1" aria-labelledby="generateInvoiceLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-md modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <form id="generateInvoiceForm">
+                                            {% csrf_token %}
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="generateInvoiceLabel">Generate Invoice</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="no_invoice" class="form-label">Nomor Invoice</label>
+                                                    <input type="text" class="form-control" id="no_invoice" name="invoice_number" required>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="branchSelect2" class="form-label">Pilih Cabang</label>
+                                                    <select class="form-select select2" id="branchSelect2" name="branch_code">
+                                                        <option value="" selected disabled>-- Pilih Cabang --</option>
+                                                        {% for branch in branches %}
+                                                        <option value="{{ branch.branch_code }}">
+                                                            {{ branch.branch_code }} || {{ branch.branch_name }}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="row g-3">
+                                                    <div class="col-12">
+                                                        <label class="form-label">Tanggal Bayar</label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Mulai</span>
+                                                            <input type="date" class="form-control" id="dateFrom" name="date_from" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Sampai</span>
+                                                            <input type="date" class="form-control" id="dateTo" name="date_to" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div id="dateHelp" class="form-text">Pilih rentang tanggal akta (mulai – sampai).</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="alert alert-danger d-none mt-3" id="generateInvoiceError"></div>
+                                            </div>
+                                            
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-secondary" id="btnGenerateInvoice">
+                                                    <i class="bi bi-power"></i> Generate Invoice
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal fade" id="modalBelumGenerate" tabindex="-1" aria-labelledby="modalBelumGenerateLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modalBelumGenerateLabel">Data Yang Belum Di-Generate</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row g-2 align-items-end mb-3" id="filterBelumGenerate">
+                                                <div class="col-12 col-md-3">
+                                                    <label for="bgStartDate" class="form-label mb-1">Start date</label>
+                                                    <input type="date" class="form-control" id="bgStartDate" placeholder="YYYY-MM-DD">
+                                                </div>
+                                                <div class="col-12 col-md-3">
+                                                    <label for="bgEndDate" class="form-label mb-1">End date</label>
+                                                    <input type="date" class="form-control" id="bgEndDate" placeholder="YYYY-MM-DD">
+                                                </div>
+                                                <div class="col-12 col-md-3 d-flex gap-1">
+                                                    <button type="button" class="btn btn-primary w-100" id="btnApplyBelumGenerate">Terapkan</button>
+                                                    <button type="button" class="btn btn-outline-secondary" id="btnTodayBelumGenerate" title="Set hari ini">Hari ini</button>
+                                                    <button type="button" class="btn btn-outline-secondary" id="btnResetBelumGenerate" title="Kosongkan filter">Reset</button>
+                                                </div>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table id="tblBelumGenerate" class="table table-striped table-bordered w-100">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Nama Cabang</th>
+                                                            <th>Tanggal Akta</th>
+                                                            <th>Nomor Kontrak</th>
+                                                            <th>Nama Debitur</th>
+                                                            <th>Nomor Akta</th>
+                                                            <th>Nomor Sertifikat</th>
+                                                            <th>Notaris</th>
+                                                            <th>Biaya PNBP</th>
+                                                            <th>Biaya Jasa</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th colspan="7" class="text-end">Total</th>
+                                                            <th id="totalPnbp" class="text-end"></th>
+                                                            <th id="totalJasa" class="text-end"></th>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <small class="text-muted me-auto">
+                                                Menampilkan data yang belum di-generate akta/sertifikat.
+                                            </small>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!-- end card -->
+                    </div> <!-- end col -->
+                </div> <!-- end row -->
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+
+<script>
+    let table;
+    
+    $(document).ready(function () {
+        const today = new Date().toISOString().slice(0, 10);
+        
+        $('#startDate').val(today);
+        $('#endDate').val(today);
+        
+        // JS inisialisasi DataTables
+        const table = $('#invoiceTable').DataTable({
+            processing: true,
+            serverSide: true,
+            deferRender: true,
+            searchDelay: 400,
+            ajax: {
+                url: '/api/invoice/data-oc/',
+                type: 'GET',
+                dataSrc: 'data',
+                data: function (d) {
+                    d.invoice_st = 1; // HANYA yang SUDAH digenerate
+                    const s = $('#startDate').val();
+                    const e = $('#endDate').val();
+                    const bc = $('#branchSelect').val();
+                    const inv = ($('#numin').val() || '').trim();
+                    if (s) d.start_date = s;   // yyyy-mm-dd
+                    if (e) d.end_date = e;     // yyyy-mm-dd
+                    if (bc) d.branch_code = bc;
+                    if (inv) d.invoice_no = inv;
+                }
+            },
+            columns: [
+            { data: 'id', orderable: false, searchable: false,
+            render: d => `<input type="checkbox" class="select-row" value="${d}">` },
+            { data: 'branch_code', defaultContent: '' },
+            { data: 'branch_name', defaultContent: '' },
+            { data: 'document_number', defaultContent: '' },
+            { data: 'document_date', defaultContent: '' },
+            { data: 'agreement_number', defaultContent: '' },
+            { data: 'debtor_name', defaultContent: '' },
+            { data: 'voucher_code', defaultContent: '' },
+            { data: 'certificate_number', defaultContent: '' },
+            { data: 'certificate_date', defaultContent: '' },
+            { data: 'guarantee_value', defaultContent: 0, render: $.fn.dataTable.render.number('.', ',', 0) },
+            { data: 'pnbp_fees', defaultContent: 0, render: $.fn.dataTable.render.number('.', ',', 0) },
+            { data: 'service_cost', defaultContent: 0, render: $.fn.dataTable.render.number('.', ',', 0) },
+            { data: 'notary_id', defaultContent: '' },
+            { data: 'tgl_pay', defaultContent: '' },
+            { data: 'no_invoice', defaultContent: '' },
+            ],
+            order: [[4, 'desc']], // document_date
+            scrollX: true,
+            fixedHeader: true,
+            language: { emptyTable: "Tidak ada data tersedia" },
+            initComplete: function () { hideLoading?.(); }
+        });
+        
+        // $.fn.dataTable.ext.search.push(function (settings, data) {
+        //    const start = $('#startDate').val(), end = $('#endDate').val(), docDateStr = data[4];
+        //    if (!start && !end) return true;
+        //    if (!docDateStr) return false;
+        //    const rowDate = new Date(docDateStr);
+        //    if (Number.isNaN(rowDate.getTime())) return false;
+        //    if (start && rowDate < new Date(start)) return false;
+        //    if (end   && rowDate > new Date(end))   return false;
+        //    return true;
+        // });
+        
+        $('#selectAll').on('change', function () { $('.select-row').prop('checked', this.checked); });
+        $('#invoiceTable').on('change', '.select-row', function () {
+            const all = $('.select-row').length, checked = $('.select-row:checked').length;
+            $('#selectAll').prop('checked', all > 0 && checked === all);
+        });
+        table.on('draw', function () { $('#selectAll').prop('checked', false); });
+        
+        $('#filterBtn').on('click', () => table.ajax.reload());
+        $('#resetBtn').on('click', () => {
+            $('#startDate').val('');
+            $('#endDate').val('');
+            $('#branchSelect').val('');
+            table.ajax.reload();
+        });
+        
+        $('#downloadInvoiceBtn').on('click', async function () {
+            // === (REMOVED) Date filters ===
+            // const start = $('#startDate').val();
+            // const end   = $('#endDate').val();
+            
+            const branchCode = $('#branchSelect').val();
+            const invoiceNo  = ($('#numin').val() || '').trim();
+            
+            Swal.fire({
+                title: 'Konfirmasi Download',
+                html: `Apakah Anda yakin ingin mendownload invoice?<br>
+               <small>Cabang: ${branchCode || 'Semua/Belum dipilih'}</small><br>
+               <small>Nomor Invoice: ${invoiceNo || 'Semua'}</small>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, download',
+                cancelButtonText: 'Batal'
+            }).then(async ({ isConfirmed }) => {
+                if (!isConfirmed) return;
+                
+                try {
+                    showLoading();
+                    
+                    const url = new URL('/api/invoice/download-oc/', window.location.origin);
+                    
+                    // === (REMOVED) Date params ===
+                    // if (start) url.searchParams.append('start_date', start);
+                    // if (end)   url.searchParams.append('end_date', end);
+                    
+                    // === Only keep these two filters ===
+                    if (branchCode) url.searchParams.append('branch_code', branchCode);
+                    if (invoiceNo)  url.searchParams.append('invoice_no', invoiceNo);
+                    
+                    const res = await fetch(url.toString(), {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    
+                    const ct = res.headers.get('Content-Type') || '';
+                    console.log('➡️ URL:', url.toString());
+                    console.log('➡️ Status:', res.status);
+                    console.log('➡️ Content-Type:', ct);
+                    
+                    if (res.ok && ct.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+                        const blob = await res.blob();
+                        const cd = res.headers.get('Content-Disposition') || '';
+                        const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                        const filename = match ? match[1].replace(/['"]/g, '') : 'Invoice_Generated.xlsx';
+                        
+                        const urlBlob = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = urlBlob;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(urlBlob);
+                        
+                        Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Invoice berhasil didownload.' });
+                        return;
+                    }
+                    
+                    const r = res.clone();
+                    let message = `Gagal (${res.status})`;
+                    try {
+                        if ((r.headers.get('Content-Type') || '').includes('application/json')) {
+                            const data = await r.json();
+                            console.error('❌ Response JSON:', data);
+                            message = data?.detail || data?.message || JSON.stringify(data);
+                        } else {
+                            const text = await r.text();
+                            console.error('❌ Response TEXT:', text);
+                            if (/<!doctype html>/i.test(text) && /login/i.test(text)) {
+                                message = 'Session habis / diarahkan ke halaman login. Silakan login ulang.';
+                            } else if (text) {
+                                message = text.slice(0, 1000);
+                            }
+                        }
+                    } catch (e) {
+                        console.error('❌ Error read body:', e);
+                        message = `${message}. (Tidak dapat membaca body respons)`;
+                    }
+                    
+                    showFormError(message);
+                    Swal.fire({ icon: 'error', title: 'Gagal', html: message });
+                    
+                } catch (error) {
+                    const msg = error?.message ? `Gagal terhubung ke server: ${error.message}` : 'Gagal terhubung ke server.';
+                    console.error('❌ Network/JS Error:', error);
+                    showFormError(msg);
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: msg });
+                } finally {
+                    hideLoading();
+                }
+            });
+        });
+        
+        $('#generate').on('click', function () {
+            $('#dateFrom').val($('#startDate').val() || '');
+            $('#dateTo').val($('#endDate').val() || '');
+            new bootstrap.Modal(document.getElementById('generateInvoiceModal')).show();
+        });
+        
+        $('#generateInvoiceForm').on('submit', async function (e) {
+            e.preventDefault();
+            
+            const invoiceNumber = $('#no_invoice').val().trim();
+            const branchCodeRaw = $('#generateInvoiceForm select[name="branch_code"]').val();
+            const dateFrom = $('#dateFrom').val();
+            const dateTo   = $('#dateTo').val();
+            const selectedIds = $('.select-row:checked').map(function () { return $(this).val(); }).get();
+            
+            // Validasi awal di sisi UI
+            if (!invoiceNumber) return showFormError('no_invoice wajib diisi.');
+            // if (!branchCode)    return showFormError('branch_code/branch wajib diisi.');  // OLD (dihilangkan)
+            if (dateFrom && dateTo && new Date(dateFrom) > new Date(dateTo)) {
+                return showFormError('Tanggal mulai tidak boleh lebih besar dari tanggal sampai.');
+            }
+            if (!dateFrom && !dateTo && selectedIds.length === 0) {
+                return showFormError('Pilih rentang tanggal atau centang minimal satu data.');
+            }
+            
+            const branchCode = (branchCodeRaw && String(branchCodeRaw).trim()) ? String(branchCodeRaw).trim() : 'ALL'; // NEW
+            
+            const payload = {
+                no_invoice: invoiceNumber,
+                branch: branchCode,                // NEW: bisa "ALL" ketika kosong
+                date_from: dateFrom || null,
+                date_to:   dateTo   || null,
+                consumer_ids: selectedIds
+            };
+            
+            const csrftoken = getCSRFToken();
+            const btn = $('#btnGenerateInvoice');
+            const btnHtml = btn.html();
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Memproses...');
+            
+            try {
+                const res = await fetch('/api/invoice/generate-oc/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin',
+                    redirect: 'manual',
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.type === 'opaqueredirect' || (res.status >= 300 && res.status < 400)) {
+                    const msg = 'Request ter-redirect. Cek login/HTTPS/rewrite di server.';
+                    showFormError(msg);
+                    return;
+                }
+                
+                if (!res.ok) {
+                    // TAMPILKAN VALIDASI DARI BACKEND SECARA LANGSUNG
+                    const { messageText, messageHtml } = await buildFriendlyError(res);
+                    showFormError(messageText);
+                    Swal.fire({ icon: 'error', title: `Gagal (${res.status})`, html: messageHtml || messageText });
+                    return;
+                }
+                
+                const contentType = res.headers.get('Content-Type') || '';
+                if (contentType.includes('application/') && !contentType.includes('json')) {
+                    const blob = await res.blob();
+                    const cd = res.headers.get('Content-Disposition') || '';
+                    const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                    const filename = match ? match[1].replace(/['"]/g, '') : (invoiceNumber + '.xlsx');
+                    
+                    const urlBlob = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = urlBlob; a.download = filename;
+                    document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(urlBlob);
+                } else {
+                    await res.json().catch(()=>{});
+                }
+                
+                bootstrap.Modal.getInstance(document.getElementById('generateInvoiceModal')).hide();
+                Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Invoice berhasil digenerate.' });
+                table.ajax.reload(null, false);
+                
+            } catch (error) {
+                // Network/JS error — TIDAK pakai pesan generik
+                const msg = error?.message ? `Gagal terhubung ke server: ${error.message}` : 'Gagal terhubung ke server.';
+                showFormError(msg);
+                Swal.fire({ icon: 'error', title: 'Gagal', text: msg });
+            } finally {
+                btn.prop('disabled', false).html(btnHtml);
+            }
+        });
+        
+        // ================= Helpers =================
+        
+        window.buildFriendlyError = async function (res) {
+            const status = res.status;
+            const statusText = res.statusText || '';
+            const ct = (res.headers.get('Content-Type') || '').toLowerCase();
+            let messageText = `${status} ${statusText} — Gagal memproses permintaan.`;
+            let messageHtml = '';
+            
+            try {
+                if (ct.includes('application/json')) {
+                    const j = await res.json();
+                    const main = j.detail || j.message || j.error || 'Gagal memproses permintaan.';
+                    messageText = `${status} ${statusText} — ${main}`;
+                    
+                    // Detail validasi khusus (payment_date) dari views.py
+                    if (j.missing_payment_date || (Array.isArray(j.samples_agreement_number) && j.samples_agreement_number.length)) {
+                        const total = j.total_selected != null ? `<div>Total dipilih: <b>${escapeHtml(j.total_selected)}</b></div>` : '';
+                        const miss  = j.missing_payment_date != null ? `<div>Tanpa payment_date: <b>${escapeHtml(j.missing_payment_date)}</b></div>` : '';
+                        const list  = Array.isArray(j.samples_agreement_number) && j.samples_agreement_number.length
+                        ? `<div class="mt-2">Contoh agreement number tanpa payment_date:<ul>${j.samples_agreement_number.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul></div>` : '';
+                        messageHtml = `<div>${escapeHtml(main)}</div>${total}${miss}${list}`;
+                        
+                    } else if (j.errors && typeof j.errors === 'object') {
+                        // DRF: field -> [errors]
+                        const items = Object.entries(j.errors)
+                        .map(([k, v]) => `<li><b>${escapeHtml(k)}</b>: ${escapeHtml(Array.isArray(v) ? v.join(', ') : String(v))}</li>`)
+                        .join('');
+                        messageHtml = `<div>${escapeHtml(main)}</div><ul>${items}</ul>`;
+                        
+                    } else {
+                        messageHtml = `<div>${escapeHtml(main)}</div>`;
+                    }
+                    
+                } else {
+                    // HTML traceback / teks mentah
+                    const raw = await res.text();
+                    if (ct.includes('text/html')) {
+                        const summary = summarizeDjangoHtml(raw);
+                        messageText = `${status} ${statusText} — ${summary}`;
+                        messageHtml  = `<div>${escapeHtml(summary)}</div>`;
+                    } else {
+                        const trimmed = raw.replace(/\s+/g, ' ').slice(0, 300);
+                        messageText = `${status} ${statusText} — ${trimmed || 'Terjadi kesalahan pada server.'}`;
+                        messageHtml  = `<div>${escapeHtml(trimmed)}</div>`;
+                    }
+                }
+            } catch (e) {
+                messageText = `${status} ${statusText} — Gagal memproses respons error.`;
+                messageHtml = `<div>Gagal memproses respons error.</div>`;
+            }
+            
+            return { messageText, messageHtml };
+        };
+        
+        window.summarizeDjangoHtml = function (html) {
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const title = (doc.querySelector('title') || {}).textContent || '';
+                const h1    = (doc.querySelector('h1')    || {}).textContent || '';
+                const pre   = (doc.querySelector('pre')   || {}).textContent || '';
+                const summary = (title || h1 || pre || 'Kesalahan pada server').trim().replace(/\s+/g, ' ');
+                return summary.length > 300 ? summary.slice(0, 300) + '…' : summary;
+            } catch {
+                return 'Kesalahan pada server';
+            }
+        };
+        
+        window.escapeHtml = function (s) {
+            return String(s)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#39;');
+        };
+        
+        function showFormError(msg) {
+            $('#generateInvoiceError').html(escapeHtml(msg)).removeClass('d-none');
+        }
+        
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        }
+        
+        // ===== Helpers khusus modal "Belum Generate" =====
+        function fmtRupiah(n) {
+            if (n == null || n === '') return '-';
+            const num = Number(n) || 0;
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+        }
+        function fmtTanggal(v) {
+            if (!v) return '-';
+            const d = new Date(v);
+            if (isNaN(d)) return v;
+            const dd = String(d.getDate()).padStart(2,'0');
+            const mm = String(d.getMonth()+1).padStart(2,'0');
+            const yyyy = d.getFullYear();
+            return `${dd}/${mm}/${yyyy}`;
+        }
+        
+        let dtBelumGenerate = null;
+        
+        function todayStr() {
+            const d = new Date();
+            const mm = String(d.getMonth()+1).padStart(2,'0');
+            const dd = String(d.getDate()).padStart(2,'0');
+            return `${d.getFullYear()}-${mm}-${dd}`;
+        }
+        function buildBelumGenerateUrl() {
+            const url = new URL('/api/invoice/data-oc/', window.location.origin);
+            url.searchParams.set('invoice_st', '0'); // belum generate
+            url.searchParams.set('start', '0');
+            url.searchParams.set('length', '100000');
+            
+            // ambil dari input dalam modal
+            const s = $('#bgStartDate').val()?.trim();
+            const e = $('#bgEndDate').val()?.trim();
+            const bc = $('#bgBranchCode').val()?.trim();
+            
+            if (s) url.searchParams.set('start_date', s);
+            if (e) url.searchParams.set('end_date', e);
+            if (bc) url.searchParams.set('branch_code', bc);
+            
+            return url.toString();
+        }
+        
+        // buka modal
+        $(document).on('click', '#blmgnrt', function (e) {
+            e.preventDefault();
+            
+            const modalEl = document.getElementById('modalBelumGenerate');
+            if (!modalEl) return console.warn('modalBelumGenerate tidak ditemukan');
+            
+            // default-kan tanggal modal = filter global jika ada; kalau kosong = hari ini
+            const gStart = $('#startDate').val();
+            const gEnd   = $('#endDate').val();
+            const gBranch= $('#branchSelect').val();
+            
+            if (!$('#bgStartDate').val() && !$('#bgEndDate').val()) {
+                $('#bgStartDate').val(gStart || todayStr());
+                $('#bgEndDate').val(gEnd   || todayStr());
+            }
+            if (!$('#bgBranchCode').val() && gBranch) {
+                $('#bgBranchCode').val(gBranch);
+            }
+            
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+            
+            const urlStr = buildBelumGenerateUrl();
+            
+            if (!dtBelumGenerate) {
+                dtBelumGenerate = $('#tblBelumGenerate').DataTable({
+                    processing: true,
+                    deferRender: true,
+                    serverSide: false,
+                    ajax: { url: urlStr, type: 'GET', dataSrc: 'data' },
+                    columns: [
+                    { data: 'branch_name', defaultContent: '-' },
+                    { data: 'document_date', render: d => fmtTanggal(d), defaultContent: '-' },
+                    { data: 'agreement_number', defaultContent: '-' },
+                    { data: 'debtor_name', defaultContent: '-' },
+                    { data: 'document_number', defaultContent: '' },
+                    { data: 'certificate_number', defaultContent: '' },
+                    { data: 'notary_id', defaultContent: '' },
+                    { data: 'pnbp_fees', className: 'text-end', render: d => fmtRupiah(d) },
+                    { data: 'service_cost', className: 'text-end', render: d => fmtRupiah(d) },
+                    ],
+                    order: [[1, 'desc']],
+                    pageLength: 10,
+                    lengthChange: false,
+                    language: {
+                        emptyTable: 'Tidak ada data yang belum di-generate.',
+                        search: 'Cari:',
+                        paginate: { previous: 'Sebelumnya', next: 'Berikutnya' }
+                    },
+                    footerCallback: function (_row, data) {
+                        const sum = (key) => data.reduce((a, r) => a + (Number(r?.[key] ?? 0) || 0), 0);
+                        $('#totalPnbp').text(fmtRupiah(sum('pnbp_fees')));
+                        $('#totalJasa').text(fmtRupiah(sum('service_cost')));
+                    }
+                });
+                
+                $('#modalBelumGenerate').on('shown.bs.modal', function () {
+                    dtBelumGenerate.columns().adjust();
+                });
+                
+            } else {
+                dtBelumGenerate.ajax.url(urlStr).load(() => {
+                    dtBelumGenerate.columns().adjust();
+                }, false);
+            }
+        });
+        
+        // tombol filter dalam modal
+        $(document).on('click', '#btnApplyBelumGenerate', function () {
+            if (!dtBelumGenerate) return;
+            dtBelumGenerate.ajax.url(buildBelumGenerateUrl()).load();
+        });
+        $(document).on('click', '#btnTodayBelumGenerate', function () {
+            const t = todayStr();
+            $('#bgStartDate').val(t);
+            $('#bgEndDate').val(t);
+            $('#btnApplyBelumGenerate').trigger('click');
+        });
+        $(document).on('click', '#btnResetBelumGenerate', function () {
+            $('#bgStartDate').val('');
+            $('#bgEndDate').val('');
+            $('#bgBranchCode').val('');
+            $('#btnApplyBelumGenerate').trigger('click');
+        });
+        
+        function showLoading() { $('#loading-overlay').show(); $('#loading-message').show(); }
+        function hideLoading() { $('#loading-overlay').hide(); $('#loading-message').hide(); }
+    });
+</script>
+{% endblock %}

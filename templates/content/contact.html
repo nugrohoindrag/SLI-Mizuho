@@ -1,0 +1,132 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Kontak {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <!-- Breadcrumb -->
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard' %}">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active">Kontak</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content-body">
+            <section id="contact-simple">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-md-10 col-sm-12">
+                        
+                        <!-- Kartu Kontak Utama -->
+                        <div class="card shadow-sm mb-3">
+                            <div class="card-header bg-dark text-white text-center">
+                                <h4 class="mb-0">Hubungi Kami</h4>
+                                <small>PT Sarana Legalitas Indonesia</small>
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <!-- Gambar -->
+                                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                                        <img src="{% static 'images/Contact2.png' %}" alt="Kontak PT SLI" class="img-fluid rounded img-thumbnail">
+                                    </div>
+                                    
+                                    <!-- Teks & WA -->
+                                    <div class="col-md-8 text-center text-md-start">
+                                        <p class="fw-bold mb-1">
+                                            Punya pertanyaan atau butuh bantuan terkait layanan fidusia dan legalitas?
+                                        </p>
+                                        <p class="text-muted mb-2">
+                                            Tim kami siap membantu Anda. Silakan hubungi kami melalui nomor whatsapp berikut:
+                                        </p>
+                                        
+                                        <!-- WA -->
+                                        <div class="mb-2">
+                                            <a href="https://wa.me/6281259962001?text=Halo,%20PT%20SLI" target="_blank" class="btn btn-success d-inline-flex align-items-center"> <i class="fab fa-whatsapp mr-1"></i>
+                                                <span>WhatsApp: 0812-5996-2001</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <hr>
+                                
+                                <!-- Jam Operasional & Alamat -->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-clock text-primary mr-1"></i> Jam Operasional
+                                        </h6>
+                                        <p class="mb-0 text-muted">
+                                            Senin – Jumat : 08.00 – 17.00 WIB<br>
+                                            Sabtu, Minggu & Hari Libur Nasional : Tutup
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-map-marker-alt text-danger mr-1"></i> Alamat Kantor
+                                        </h6>
+                                        <p class="mb-0 text-muted">
+                                            PT Sarana Legalitas Indonesia<br>
+                                            Jalan R.S Fatmawati 16
+                                            12420 Jakarta Selatan
+                                            Jakarta - Indonesia
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% comment %} <!-- Kartu Info Layanan Singkat -->
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-4 mb-3 mb-md-0">
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-file-signature text-primary mr-1"></i> Layanan
+                                        </h6>
+                                        <p class="mb-0 text-muted small">
+                                            Konsultasi dan pengurusan dokumen fidusia serta legalitas terkait.
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4 mb-3 mb-md-0">
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-headset text-success mr-1"></i> Dukungan
+                                        </h6>
+                                        <p class="mb-0 text-muted small">
+                                            Bantuan teknis untuk akses sistem & update status dokumen.
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-info-circle text-warning mr-1"></i> Informasi
+                                        </h6>
+                                        <p class="mb-0 text-muted small">
+                                            Informasi status proses, panduan penggunaan sistem, dan lainnya.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Kartu Info --> {% endcomment %}
+                        
+                    </div>
+                </section>
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

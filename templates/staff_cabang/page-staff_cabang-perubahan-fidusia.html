@@ -1,0 +1,2413 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Staff Cabang - Perubahan Fidusia {% endblock %}
+
+{% block content %}
+
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Perubahan Fidusia</a></li>
+                            <li class="breadcrumb-item active">Perubahan Fidusia</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h4>Perubahan Fidusia</h4>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end mb-3">
+                                <button type="button" id="btn-process-fidusia" class="btn btn-warning mr-2">
+                                    <i class="fas fa-clone"></i> Perubahan Fidusia
+                                </button>
+                            </div>
+                            
+                            <div class="card-body">
+                                
+                                <div id="loading-overlay" style="display: none;position: fixed;top: 0;left: 0;width: 100vw;height: 100vh;background: rgba(255, 255, 255, 0.6);z-index: 1050; cursor: wait;"></div>
+                                
+                                <!-- Spinner loading (sudah kamu punya) -->
+                                <div id="loading-message" style="display: none;position: fixed;z-index: 1060;top: 50%;left: 50%;transform: translate(-50%, -50%);text-align: center;display: flex;flex-direction: column;align-items: center;">
+                                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                                    <div style="margin-top: 10px; font-weight: bold;">Loading data...</div>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table id="consumerTable" class="display table table-striped w-100">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Id</th>
+                                                <th>Status Dokumen</th>
+                                                <th>Nama Cabang</th>
+                                                <th>Jenis Nasabah</th>
+                                                <th>Nama Pada BPKB</th>
+                                                <th>Tanggal Lahir BPKB</th>
+                                                <th>Tempat Lahir BPKB</th>
+                                                <th>Pekerjaan BPKB</th>
+                                                <th>Kewarganegaraan BPKB</th>
+                                                <th>Alamat BPKB</th>
+                                                <th>RT BPKB</th>
+                                                <th>RW BPKB</th>
+                                                <th>Kelurahan BPKB</th>
+                                                <th>Kecamatan BPKB</th>
+                                                <th>Kota BPKB</th>
+                                                <th>Provinsi BPKB</th>
+                                                <th>Kode Pos BPKB</th>
+                                                <th>No KTP BPKB</th>
+                                                <th>No ID BPKB</th>
+                                                <th>No NPWP BPKB</th>
+                                                <th>No BPKB</th>
+                                                <th>Nama Debitur</th>
+                                                <th>Jenis Kelamin</th>
+                                                <th>Status Pernikahan</th>
+                                                <th>Tmp Lahir</th>
+                                                <th>Tgl Lahir</th>
+                                                <th>Pekerjaan</th>
+                                                <th>Kewarganegaraan</th>
+                                                <th>Jenis Identitas</th>
+                                                <th>No Identitas</th>
+                                                <th>Alamat</th>
+                                                <th>Rt Rw</th>
+                                                <th>Kelurahan</th>
+                                                <th>Kecamatan</th>
+                                                <th>Kota</th>
+                                                <th>Provinsi</th>
+                                                <th>Kode Pos</th>
+                                                <th>Jenis Badan</th>
+                                                <th>NPWP Badan</th>
+                                                <th>No Akta Badan</th>
+                                                <th>Tgl Akta badan</th>
+                                                <th>Nama PJ Badan</th>
+                                                <th>JK PJ Badan</th>
+                                                <th>Status PJ Badan</th>
+                                                <th>Tempat Lahir PJ Badan</th>
+                                                <th>Tgl Lahir PJ Badan</th>
+                                                <th>Kewarganegaraan PJ Badan</th>
+                                                <th>TypeId PJ Badan</th>
+                                                <th>NoID PJ Badan</th>
+                                                <th>Alamat PJ Badan</th>
+                                                <th>RT RW PJ Badan</th>
+                                                <th>Kelurahan PJ Badan</th>
+                                                <th>Kecamatan PJ Badan</th>
+                                                <th>Kota PJ Badan</th>
+                                                <th>Provinsi PJ Badan</th>
+                                                <th>Jabatan PJ Badan</th>
+                                                <th>Jenis Perjanjian</th>
+                                                <th>Nama Perjanjian</th>
+                                                <th>No Perjanjian</th>
+                                                <th>Tgl Perjanjian</th>
+                                                <th>Nilai Hutang Pokok</th>
+                                                <th>Nilai Penjaminan</th>
+                                                <th>Tgl Awal Cicilan</th>
+                                                <th>Tenor</th>
+                                                <th>Kondisi Kendaraan</th>
+                                                <th>Merek</th>
+                                                <th>Tipe</th>
+                                                <th>Warna</th>
+                                                <th>Tahun Perakitan</th>
+                                                <th>Tahun Pembuatan</th>
+                                                <th>No Rangka</th>
+                                                <th>No Mesin</th>
+                                                <th>Nilai Objek OTR</th>
+                                                <th>Biaya PNBP</th>
+                                                <th>Biaya Jasa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Diisi otomatis via DataTables -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Modal Proses Perubahan Fidusia -->
+                                <div class="modal fade" id="modalProcessFidusia" tabindex="-1" aria-labelledby="modalProcessFidusiaLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <form id="formProcessFidusia" class="modal-content" novalidate>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="modalProcessFidusiaLabel">Proses Perubahan Fidusia</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                
+                                                <div class="mb-3">
+                                                    <label for="inputAgreementNumber" class="form-label">Nomor Perjanjian (Agreement Number)</label>
+                                                    <input type="text" class="form-control" id="inputAgreementNumber" name="agreement_number" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="fiduciary_change_letter_number" class="form-label">Nomor Surat Permohonan Perubahan</label>
+                                                    <input type="text" class="form-control" id="fiduciary_change_letter_number" name="fiduciary_change_letter_number" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="date_of_change_of_fiduciary_letter" class="form-label">Tanggal Surat Permohonan</label>
+                                                    <input type="date" class="form-control" id="date_of_change_of_fiduciary_letter" name="date_of_change_of_fiduciary_letter" required>
+                                                </div>
+                                                
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="changeAgreementNumberCheckbox" name="change_agreement">
+                                                    <label class="form-check-label" for="changeAgreementNumberCheckbox">
+                                                        Ubah Nomor Perjanjian
+                                                    </label>
+                                                </div>
+                                                
+                                                <div class="mb-3 d-none" id="newAgreementNumberWrapper">
+                                                    <label for="newAgreementNumber" class="form-label">Nomor Perjanjian Baru</label>
+                                                    <input type="text" class="form-control" id="newAgreementNumber" name="new_agreement_number" placeholder="Masukkan nomor baru">
+                                                </div>
+                                                
+                                                <!-- Jenis Perubahan (Hidden awalnya) -->
+                                                <div class="mb-3">
+                                                    <label for="changeType" class="form-label">Jenis Perubahan</label>
+                                                    <select class="form-select" id="changeType" name="change_type">
+                                                        <option value="">-- Pilih Jenis Perubahan --</option>
+                                                        <option value="subject">Subjek (Debitur)</option>
+                                                        <option value="object">Objek (Kendaraan)</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Choose Objek -->
+                                                <div class="mb-3">
+                                                    <label for="jnsperubahan" class="form-label">Jenis Nasabah</label>
+                                                    <span class="badge badge-primary" id="jnsperubahan" style="font-weight: bold;">10</span>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label" for="debtorTypePerorangan">Debitur</label>
+                                                    <span class="badge badge-primary" id="debtorTypePerorangan" style="font-weight: bold;"></span>
+                                                </div>
+                                                
+                                                <!-- Inputan Tambahan saat pilih objek perorangan / PT -->
+                                                
+                                                <div id="form_object_fields_wrapper" class="d-none">
+                                                    <div class="mb-3"><label>Merk</label>
+                                                        <input type="text" class="form-control" name="new_brand"
+                                                        value="{{ consumer.brand|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>Tipe</label>
+                                                        <input type="text" class="form-control" name="new_type"
+                                                        value="{{ consumer.type|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>No. Rangka</label>
+                                                        <input type="text" class="form-control" name="new_chassis_number"
+                                                        value="{{ consumer.chassis_number|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>No. Mesin</label>
+                                                        <input type="text" class="form-control" name="new_engine_number"
+                                                        value="{{ consumer.engine_number|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>Warna</label>
+                                                        <input type="text" class="form-control" name="new_color"
+                                                        value="{{ consumer.color|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>Nilai OTR</label>
+                                                        <input type="number" class="form-control" name="new_otr_values"
+                                                        value="{{ consumer.otr_value|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>Terbilang OTR</label>
+                                                        <input type="text" class="form-control" name="new_otr_terbilang" readonly
+                                                        value="{{ consumer.otr_value_words|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <!-- Info Consumer (display only) → tanpa name agar tidak terkirim -->
+                                                    <div class="mb-3"><label>Nama BPKB</label>
+                                                        <input type="text" id="name_on_bpkb" class="form-control"
+                                                        value="{{ consumer.name_on_bpkb|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Kewarganegaraan BPKB</label>
+                                                        <input type="text" id="bpkb_nationality" class="form-control" 
+                                                        value="{{ consumer.bpkb_nationality|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Tempat Lahir BPKB</label>
+                                                        <input type="text" id="bpkb_birth_place" class="form-control" value="{{ consumer.bpkb_birth_place|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Tanggal Lahir BPKB</label>
+                                                        <input type="date" id="bpkb_birth_date" class="form-control" value="{{ consumer.bpkb_birth_date|date:'Y-m-d' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Terbilang Tanggal Lahir</label>
+                                                        <input type="text" id="bpkb_birth_date_words" class="form-control" value="{{ consumer.bpkb_birth_date_words|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Pekerjaan BPKB</label>
+                                                        <input type="text" id="bpkb_occupation" class="form-control" value="{{ consumer.bpkb_occupation|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Kabupaten BPKB</label>
+                                                        <input type="text" id="bpkb_city" class="form-control" value="{{ consumer.bpkb_city|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Alamat BPKB</label>
+                                                        <textarea id="bpkb_address" class="form-control" readonly>{{ consumer.bpkb_address|default_if_none:'' }}</textarea>
+                                                    </div>
+                                                    <div class="mb-3"><label>RT BPKB</label>
+                                                        <input type="text" id="bpkb_rt" class="form-control" value="{{ consumer.bpkb_rt|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>RW BPKB</label>
+                                                        <input type="text" id="bpkb_rw" class="form-control" value="{{ consumer.bpkb_rw|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Kecamatan BPKB</label>
+                                                        <input type="text" id="bpkb_district" class="form-control" value="{{ consumer.bpkb_district|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Kelurahan BPKB</label>
+                                                        <input type="text" id="bpkb_subdistrict" class="form-control" value="{{ consumer.bpkb_subdistrict|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Provinsi BPKB</label>
+                                                        <input type="text" id="bpkb_province" class="form-control" value="{{ consumer.bpkb_province|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Kode Pos</label>
+                                                        <input type="text" id="bpkb_postal_code" class="form-control" value="{{ consumer.bpkb_postal_code|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>No. KTP BPKB</label>
+                                                        <input type="text" id="bpkb_ktp" class="form-control" value="{{ consumer.bpkb_ktp|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Choose Subjek -->
+                                                <div class="mb-3 d-none" id="chooseChangeWrapper">
+                                                    <label for="choose_change" class="form-label">Pilih Perubahan</label>
+                                                    <select class="form-select" id="choose_change" name="choose_change" required>
+                                                        <option value="">-- Pilih Perubahan --</option>
+                                                        <option value="perubahan1">Perubahan Nama</option>
+                                                        <option value="perubahan2">Kesalahan Penulisan Nama dan atau Alamat</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Choose Subjek - Perubahan Nama -->
+                                                <div class="mb-3 d-none" id="change_bpkb_address">
+                                                    <label for="choose_change_name" class="form-label">Pilih Perubahan Nama</label>
+                                                    <select class="form-select" id="choose_change_name" name="choose_change_name" required>
+                                                        <option value="">-- Pilih Perubahan Nama --</option>
+                                                        <option value="perubahan1nama">Perubahan Nama dari 1 Menjadi 2 Nama</option>
+                                                        <option value="perubahan2nama">Perubahan Nama dari 2 Menjadi 1 Nama</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Choose Subjek - Perubahan Nama - Perubahan Nama dari 1 Menjadi 2 Nama -->
+                                                <div id="form_bpkb_fields_wrapper" class="d-none">
+                                                    <!-- ========== FIELD BPKB (sudah ada) ========== -->
+                                                    <div class="mb-3">
+                                                        <label>Nama BPKB</label>
+                                                        <input type="text" class="form-control" name="new_name_on_bpkb"
+                                                        value="{{ consumer.name_on_bpkb|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Kewarganegaraan BPKB</label>
+                                                        <input type="text" id="bpkb_nationality" class="form-control" name="new_bpkb_nationality"
+                                                        value="{{ consumer.bpkb_nationality|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Tempat Lahir BPKB</label>
+                                                        <input type="text" class="form-control" name="new_bpkb_birth_place"
+                                                        value="{{ consumer.bpkb_birth_place|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Tanggal Lahir BPKB</label>
+                                                        <input type="date" class="form-control" name="new_bpkb_birth_date"
+                                                        value="{{ consumer.bpkb_birth_date|date:'Y-m-d' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Terbilang Tanggal Lahir</label>
+                                                        <input type="text" id="bpkb_birth_terbilang" class="form-control" name="new_bpkb_birth_terbilang" readonly
+                                                        value="{{ consumer.bpkb_birth_date_words|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Pekerjaan BPKB</label>
+                                                        <input type="text" class="form-control" name="new_bpkb_occupation"
+                                                        value="{{ consumer.bpkb_occupation|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Kabupaten BPKB</label>
+                                                        <input type="text" class="form-control" name="new_bpkb_city"
+                                                        value="{{ consumer.bpkb_city|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Alamat BPKB</label>
+                                                        <textarea class="form-control" name="new_bpkb_address">{{ consumer.bpkb_address|default_if_none:'' }}</textarea>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>RT BPKB</label>
+                                                        <input type="text" class="form-control" name="new_bpkb_rt"
+                                                        value="{{ consumer.bpkb_rt|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>RW BPKB</label>
+                                                        <input type="text" class="form-control" name="new_bpkb_rw"
+                                                        value="{{ consumer.bpkb_rw|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Kecamatan BPKB</label>
+                                                        <input type="text" class="form-control" name="new_bpkb_district"
+                                                        value="{{ consumer.bpkb_district|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Kelurahan BPKB</label>
+                                                        <input type="text" class="form-control" name="new_bpkb_subdistrict"
+                                                        value="{{ consumer.bpkb_subdistrict|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Provinsi BPKB</label>
+                                                        <input type="text" class="form-control" name="new_bpkb_province"
+                                                        value="{{ consumer.bpkb_province|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Kode Pos</label>
+                                                        <input type="text" class="form-control" name="new_bpkb_postal_code"
+                                                        value="{{ consumer.bpkb_postal_code|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>No. KTP BPKB</label>
+                                                        <input type="text" class="form-control" name="new_bpkb_ktp"
+                                                        value="{{ consumer.bpkb_ktp|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <hr>
+                                                    
+                                                    <!-- ========== FIELD DEBITUR (baru ditambahkan lengkap) ========== -->
+                                                    <div class="mb-3">
+                                                        <label>Nama Debitur</label>
+                                                        <input type="text" class="form-control" name="new_debtor_name"
+                                                        value="{{ consumer.debtor_name|default_if_none:'' }}" readonly />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Jenis Kelamin Debitur</label>
+                                                        <input type="text" class="form-control" name="new_gender"
+                                                        value="{{ consumer.gender|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Status Pernikahan</label>
+                                                        <input type="text" class="form-control" name="new_marital_status"
+                                                        value="{{ consumer.marital_status|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Tempat Lahir</label>
+                                                        <input type="text" class="form-control" name="new_birth_place"
+                                                        value="{{ consumer.birth_place|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Tanggal Lahir</label>
+                                                        <input type="date" class="form-control" name="new_birth_date"
+                                                        value="{{ consumer.birth_date|date:'Y-m-d' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Pekerjaan</label>
+                                                        <input type="text" class="form-control" name="new_occupation"
+                                                        value="{{ consumer.occupation|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Kewarganegaraan</label>
+                                                        <input type="text" class="form-control" name="new_nationality"
+                                                        value="{{ consumer.nationality|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Jenis Identitas</label>
+                                                        <input type="text" class="form-control" name="new_id_type"
+                                                        value="{{ consumer.id_type|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>No. Identitas</label>
+                                                        <input type="text" class="form-control" name="new_id_number"
+                                                        value="{{ consumer.id_number|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Alamat</label>
+                                                        <textarea class="form-control" name="new_address">{{ consumer.address|default_if_none:'' }}</textarea>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>RT / RW</label>
+                                                        <input type="text" class="form-control" name="new_rt_rw"
+                                                        value="{{ consumer.rt_rw|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Kelurahan</label>
+                                                        <input type="text" class="form-control" name="new_subdistrict"
+                                                        value="{{ consumer.subdistrict|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Kecamatan</label>
+                                                        <input type="text" class="form-control" name="new_district"
+                                                        value="{{ consumer.district|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Kota/Kabupaten</label>
+                                                        <input type="text" class="form-control" name="new_city"
+                                                        value="{{ consumer.city|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Provinsi</label>
+                                                        <input type="text" class="form-control" name="new_province"
+                                                        value="{{ consumer.province|default_if_none:'' }}" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label>Kode Pos</label>
+                                                        <input type="text" class="form-control" name="new_postal_code"
+                                                        value="{{ consumer.postal_code|default_if_none:'' }}" />
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Choose Subjek perubahan 2 - Kesalahan Penulisan Nama dan atau Alamat -->
+                                                {% comment %} <div class="mb-3 d-none" id="choose_change_name_org_wrapper">
+                                                    <label for="choose_change_name_org" class="form-label">Pilih Organisasi</label>
+                                                    <select class="form-select" name="choose_change_name_org" id="choose_change_name_org">
+                                                        <option value="">-- Pilih --</option>
+                                                        <option value="pilih_organisasi1">Perorangan</option>
+                                                        <option value="pilih_organisasi2">PT</option>
+                                                    </select>
+                                                </div> {% endcomment %}
+                                                
+                                                {% comment %} choose_change_name_org {% endcomment %}
+                                                <div class="mb-3 d-none" id="choose_change_name_org_wrapper">
+                                                    <label for="jnsperubahan" class="form-label">Jenis Nasabah</label>
+                                                    <span class="badge badge-primary" id="choose_change_name_org" style="font-weight: bold;">10</span>
+                                                </div>
+                                                
+                                                <!-- Choose Subjek perubahan 2 - Kesalahan Penulisan Nama dan atau Alamat -->
+                                                <div class="mb-3 d-none" id="choose_mistake">
+                                                    <label for="choose_mistake_select" class="form-label">Pilih Kesalahan</label>
+                                                    <span class="badge badge-primary" id="choose_mistake_select" style="font-weight: bold;">10</span>
+                                                </div>
+                                                
+                                                <!-- Choose Subjek perubahan 2 - Kesalahan Penulisan 1 Nama -->
+                                                <div class="row d-none" id="form_object_fields_wrapper_bpkb">
+                                                    <div class="col-md-6">
+                                                        <label for="bpkb_name" class="form-label">Nama</label>
+                                                        <input type="text" class="form-control" id="bpkb_name" name="new_name_on_bpkb"
+                                                        value="{{ consumer.name_on_bpkb|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-6">
+                                                        <label for="bpkb_birth_date" class="form-label">Tanggal Lahir</label>
+                                                        <input type="date" class="form-control" id="bpkb_birth_date" name="new_bpkb_birth_date"
+                                                        value="{{ consumer.bpkb_birth_date|date:'Y-m-d' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-6">
+                                                        <label for="bpkb_birth_place" class="form-label">Tempat Lahir</label>
+                                                        <input type="text" class="form-control" id="bpkb_birth_place" name="new_bpkb_birth_place"
+                                                        value="{{ consumer.bpkb_birth_place|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-6">
+                                                        <label for="bpkb_occupation" class="form-label">Pekerjaan</label>
+                                                        <input type="text" class="form-control" id="bpkb_occupation" name="new_bpkb_occupation"
+                                                        value="{{ consumer.bpkb_occupation|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-6">
+                                                        <label for="bpkb_nationality" class="form-label">Kewarganegaraan</label>
+                                                        <input type="text" class="form-control" id="bpkb_nationality" name="new_bpkb_nationality"
+                                                        value="{{ consumer.bpkb_nationality|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-6">
+                                                        <label for="bpkb_address" class="form-label">Alamat</label>
+                                                        <textarea class="form-control" id="bpkb_address" name="new_bpkb_address">{{ consumer.bpkb_address|default_if_none:'' }}</textarea>
+                                                    </div>
+                                                    
+                                                    <div class="col-md-3">
+                                                        <label for="bpkb_rt" class="form-label">RT</label>
+                                                        <input type="text" class="form-control" id="bpkb_rt" name="new_bpkb_rt"
+                                                        value="{{ consumer.bpkb_rt|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-3">
+                                                        <label for="bpkb_rw" class="form-label">RW</label>
+                                                        <input type="text" class="form-control" id="bpkb_rw" name="new_bpkb_rw"
+                                                        value="{{ consumer.bpkb_rw|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-6">
+                                                        <label for="bpkb_subdistrict" class="form-label">Kelurahan</label>
+                                                        <input type="text" class="form-control" id="bpkb_subdistrict" name="new_bpkb_subdistrict"
+                                                        value="{{ consumer.bpkb_subdistrict|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-6">
+                                                        <label for="bpkb_district" class="form-label">Kecamatan</label>
+                                                        <input type="text" class="form-control" id="bpkb_district" name="new_bpkb_district"
+                                                        value="{{ consumer.bpkb_district|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-6">
+                                                        <label for="bpkb_city" class="form-label">Kota</label>
+                                                        <input type="text" class="form-control" id="bpkb_city" name="new_bpkb_city"
+                                                        value="{{ consumer.bpkb_city|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-6">
+                                                        <label for="bpkb_province" class="form-label">Provinsi</label>
+                                                        <input type="text" class="form-control" id="bpkb_province" name="new_bpkb_province"
+                                                        value="{{ consumer.bpkb_province|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-4">
+                                                        <label for="bpkb_postal_code" class="form-label">Kode Pos</label>
+                                                        <input type="text" class="form-control" id="bpkb_postal_code" name="new_bpkb_postal_code"
+                                                        value="{{ consumer.bpkb_postal_code|default_if_none:'' }}">
+                                                    </div>
+                                                    
+                                                    <div class="col-md-8">
+                                                        <label for="bpkb_ktp" class="form-label">No KTP</label>
+                                                        <input type="text" class="form-control" id="bpkb_ktp" name="new_bpkb_ktp"
+                                                        value="{{ consumer.bpkb_ktp|default_if_none:'' }}">
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Choose Subjek perubahan 2 - Kesalahan Penulisan Nama dan atau Alamat pilih_kesalahan2 -->
+                                                <div class="mb-3 d-none" id="choose_mistake_2nama_wrapper">
+                                                    <label for="choose_mistake_2nama" class="form-label">Pilih Kesalahan 2 Nama</label>
+                                                    <select class="form-select" id="choose_mistake_2nama" name="choose_mistake_2nama">
+                                                        <option value="">-- Pilih Kesalahan 2 Nama --</option>
+                                                        <option value="pilih_bpkb">Pada BPKB</option>
+                                                        <option value="pilih_debitur">Pada Debitur</option>
+                                                        <option value="pilih_bpkb&debitur">Pada BPKB dan Debitur</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Wrapper BPKB -->
+                                                <div class="mb-3 d-none" id="form_object_fields_wrapper_onbpkb">
+                                                    <label for="name_on_bpkb_onbpkb">Nama pada BPKB</label>
+                                                    <input type="text" name="new_name_on_bpkb" class="form-control"
+                                                    value="{{ consumer.name_on_bpkb|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_birth_date_onbpkb">Tanggal Lahir BPKB</label>
+                                                    <input type="date" class="form-control" id="bpkb_birth_date_onbpkb" name="new_bpkb_birth_date"
+                                                    value="{{ consumer.bpkb_birth_date|date:'Y-m-d' }}">
+                                                    
+                                                    <label for="bpkb_birth_place_onbpkb">Tempat Lahir BPKB</label>
+                                                    <input type="text" class="form-control" id="bpkb_birth_place_onbpkb" name="new_bpkb_birth_place"
+                                                    value="{{ consumer.bpkb_birth_place|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_occupation_onbpkb">Pekerjaan BPKB</label>
+                                                    <input type="text" class="form-control" id="bpkb_occupation_onbpkb" name="new_bpkb_occupation"
+                                                    value="{{ consumer.bpkb_occupation|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_nationality_onbpkb">Kewarganegaraan BPKB</label>
+                                                    <input type="text" class="form-control" id="bpkb_nationality_onbpkb" name="new_bpkb_nationality"
+                                                    value="{{ consumer.bpkb_nationality|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_ktp_onbpkb">No KTP BPKB</label>
+                                                    <input type="text" class="form-control" id="bpkb_ktp_onbpkb" name="new_bpkb_ktp"
+                                                    value="{{ consumer.bpkb_ktp|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_npwp_number_onbpkb">NPWP BPKB</label>
+                                                    <input type="text" class="form-control" id="bpkb_npwp_number_onbpkb" name="new_bpkb_npwp_number"
+                                                    value="{{ consumer.bpkb_npwp_number|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_id_number_onbpkb">Nomor Identitas BPKB</label>
+                                                    <input type="text" class="form-control" id="bpkb_id_number_onbpkb" name="new_bpkb_id_number"
+                                                    value="{{ consumer.bpkb_id_number|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_address_onbpkb">Alamat BPKB</label>
+                                                    <textarea class="form-control" id="bpkb_address_onbpkb" name="new_bpkb_address">{{ consumer.bpkb_address|default_if_none:'' }}</textarea>
+                                                    
+                                                    <label for="bpkb_rt_onbpkb">RT</label>
+                                                    <input type="text" class="form-control" id="bpkb_rt_onbpkb" name="new_bpkb_rt"
+                                                    value="{{ consumer.bpkb_rt|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_rw_onbpkb">RW</label>
+                                                    <input type="text" class="form-control" id="bpkb_rw_onbpkb" name="new_bpkb_rw"
+                                                    value="{{ consumer.bpkb_rw|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_subdistrict_onbpkb">Kelurahan</label>
+                                                    <input type="text" class="form-control" id="bpkb_subdistrict_onbpkb" name="new_bpkb_subdistrict"
+                                                    value="{{ consumer.bpkb_subdistrict|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_district_onbpkb">Kecamatan</label>
+                                                    <input type="text" class="form-control" id="bpkb_district_onbpkb" name="new_bpkb_district"
+                                                    value="{{ consumer.bpkb_district|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_city_onbpkb">Kota</label>
+                                                    <input type="text" class="form-control" id="bpkb_city_onbpkb" name="new_bpkb_city"
+                                                    value="{{ consumer.bpkb_city|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_province_onbpkb">Provinsi</label>
+                                                    <input type="text" class="form-control" id="bpkb_province_onbpkb" name="new_bpkb_province"
+                                                    value="{{ consumer.bpkb_province|default_if_none:'' }}">
+                                                    
+                                                    <label for="bpkb_postal_code_onbpkb">Kode Pos</label>
+                                                    <input type="text" class="form-control" id="bpkb_postal_code_onbpkb" name="new_bpkb_postal_code"
+                                                    value="{{ consumer.bpkb_postal_code|default_if_none:'' }}">
+                                                </div>
+                                                
+                                                <!-- Wrapper Debitur -->
+                                                <div class="mb-3 d-none" id="form_object_fields_wrapper_debitur">
+                                                    <label for="debtor_name_debitur">Nama Debitur</label>
+                                                    <input type="text" class="form-control" id="debtor_name_debitur" name="new_debtor_name"
+                                                    value="{{ consumer.debtor_name|default_if_none:'' }}">
+                                                    
+                                                    <label for="gender_debitur">Jenis Kelamin</label>
+                                                    <input type="text" class="form-control" id="gender_debitur" name="new_gender"
+                                                    value="{{ consumer.gender|default_if_none:'' }}">
+                                                    
+                                                    <label for="marital_status_debitur">Status Pernikahan</label>
+                                                    <input type="text" class="form-control" id="marital_status_debitur" name="new_marital_status"
+                                                    value="{{ consumer.marital_status|default_if_none:'' }}">
+                                                    
+                                                    <label for="birth_place_debitur">Tempat Lahir</label>
+                                                    <input type="text" class="form-control" id="birth_place_debitur" name="new_birth_place"
+                                                    value="{{ consumer.birth_place|default_if_none:'' }}">
+                                                    
+                                                    <label for="birth_date_debitur">Tanggal Lahir</label>
+                                                    <input type="date" class="form-control" id="birth_date_debitur" name="new_birth_date"
+                                                    value="{{ consumer.birth_date|date:'Y-m-d' }}">
+                                                    
+                                                    <label for="occupation_debitur">Pekerjaan</label>
+                                                    <input type="text" class="form-control" id="occupation_debitur" name="new_occupation"
+                                                    value="{{ consumer.occupation|default_if_none:'' }}">
+                                                    
+                                                    <label for="nationality_debitur">Kewarganegaraan</label>
+                                                    <input type="text" class="form-control" id="nationality_debitur" name="new_nationality"
+                                                    value="{{ consumer.nationality|default_if_none:'' }}">
+                                                    
+                                                    <label for="id_type_debitur">Jenis Identitas</label>
+                                                    <input type="text" class="form-control" id="id_type_debitur" name="new_id_type"
+                                                    value="{{ consumer.id_type|default_if_none:'' }}">
+                                                    
+                                                    <label for="id_number_debitur">Nomor Identitas</label>
+                                                    <input type="text" class="form-control" id="id_number_debitur" name="new_id_number"
+                                                    value="{{ consumer.id_number|default_if_none:'' }}">
+                                                    
+                                                    <label for="address_debitur">Alamat</label>
+                                                    <textarea class="form-control" id="address_debitur" name="new_address">{{ consumer.address|default_if_none:'' }}</textarea>
+                                                    
+                                                    <label for="rt_rw_debitur">RT/RW</label>
+                                                    <input type="text" class="form-control" id="rt_rw_debitur" name="new_rt_rw"
+                                                    value="{{ consumer.rt_rw|default_if_none:'' }}">
+                                                    
+                                                    <label for="subdistrict_debitur">Kelurahan</label>
+                                                    <input type="text" class="form-control" id="subdistrict_debitur" name="new_subdistrict"
+                                                    value="{{ consumer.subdistrict|default_if_none:'' }}">
+                                                    
+                                                    <label for="district_debitur">Kecamatan</label>
+                                                    <input type="text" class="form-control" id="district_debitur" name="new_district"
+                                                    value="{{ consumer.district|default_if_none:'' }}">
+                                                    
+                                                    <label for="city_debitur">Kota</label>
+                                                    <input type="text" class="form-control" id="city_debitur" name="new_city"
+                                                    value="{{ consumer.city|default_if_none:'' }}">
+                                                    
+                                                    <label for="province_debitur">Provinsi</label>
+                                                    <input type="text" class="form-control" id="province_debitur" name="new_province"
+                                                    value="{{ consumer.province|default_if_none:'' }}">
+                                                    
+                                                    <label for="postal_code_debitur">Kode Pos</label>
+                                                    <input type="text" class="form-control" id="postal_code_debitur" name="new_postal_code"
+                                                    value="{{ consumer.postal_code|default_if_none:'' }}">
+                                                </div>
+                                                
+                                                <!-- Inputan Tambahan saat pilih objek perorangan / PT -->
+                                                <div id="form_object_fields_wrapper_bpkb" class="d-none">
+                                                    <div class="mb-3"><label>Merk</label>
+                                                        <input type="text" class="form-control" name="new_brand"
+                                                        value="{{ consumer.brand|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>Tipe</label>
+                                                        <input type="text" class="form-control" name="new_type"
+                                                        value="{{ consumer.type|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>No. Rangka</label>
+                                                        <input type="text" class="form-control" name="new_chassis_number"
+                                                        value="{{ consumer.chassis_number|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>No. Mesin</label>
+                                                        <input type="text" class="form-control" name="new_engine_number"
+                                                        value="{{ consumer.engine_number|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>Warna</label>
+                                                        <input type="text" class="form-control" name="new_color"
+                                                        value="{{ consumer.color|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>Nilai OTR</label>
+                                                        <input type="number" class="form-control" name="new_otr_values"
+                                                        value="{{ consumer.otr_value|default_if_none:'' }}">
+                                                    </div>
+                                                    <div class="mb-3"><label>Terbilang OTR</label>
+                                                        <input type="text" id="otr_value_words" class="form-control" name="new_otr_terbilang"
+                                                        value="{{ consumer.otr_value_words|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    
+                                                    <!-- Bagian readonly info dari consumer -->
+                                                    <div class="mb-3"><label>Nama BPKB</label>
+                                                        <input type="text" id="name_on_bpkb" class="form-control"
+                                                        value="{{ consumer.name_on_bpkb|default_if_none:'' }}" readonly>
+                                                    </div>
+                                                    <div class="mb-3"><label>Kewarganegaraan BPKB</label>
+                                                        <input type="text" id="bpkb_nationality" class="form-control" name="bpkb_nationality"
+                                                        value="{{ consumer.bpkb_nationality|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>Tempat Lahir BPKB</label>
+                                                        <input type="text" id="bpkb_birth_place" class="form-control" name="bpkb_birth_place"
+                                                        value="{{ consumer.bpkb_birth_place|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>Tanggal Lahir BPKB</label>
+                                                        <input type="date" id="bpkb_birth_date" class="form-control" name="bpkb_birth_date"
+                                                        value="{{ consumer.bpkb_birth_date|date:'Y-m-d' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>Terbilang Tanggal Lahir</label>
+                                                        <input type="text" id="bpkb_birth_terbilang" class="form-control" name="bpkb_birth_terbilang"
+                                                        value="{{ consumer.bpkb_birth_date_words|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>Pekerjaan BPKB</label>
+                                                        <input type="text" id="bpkb_occupation" class="form-control" name="bpkb_occupation"
+                                                        value="{{ consumer.bpkb_occupation|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>Kabupaten BPKB</label>
+                                                        <input type="text" id="bpkb_city" class="form-control" name="bpkb_city"
+                                                        value="{{ consumer.bpkb_city|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>Alamat BPKB</label>
+                                                        <textarea id="bpkb_address" class="form-control" name="bpkb_address" readonly>{{ consumer.bpkb_address|default_if_none:'' }}</textarea>
+                                                    </div>
+                                                    <div class="mb-3"><label>RT BPKB</label>
+                                                        <input type="text" id="bpkb_rt" class="form-control" name="bpkb_rt"
+                                                        value="{{ consumer.bpkb_rt|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>RW BPKB</label>
+                                                        <input type="text" id="bpkb_rw" class="form-control" name="bpkb_rw"
+                                                        value="{{ consumer.bpkb_rw|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>Kecamatan BPKB</label>
+                                                        <input type="text" id="bpkb_district" class="form-control" name="bpkb_district"
+                                                        value="{{ consumer.bpkb_district|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>Kelurahan BPKB</label>
+                                                        <input type="text" id="bpkb_subdistrict" class="form-control" name="bpkb_subdistrict"
+                                                        value="{{ consumer.bpkb_subdistrict|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>Provinsi BPKB</label>
+                                                        <input type="text" id="bpkb_province" class="form-control" name="bpkb_province"
+                                                        value="{{ consumer.bpkb_province|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>Kode Pos</label>
+                                                        <input type="text" id="bpkb_postal_code" class="form-control" name="bpkb_postal_code"
+                                                        value="{{ consumer.bpkb_postal_code|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                    <div class="mb-3"><label>No. KTP BPKB</label>
+                                                        <input type="text" id="bpkb_ktp" class="form-control" name="bpkb_ktp"
+                                                        value="{{ consumer.bpkb_ktp|default_if_none:'' }}" readonly/>
+                                                    </div>
+                                                </div>
+                                                
+                                                <hr class="my-3">
+                                                <div class="form-check mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="disclaimerCheck" name="disclaimer" required>
+                                                    <label class="form-check-label text-muted small" for="disclaimerCheck">
+                                                        Saya menjamin bahwa seluruh data dan informasi yang diberikan dalam perubahan/perbaikan ini, adalah benar dan sesuai adanya, serta diperoleh dengan cara dan tindakan yang tidak bertentangan dengan peraturan perundangan yang berlaku.
+                                                        <br><br>
+                                                        Dan karenanya Saya menjamin sepenuhnya untuk membebaskan <strong>SLI</strong> dan <strong>Notaris</strong> dari segala bentuk tuntutan, gugatan hukum dan segala bentuk ganti rugi apapun dari <strong>PIHAK-PIHAK</strong> lainnya.
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Proses</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                
+                                <!-- View Modal -->
+                                <div class="modal fade" id="modalView" tabindex="-1" aria-labelledby="modalViewLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-info text-white">
+                                                <h5 class="modal-title" id="modalViewLabel"><i class="fas fa-eye"></i> Detail Data Konsumen</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body" id="modalViewBody">
+                                                <!-- Data detail akan dimuat lewat JS -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Edit Modal -->
+                                <div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-warning">
+                                                <h5 class="modal-title" id="modalEditLabel"><i class="fas fa-pencil-alt"></i> Edit Data</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body" id="modalEditBody">
+                                                <!-- Form edit akan dimuat lewat JS -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Revisi Modal -->
+                                <div class="modal fade" id="modalRevisi" tabindex="-1" aria-labelledby="modalRevisiLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-primary text-white">
+                                                <h5 class="modal-title" id="modalRevisiLabel"><i class="fas fa-arrow-rotate-left"></i> Revisi Data</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body" id="modalRevisiBody">
+                                                <!-- Form atau info revisi -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Dokumen Modal -->
+                                <div class="modal fade" id="modalDokumen" tabindex="-1" aria-labelledby="modalDokumenLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-secondary text-white">
+                                                <h5 class="modal-title" id="modalDokumenLabel"><i class="fas fa-right-left"></i> Dokumen</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body" id="modalDokumenBody">
+                                                <!-- Data dokumen -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="modalDelete" tabindex="-1" aria-labelledby="modalDeleteLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-danger text-white">
+                                                <h5 class="modal-title" id="modalDeleteLabel"><i class="fas fa-trash"></i> Konfirmasi Hapus</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body" id="modalDeleteBody">
+                                                Apakah Anda yakin ingin menghapus data ini?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                <button type="button" class="btn btn-danger" id="btnConfirmDelete">Hapus</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card -->
+                    </div> <!-- end col -->
+                </div> <!-- end row -->
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+
+{% block script %}
+<!--
+    =========================================================
+    Script Perubahan Fidusia
+    Fungsi: CRUD + UI Helpers
+    - READ    : Prefill form by agreement, DataTable listing
+    - CREATE  : Submit form proses → /perubahan-fidusia/proses/
+    - UPDATE  : Modal edit (load & submit di tempat lain)
+    - DELETE  : Konfirmasi hapus (trigger tombol luar)
+    - UI/UX   : Enable/disable field, conditional sections, terbilang, dsb.
+    =========================================================
+-->
+<script>
+    var dataTable;
+    
+    /* =========================
+    Helpers: Form Gate Toggle
+    ========================= */
+    function setGateEnabled(enabled) {
+        // enable/disable SEMUA input/select/textarea KECUALI #inputAgreementNumber
+        $('#formProcessFidusia')
+        .find('input, select, textarea, button[type="submit"]')
+        .each(function () {
+            const $el = $(this);
+            if ($el.is('#inputAgreementNumber')) return;
+            
+            // simpan required lama
+            if (!$el.data('req-init')) $el.data('req-init', $el.prop('required'));
+            
+            if (enabled) {
+                // pulihkan required ke nilai awal & enable
+                if ($el.data('req-init') !== undefined) $el.prop('required', $el.data('req-init'));
+                $el.prop('disabled', false);
+            } else {
+                // matikan required biar tidak mengganjal & disable
+                $el.prop('required', false).prop('disabled', true);
+            }
+        });
+    }
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        const provider = document.getElementById("fiduciary_provider");
+        const bpkbName = document.getElementById("bpkb_name");
+        
+        function updateNameAttribute() {
+            if (provider.value === "Atas Nama Customer") {
+                bpkbName.setAttribute("name", "new_debtor_name");
+            } else {
+                bpkbName.setAttribute("name", "new_name_on_bpkb");
+            }
+        }
+        
+        updateNameAttribute();           // jalankan saat halaman dibuka
+        provider.addEventListener("change", updateNameAttribute); // jalankan saat berubah
+    });
+    
+    // function lockSubjectOption() { // (NEW)
+    //   const $sel = $('#changeType');
+    //   // disable option subject
+    //   $sel.find('option[value="subject"]').prop('disabled', true);
+    //   // kalau kebetulan sudah terpilih, kosongkan
+    //   if ($sel.val() === 'subject') $sel.val('');
+    //   // cegah user memaksa pilih subject via event
+    //   $sel.off('change.lockSubject').on('change.lockSubject', function () {
+    //     if ($(this).val() === 'subject') $(this).val('');
+    //   });
+    // }
+    
+    /* =========================
+    Document Ready
+    ========================= */
+    $(document).ready(() => {
+        const csrftoken = getCookie('csrftoken');
+        
+        /* -------------------------
+        Helper: Ambil Cookie
+        ------------------------- */
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        /* -------------------------
+        READ: Prefill by Agreement
+        ------------------------- */
+        (function () {
+            const $agreement = $('#inputAgreementNumber');
+            const API_BASE = '/api/consumer-by-agreement/';
+            let debounceTimer = null;
+            
+            // === util angka & terbilang ===
+            const toNumber = (v) => {
+                if (v == null) return NaN;
+                let s = String(v).trim();
+                s = s.replace(/[^\d,.\-]/g, '');
+                if (s.includes(',') && s.includes('.')) {
+                    s = s.replace(/\./g, '').replace(',', '.'); // ID: . ribuan, , desimal
+                } else if (s.includes(',')) {
+                    s = s.replace(',', '.');
+                }
+                const num = Number(s);
+                return Number.isFinite(num) ? num : NaN;
+            };
+            
+            function terbilang(nilai) {
+                const num = toNumber(nilai);
+                if (!Number.isFinite(num)) return '';
+                if (num === 0) return 'Nol';
+                const satuan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+                function konversi(n) {
+                    n = Math.floor(n);
+                    if (n === 0) return '';
+                    if (n < 12) return satuan[n];
+                    if (n < 20) return konversi(n - 10) + ' Belas';
+                    if (n < 100) return konversi(Math.floor(n / 10)) + ' Puluh ' + konversi(n % 10);
+                    if (n < 200) return 'Seratus ' + konversi(n - 100);
+                    if (n < 1000) return konversi(Math.floor(n / 100)) + ' Ratus ' + konversi(n % 100);
+                    if (n < 2000) return 'Seribu ' + konversi(n - 1000);
+                    if (n < 1_000_000) return konversi(Math.floor(n / 1000)) + ' Ribu ' + konversi(n % 1000);
+                    if (n < 1_000_000_000) return konversi(Math.floor(n / 1_000_000)) + ' Juta ' + konversi(n % 1_000_000);
+                    if (n < 1_000_000_000_000) return konversi(Math.floor(n / 1_000_000_000)) + ' Miliar ' + konversi(n % 1_000_000_000);
+                    if (n < 1_000_000_000_000_000) return konversi(Math.floor(n / 1_000_000_000_000)) + ' Triliun ' + konversi(n % 1_000_000_000_000);
+                    return 'Angka terlalu besar';
+                }
+                const hasil = konversi(Math.abs(num)).replace(/\s+/g, ' ').trim();
+                return (num < 0 ? 'Minus ' : '') + hasil;
+            }
+            
+            // === util tanggal ===
+            const parseDateSafe = (val) => {
+                if (!val && val !== 0) return null;
+                if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+                
+                const s0 = String(val).trim();
+                const s  = s0.replace(/\s+/g, '');
+                
+                // native
+                let d = new Date(s0);
+                if (!isNaN(d.getTime())) return d;
+                
+                // YYYY-MM-DD / YYYY/MM/DD
+                let m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+                if (m) {
+                    const [_, yy, mm, dd] = m;
+                    d = new Date(Number(yy), Number(mm) - 1, Number(dd));
+                    if (!isNaN(d.getTime())) return d;
+                }
+                
+                // DD/MM/YYYY atau DD-MM-YYYY
+                m = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+                if (m) {
+                    const [_, dd, mm, yy] = m;
+                    d = new Date(Number(yy), Number(mm) - 1, Number(dd));
+                    if (!isNaN(d.getTime())) return d;
+                }
+                
+                // epoch ms
+                if (/^\d+$/.test(s)) {
+                    d = new Date(Number(s));
+                    if (!isNaN(d.getTime())) return d;
+                }
+                return null;
+            };
+            
+            const toSlashIndoDate = (val) => {
+                const d = parseDateSafe ? parseDateSafe(val) : new Date(val);
+                if (!d || Number.isNaN(d.getTime())) return '';
+                const dd = String(d.getDate()).padStart(2, '0');
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const yy = d.getFullYear();
+                return `${dd} / ${mm} / ${yy}`;
+            };
+            
+            const toISODateInput = (val) => {
+                const d = parseDateSafe(val);
+                if (!d) return '';
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            };
+            
+            const toLongIndoDate = (val) => {
+                const d = parseDateSafe(val);
+                if (!d) return '';
+                return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            };
+            
+            // tanggal → terbilang huruf kecil
+            function toDateTerbilangIndo(val) {
+                const d = parseDateSafe(val);
+                if (!d) return '';
+                const bulan = [
+                'Januari','Februari','Maret','April','Mei','Juni',
+                'Juli','Agustus','September','Oktober','November','Desember'
+                ][d.getMonth()];
+                
+                const hariT  = terbilang(d.getDate()).toLowerCase().replace(/\s+/g, ' ').trim();
+                const tahunT = terbilang(d.getFullYear()).toLowerCase().replace(/\s+/g, ' ').trim();
+                
+                // gabungkan jadi satu string
+                const teks = `${hariT} ${bulan} ${tahunT}`;
+                
+                // ubah ke Title Case → setiap kata kapital di awal
+                return teks
+                .split(' ')
+                .filter(Boolean)
+                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                .join(' ');
+            }
+            
+            window.toDateTerbilangIndo = toDateTerbilangIndo;
+            
+            // ambil tanggal lahir BPKB dari berbagai kandidat di DOM
+            function getBpkbBirthDateFromDom() {
+                const candidates = [
+                $('#bpkb_birth_date').val(),
+                $('#bpkb_birth_date_onbpkb').val(),
+                $('[name="new_bpkb_birth_date"]').first().val()
+                ].filter(Boolean);
+                return candidates[0] || '';
+            }
+            
+            // === mapping field ===
+            const NAME_MAP = {
+                debtor_type: ['debtorTypePerorangan', 'choose_mistake_select'],
+                customer_type: ['jnsperubahan', 'choose_change_name_org'],
+                
+                // Debitur
+                debtor_name: ['new_debtor_name', { selector: '#debtor_name' }],
+                gender: ['new_gender', { selector: '#gender' }],
+                marital_status: ['new_marital_status', { selector: '#marital_status' }],
+                birth_place: ['new_birth_place', { selector: '#birth_place' }],
+                birth_date: [
+                { name: 'new_birth_date', transform: toISODateInput },
+                { selector: '#birth_date_display', transform: toLongIndoDate }
+                ],
+                birth_terbilang: [
+                {
+                    name: 'new_birth_terbilang',
+                    transform: (v, obj) => v || toDateTerbilangIndo(obj?.birth_date || obj?.birthdate)
+                },
+                {
+                    selector: '#birth_terbilang',
+                    transform: (v, obj) => v || toDateTerbilangIndo(obj?.birth_date || obj?.birthdate)
+                }
+                ],
+                occupation: ['new_occupation', { selector: '#occupation' }],
+                nationality: ['new_nationality', { selector: '#nationality' }],
+                id_type: ['new_id_type', { selector: '#id_type' }],
+                id_number: ['new_id_number', { selector: '#id_number' }],
+                address: ['new_address', { selector: '#address' }],
+                rt_rw: ['new_rt_rw', { selector: '#rt_rw' }],
+                subdistrict: ['new_subdistrict', { selector: '#subdistrict' }],
+                district: ['new_district', { selector: '#district' }],
+                city: ['new_city', { selector: '#city' }],
+                province: ['new_province', { selector: '#province' }],
+                postal_code: ['new_postal_code', { selector: '#postal_code' }],
+                
+                // Kendaraan
+                brand: ['new_brand', { selector: '#brand' }],
+                type: ['new_type', { selector: '#type' }],
+                chassis_number: ['new_chassis_number', { selector: '#chassis_number' }],
+                engine_number: ['new_engine_number', { selector: '#engine_number' }],
+                color: ['new_color', { selector: '#color' }],
+                
+                // OTR
+                otr_value: [
+                { name: 'new_otr_values', transform: (v) => v ?? '' },
+                { selector: '#otr_value' }
+                ],
+                otr_terbilang: [
+                {
+                    name: 'new_otr_terbilang',
+                    transform: (v, obj) => {
+                        const teks = (v && String(v).trim()) || terbilang(obj?.otr_value);
+                        return teks ? `${teks} Rupiah` : '';
+                    }
+                },
+                {
+                    selector: '#otr_terbilang',
+                    transform: (v, obj) => {
+                        const teks = (v && String(v).trim()) || terbilang(obj?.otr_value);
+                        return teks ? `${teks} Rupiah` : '';
+                    }
+                }
+                ],
+                
+                // BPKB
+                name_on_bpkb: ['new_name_on_bpkb', { selector: '#name_on_bpkb' }],
+                bpkb_nationality: ['new_bpkb_nationality', { selector: '#bpkb_nationality' }],
+                bpkb_birth_place: ['new_bpkb_birth_place', { selector: '#bpkb_birth_place' }],
+                
+                // ⬇️ PENTING: semua type="date" pakai ISO (yyyy-mm-dd)
+                bpkb_birth_date: [
+                { name: 'new_bpkb_birth_date', transform: toISODateInput },
+                { selector: '#bpkb_birth_date', transform: toISODateInput },
+                { selector: '#bpkb_birth_date_onbpkb', transform: toISODateInput }
+                ],
+                
+                // terbilang: dukung 2 id berbeda
+                bpkb_birth_terbilang: [
+                {
+                    name: 'new_bpkb_birth_terbilang',
+                    transform: (v, obj) =>
+                    v
+                    || toDateTerbilangIndo(obj?.bpkb_birth_date || obj?.bpkb_birthdate || getBpkbBirthDateFromDom())
+                },
+                {
+                    selector: '#bpkb_birth_terbilang',
+                    transform: (v, obj) =>
+                    v
+                    || toDateTerbilangIndo(obj?.bpkb_birth_date || obj?.bpkb_birthdate || getBpkbBirthDateFromDom())
+                },
+                {
+                    selector: '#bpkb_birth_date_words',
+                    transform: (v, obj) =>
+                    v
+                    || toDateTerbilangIndo(obj?.bpkb_birth_date || obj?.bpkb_birthdate || getBpkbBirthDateFromDom())
+                }
+                ],
+                
+                bpkb_occupation: ['new_bpkb_occupation', { selector: '#bpkb_occupation' }],
+                bpkb_city: ['new_bpkb_city', { selector: '#bpkb_city' }],
+                bpkb_address: ['new_bpkb_address', { selector: '#bpkb_address' }],
+                bpkb_rt: ['new_bpkb_rt', { selector: '#bpkb_rt' }],
+                bpkb_rw: ['new_bpkb_rw', { selector: '#bpkb_rw' }],
+                bpkb_district: ['new_bpkb_district', { selector: '#bpkb_district' }],
+                bpkb_subdistrict: ['new_bpkb_subdistrict', { selector: '#bpkb_subdistrict' }],
+                bpkb_province: ['new_bpkb_province', { selector: '#bpkb_province' }],
+                bpkb_postal_code: ['new_bpkb_postal_code', { selector: '#bpkb_postal_code' }],
+                bpkb_ktp: ['new_bpkb_ktp', { selector: '#bpkb_ktp' }],
+                bpkb_npwp_number: ['new_bpkb_npwp_number', { selector: '#bpkb_npwp_number' }],
+                bpkb_id_number: ['new_bpkb_id_number', { selector: '#bpkb_id_number' }],
+            };
+            
+            function setTargetValue(target, value) {
+                const apply = ($el) => {
+                    if (!$el.length) return;
+                    if ($el.is('input[type="checkbox"]')) {
+                        $el.prop('checked', !!value).trigger('change');
+                    } else if ($el.is('input,textarea,select')) {
+                        $el.val(value).trigger('input').trigger('change');
+                    } else {
+                        $el.text(value);
+                    }
+                };
+                
+                if (typeof target === 'string') {
+                    let $el = $(`[name="${target}"]`);
+                    if (!$el.length) $el = $(`#${target}`);
+                    apply($el);
+                    return;
+                }
+                if (target.selector) { apply($(target.selector)); return; }
+                if (target.name)     { apply($(`[name="${target.name}"]`)); return; }
+            }
+            window.setTargetValue      = setTargetValue;
+            const sanitizeAgreement = (str) => (str || '').trim().toUpperCase();
+            
+            const resetFields = () => {
+                const names = [
+                // debitur
+                'new_debtor_name','new_gender','new_marital_status','new_birth_place','new_birth_date',
+                'new_occupation','new_nationality','new_id_type','new_id_number','new_address','new_rt_rw',
+                'new_subdistrict','new_district','new_city','new_province','new_postal_code',
+                // kendaraan
+                'new_brand','new_type','new_chassis_number','new_engine_number','new_color',
+                'new_otr_values','new_otr_terbilang',
+                // BPKB
+                'new_name_on_bpkb','new_bpkb_nationality','new_bpkb_birth_place','new_bpkb_birth_date',
+                'new_bpkb_birth_terbilang','new_bpkb_occupation','new_bpkb_city','new_bpkb_address',
+                'new_bpkb_rt','new_bpkb_rw','new_bpkb_district','new_bpkb_subdistrict','new_bpkb_province',
+                'new_bpkb_postal_code','new_bpkb_ktp','new_bpkb_npwp_number','new_bpkb_id_number',
+                // display tambahan
+                'new_birth_terbilang'
+                ];
+                names.forEach((n) => {
+                    const $el = $(`[name="${n}"]`);
+                    if ($el.length) $el.val('');
+                });
+                $('#otr_terbilang,#otr_value,#birth_date_display,#birth_terbilang,#bpkb_birth_terbilang,#bpkb_birth_date_words').val('');
+                $('#birth_terbilang').text('');
+            };
+            
+            function fillFromData(data) {
+                if (!data) return;
+                Object.entries(NAME_MAP).forEach(([apiKey, mapped]) => {
+                    const targets = Array.isArray(mapped) ? mapped : [mapped];
+                    const raw = data?.[apiKey];
+                    targets.forEach(t => {
+                        const transform = (t && t.transform) ? t.transform : null;
+                        const val = (transform ? transform(raw, data) : raw) ?? '';
+                        setTargetValue(t, val);
+                    });
+                });
+                
+                // Post-fix: kalau terbilang BPKB masih kosong, isi dari tanggal yang ada (id/name manapun)
+                const terbilangNow =
+                ($('[name="new_bpkb_birth_terbilang"]').val()
+                || $('#bpkb_birth_terbilang').val()
+                || $('#bpkb_birth_date_words').val()
+                || '').trim();
+                
+                if (!terbilangNow) {
+                    const srcDate = getBpkbBirthDateFromDom() || data?.bpkb_birth_date || data?.bpkb_birthdate;
+                    const prettyTerbilang = toDateTerbilangIndo(srcDate);
+                    if (prettyTerbilang) {
+                        setTargetValue({ name: 'new_bpkb_birth_terbilang' },  prettyTerbilang);
+                        setTargetValue({ selector: '#bpkb_birth_terbilang' },  prettyTerbilang);
+                        setTargetValue({ selector: '#bpkb_birth_date_words' }, prettyTerbilang);
+                    }
+                }
+            }
+            
+            const setLoading = (isLoading) => {
+                $agreement.prop('disabled', isLoading);
+                if (isLoading) $agreement.addClass('is-loading');
+                else $agreement.removeClass('is-loading');
+            };
+            
+            // ===== anti-loop & swal =====
+            let isLookingUp = false;
+            let suppressOnce = false;
+            let listenersBound = false;
+            
+            const unbindLookup = () => { $agreement.off('.lookup'); listenersBound = false; };
+            const bindLookup = () => {
+                if (listenersBound) return;
+                $agreement.on('input.lookup', function () {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => handleLookup(), 350);
+                });
+                $agreement.on('keydown.lookup', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        clearTimeout(debounceTimer);
+                        handleLookup();
+                    }
+                });
+                listenersBound = true;
+            };
+            
+            const safeSwal = async (opts) => {
+                unbindLookup();
+                suppressOnce = true;
+                try {
+                    await Swal.fire(Object.assign({ returnFocus: false }, opts));
+                } finally {
+                    const el = $agreement.get(0);
+                    if (el) el.focus({ preventScroll: true });
+                    setTimeout(() => { bindLookup(); suppressOnce = false; }, 0);
+                }
+            };
+            
+            const handleLookup = async () => {
+                if (suppressOnce || isLookingUp) return;
+                isLookingUp = true;
+                try {
+                    const raw = $agreement.val();
+                    const agreementNumber = sanitizeAgreement(raw);
+                    
+                    if (raw !== agreementNumber) $agreement.val(agreementNumber);
+                    
+                    if (!agreementNumber) {
+                        setGateEnabled(false);
+                        resetFields();
+                        await safeSwal({ title: 'Nomor Perjanjian kosong', text: 'Silakan masukkan Nomor Perjanjian terlebih dahulu.', icon: 'warning' });
+                        return;
+                    }
+                    
+                    setLoading(true);
+                    
+                    const response = await fetch(`${API_BASE}${encodeURIComponent(agreementNumber)}/`, {
+                        method: 'GET',
+                        headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Accept': 'application/json' },
+                        credentials: 'include'
+                    });
+                    
+                    if (response.status === 401 || response.status === 403) {
+                        await safeSwal({ title: 'Sesi habis', text: 'Silakan login ulang', icon: 'warning' });
+                        window.location.href = '/login/';
+                        return;
+                    }
+                    
+                    if (response.status === 404) {
+                        setGateEnabled(false);
+                        resetFields();
+                        await safeSwal({ title: 'Tidak ditemukan', text: 'Nomor perjanjian tidak ditemukan.', icon: 'warning' });
+                        return;
+                    }
+                    
+                    if (!response.ok) {
+                        setGateEnabled(false);
+                        resetFields();
+                        await safeSwal({ title: 'Gagal', text: `Gagal mengambil data (${response.status})`, icon: 'error' });
+                        return;
+                    }
+                    
+                    const data = await response.json();
+                    if (!data || Object.keys(data).length === 0) {
+                        setGateEnabled(false);
+                        resetFields();
+                        return;
+                    }
+                    
+                    setGateEnabled(true);
+                    fillFromData(data);
+                } catch (err) {
+                    console.error('❌ Gagal fetch:', err);
+                    setGateEnabled(false);
+                    resetFields();
+                    if (!Swal.isVisible()) {
+                        await safeSwal({ title: 'Error', text: 'Terjadi kesalahan saat mengambil data.', icon: 'error' });
+                    }
+                } finally {
+                    setLoading(false);
+                    isLookingUp = false;
+                }
+            };
+            
+            // bind
+            bindLookup();
+        })();
+        
+        /* -------------------------
+        READ: DataTable Listing
+        ------------------------- */
+        function useNewOrOld(row, newField, oldField) {
+            if (newField && row[newField] != null) {
+                const v = row[newField].toString().trim();
+                if (v !== '' && v.toLowerCase() !== 'null' && v.toLowerCase() !== 'none') return row[newField];
+            }
+            return row[oldField] ?? '';
+        }
+        
+        function fmtDate(val) {
+            if (!val) return '';
+            const s = String(val);
+            return s.length >= 10 ? s.slice(0, 10) : s;
+        }
+        
+        if (!$.fn.DataTable.isDataTable('#consumerTable')) {
+            const dataTable = $('#consumerTable').DataTable({
+                serverSide: false,
+                processing: true,
+                deferRender: true,
+                ajax: {
+                    url: '/api/PF-json/',
+                    dataSrc: function (json) {
+                        console.log('📥 /api/PF-json/ response:', json);
+                        if (Array.isArray(json)) return json;                 // non-paginated array
+                        if (Array.isArray(json?.results)) return json.results; // DRF paginated
+                        if (Array.isArray(json?.data)) return json.data;       // common pattern
+                        return [];
+                    },
+                    xhrFields: { withCredentials: true },
+                    cache: false,
+                    beforeSend: function () {
+                        $('#loading-overlay,#loading-message').show();
+                    },
+                    error: function (xhr, status, err) {
+                        if (status !== 'abort' && xhr?.status !== 401) {
+                            console.error('DataTables AJAX error:', status, err, xhr?.responseText);
+                            Swal.fire('Gagal memuat data', `HTTP ${xhr.status}`, 'error');
+                        }
+                    },
+                    complete: function () {
+                        $('#loading-overlay,#loading-message').hide();
+                    }
+                },
+                
+                columns: [
+                { data: 'id' },
+                { data: 'document_status' },
+                { data: 'branch_name' },
+                { data: 'customer_type' },
+                
+                // Nama pada BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_name_on_bpkb','name_on_bpkb') },
+                
+                // BLOK BPKB
+                { data: null, render: (d,t,row)=>fmtDate(useNewOrOld(row,'new_bpkb_birth_date','bpkb_birth_date')) }, // Tgl Lahir BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_birth_place','bpkb_birth_place') },       // Tmp Lahir BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_occupation','bpkb_occupation') },         // Pekerjaan BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_nationality','bpkb_nationality') },       // Kewarganegaraan BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_address','bpkb_address') },               // Alamat BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_rt','bpkb_rt') },                         // RT BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_rw','bpkb_rw') },                         // RW BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_subdistrict','bpkb_subdistrict') },       // Kelurahan BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_district','bpkb_district') },             // Kecamatan BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_city','bpkb_city') },                     // Kota BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_province','bpkb_province') },             // Provinsi BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_postal_code','bpkb_postal_code') },       // Kode Pos BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_bpkb_ktp','bpkb_ktp') },                       // No KTP BPKB
+                { data: 'bpkb_id_number' },                                                                          // No ID BPKB
+                { data: 'bpkb_npwp_number' },                                                                        // No NPWP BPKB
+                { data: null, render: (d,t,row)=>useNewOrOld(row, null, 'bpkb_number') },                            // No BPKB
+                
+                // Debitur dkk
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_debtor_name','debtor_name') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_gender','gender') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_marital_status','marital_status') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_birth_place','birth_place') },
+                { data: null, render: (d,t,row)=>fmtDate(useNewOrOld(row,'new_birth_date','birth_date')) },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_occupation','occupation') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_nationality','nationality') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_id_type','id_type') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_id_number','id_number') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_address','address') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_rt_rw','rt_rw') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_subdistrict','subdistrict') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_district','district') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_city','city') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_province','province') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_postal_code','postal_code') },
+                
+                { data: 'company_type' },
+                { data: 'company_npwp' },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_deed_number','deed_number') },
+                { data: null, render: (d,t,row)=>fmtDate(useNewOrOld(row,'new_deed_date','deed_date')) },
+                { data: 'company_director_name' },
+                { data: 'director_gender' },
+                { data: 'director_status' },
+                { data: 'director_birth_place' },
+                { data: null, render: (d,t,row)=>fmtDate(row.director_birth_date) },
+                { data: 'director_nationality' },
+                { data: 'director_id_type' },
+                { data: 'director_id_number' },
+                { data: 'director_address' },
+                { data: 'director_rt_rw' },
+                { data: 'director_subdistrict' },
+                { data: 'director_district' },
+                { data: 'director_city' },
+                { data: 'director_province' },
+                { data: 'director_position' },
+                
+                { data: 'agreement_type' },
+                { data: 'agreement_name' },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_agreement_number','agreement_number') },
+                { data: null, render: (d,t,row)=>fmtDate(row.agreement_date) },
+                { data: 'principal_loan' },
+                { data: 'guarantee_value' },
+                { data: null, render: (d,t,row)=>fmtDate(row.installment_start_date) },
+                { data: 'tenor' },
+                { data: 'vehicle_condition' },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_brand','brand') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_type','type') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_color','color') },
+                { data: 'assembly_year' },
+                { data: 'production_year' },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_chassis_number','chassis_number') },
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_engine_number','engine_number') },
+                
+                // Tanpa No BPKB kedua
+                { data: null, render: (d,t,row)=>useNewOrOld(row,'new_otr_values','otr_value') },
+                { data: 'pnbp_fee' },
+                { data: 'service_fee' }
+                ],
+                
+                fixedHeader: true,
+                scrollX: true,
+                scrollY: '500px',
+                columnDefs: [{ targets: [0], visible: false }],
+                language: { emptyTable: 'Tidak ada data yang tersedia hari ini' }
+            });
+            
+            $('#consumerTable').on('xhr.dt', function (e, settings, json, xhr) {
+                const rows = Array.isArray(json) ? json.length : (json?.results?.length || json?.data?.length || 0);
+                console.log(`✅ rows loaded: ${rows}`);
+            });
+        } else {
+            $('#consumerTable').DataTable().ajax.reload(null, false);
+        }
+        
+        /* --------------------------------------
+        CREATE/PROCESS: Submit Form Perubahan
+        -------------------------------------- */
+        $('#formProcessFidusia').off('submit').on('submit', function (e) {
+            e.preventDefault();
+            
+            const $form = $('#formProcessFidusia');
+            const $modal = $('#modalProcessFidusia');
+            const $submitBtn = $form.find('button[type="submit"]');
+            
+            const agreementNumber = ($modal.find('#inputAgreementNumber').val() || '').trim();
+            if (!agreementNumber) {
+                Swal.fire('Gagal', 'Nomor perjanjian wajib diisi.', 'warning')
+                .then(() => $modal.find('#inputAgreementNumber').focus());
+                return;
+            }
+            
+            // 0) BUKA SEMENTARA field yang disabled agar ikut terkirim
+            const $disabledNew = $form.find(':input[disabled][name^="new_"]');
+            const $disabledMeta = $form.find(':input[disabled]').filter(function () {
+                const n = this.name || '';
+                return [
+                'change_type','choose_change','choose_change_name','choose_change_name_org',
+                'choose_mistake','choose_mistake_2nama',
+                'debtor_type','debtor_type_PT',
+                'fiduciary_change_letter_number','date_of_change_of_fiduciary_letter',
+                'branch_code','entity_type'
+                ].includes(n);
+            });
+            $disabledNew.prop('disabled', false);
+            $disabledMeta.prop('disabled', false);
+            
+            // 1) Hanya ambil new_* + meta yang diperlukan
+            const ALLOW_META = new Set([
+            'agreement_number',
+            'change_type',
+            'choose_change',
+            'choose_change_name',
+            'choose_change_name_org',
+            'choose_mistake',
+            'choose_mistake_2nama',
+            'debtor_type',
+            'debtor_type_PT',
+            'fiduciary_change_letter_number',
+            'date_of_change_of_fiduciary_letter',
+            'branch_code',
+            'entity_type',
+            'csrfmiddlewaretoken',
+            'customer_type',
+            'fiducia_provider',
+            ]);
+            
+            const formDataObj = {};
+            
+            // Ambil hanya input yang aktif & terlihat
+            $form.find(':input:enabled:visible').each(function () {
+                const name = this.name;
+                if (!name) return;
+                if (name.startsWith('new_') || ALLOW_META.has(name)) {
+                    let val;
+                    if (this.type === 'checkbox') val = this.checked;
+                    else if (this.type === 'radio') { if (!this.checked) return; val = $(this).val(); }
+                    else val = $(this).val();
+                    formDataObj[name] = val;
+                }
+            });
+            
+            // 2) Pastikan agreement_number ikut
+            formDataObj['agreement_number'] = agreementNumber;
+            
+            // 3) Checkbox → boolean (hanya yang lolos filter & terlihat)
+            $form.find('input[type="checkbox"]:enabled:visible').each(function () {
+                const n = $(this).attr('name');
+                if (!n) return;
+                if (!(n.startsWith('new_') || ALLOW_META.has(n))) return;
+                if (!(n in formDataObj)) formDataObj[n] = false;
+                else if (formDataObj[n] === 'on') formDataObj[n] = true;
+            });
+            
+            /* ======== NORMALISASI NAMA FIELD (biar cocok dengan kolom model) ======== */
+            // new_otr_value (singular) → new_otr_values (plural) + hapus alias lama
+            if ('new_otr_value' in formDataObj && !('new_otr_values' in formDataObj)) {
+                formDataObj.new_otr_values = formDataObj.new_otr_value;
+            }
+            delete formDataObj.new_otr_value;
+            
+            // otr_terbilang (tanpa new_) → new_otr_terbilang
+            if ('otr_terbilang' in formDataObj && !('new_otr_terbilang' in formDataObj)) {
+                formDataObj.new_otr_terbilang = formDataObj.otr_terbilang;
+            }
+            delete formDataObj.otr_terbilang;
+            
+            // ======== PRE-VALIDASI KONDISIONAL + CLEAN (FIX) ========
+            const changeType   = String(formDataObj['change_type']   || '').toLowerCase();
+            const chooseChange = String(formDataObj['choose_change'] || '').toLowerCase();
+            const debtorType   = String(formDataObj['debtor_type']   || '').toLowerCase(); // individu/organisasi/pt?
+            
+            // Referensi elemen by id ATAU by name (fallback)
+            const $ddInd = $('#choose_change_name').add('[name="choose_change_name"]');       // individu
+            const $ddOrg = $('#choose_change_name_org').add('[name="choose_change_name_org"]'); // organisasi
+            
+            // Helper normalisasi: handle array, trim, buang placeholder umum
+            const norm = (v) => {
+                if (Array.isArray(v)) v = v[0] || '';
+                v = (v ?? '').toString().trim();
+                const bad = ['', '0', '-', 'pilih', 'pilih...', 'select', 'select...'];
+                return bad.includes(v.toLowerCase()) ? '' : v;
+            };
+            
+            // Ambil value dari DOM (kebal :visible), plus fallback text option terpilih
+            const getValSmart = ($el) => {
+                if (!$el || !$el.length) return '';
+                const v = $el.val();
+                const txt = $el.is('select') ? $el.find('option:selected').text() : '';
+                return norm(v) || norm(txt);
+            };
+            
+            const mapNameChoice = (v) => {
+                v = (v || '').toString().trim().toLowerCase().replace(/\s+/g,'');
+                if (v === 'perubahan1' || v === 'perubahan1nama') return 'perubahan1nama'; // 1→2
+                if (v === 'perubahan2' || v === 'perubahan2nama') return 'perubahan2nama'; // 2→1
+                return v;
+            };
+            
+            const nameIndDOM = getValSmart($ddInd);
+            const nameOrgDOM = getValSmart($ddOrg);
+            
+            // Fallback dari payload yang sudah terkumpul (kalau ada)
+            const nameIndFD = norm(formDataObj['choose_change_name']);
+            const nameOrgFD = norm(formDataObj['choose_change_name_org']);
+            
+            // Tentukan sumber yang dipakai.
+            // Kalau debtor_type menunjukkan organisasi/PT, prioritaskan field organisasi.
+            let chosenName = '';
+            if (['organisasi','pt','perusahaan','badan','badan_usaha'].includes(debtorType)) {
+                chosenName = [nameOrgDOM, nameOrgFD, nameIndDOM, nameIndFD].find(Boolean) || '';
+            } else {
+                chosenName = [nameIndDOM, nameIndFD, nameOrgDOM, nameOrgFD].find(Boolean) || '';
+            }
+            
+            if (changeType === 'subject' && chooseChange === 'perubahan1') {
+                if (!chosenName) {
+                    Swal.fire('Gagal', 'Jenis perubahan nama wajib dipilih.', 'warning');
+                    $submitBtn.prop('disabled', false).html('<i class="fas fa-save"></i> Proses');
+                    return;
+                }
+                formDataObj['choose_change_name'] = mapNameChoice(chosenName);
+                delete formDataObj['choose_change_name_org'];
+            } else {
+                // Kesalahan penulisan (perubahan2) tidak perlu kirim detail nama
+                delete formDataObj['choose_change_name'];
+                delete formDataObj['choose_change_name_org'];
+            }
+            
+            /* ======== NORMALISASI NILAI STRING KOSONG -> null ======== */
+            Object.keys(formDataObj).forEach((k) => {
+                if (typeof formDataObj[k] === 'string') {
+                    formDataObj[k] = formDataObj[k].trim();
+                    if (formDataObj[k] === '') formDataObj[k] = null;
+                }
+            });
+            
+            // 3.5) DEBUG: laporkan field new_ yang tidak ikut terkumpul (membantu cek HTML)
+            (function(){
+                const EXPECT_NEW = [
+                'new_deed_number','new_deed_date','new_agreement_number','new_debtor_name',
+                'new_address','new_id_number','new_birth_place','new_birth_date',
+                'new_chassis_number','new_engine_number','new_type','new_color','new_brand',
+                'new_otr_values','new_otr_terbilang',
+                'new_name_on_bpkb','new_bpkb_nationality','new_bpkb_birth_place','new_bpkb_birth_date',
+                'new_bpkb_birth_terbilang','new_bpkb_occupation','new_bpkb_city','new_bpkb_address',
+                'new_bpkb_rt','new_bpkb_rw','new_bpkb_district','new_bpkb_subdistrict',
+                'new_bpkb_province','new_bpkb_postal_code','new_bpkb_ktp',
+                'new_gender','new_marital_status','new_rt_rw','new_subdistrict','new_district','new_city','new_province'
+                ];
+                const missing = EXPECT_NEW.filter(k => !(k in formDataObj));
+                if (missing.length) {
+                    console.warn('⚠️ Beberapa field new_ tidak terkumpul (cek name/visibility di HTML):', missing);
+                }
+            })();
+            
+            // >>> KEMBALIKAN STATUS disabled
+            $disabledNew.prop('disabled', true);
+            $disabledMeta.prop('disabled', true);
+            
+            // 4) Cek consumer + kirim
+            const getCookieSafe = (name) => {
+                const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+                return m ? decodeURIComponent(m.pop()) : '';
+            };
+            
+            $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memeriksa...');
+            const checkUrl = `/api/consumer-by-agreement/${encodeURIComponent(agreementNumber)}/`;
+            
+            fetch(checkUrl, {
+                method: 'GET',
+                headers: { 'X-CSRFToken': getCookieSafe('csrftoken'), 'Accept': 'application/json' },
+                credentials: 'include'
+            })
+            .then(async (r) => {
+                console.debug('✅ Cek consumer status:', r.status, 'URL:', r.url);
+                if (r.status === 404) {
+                    Swal.fire('Tidak ditemukan', `Nomor perjanjian <b>${agreementNumber}</b> tidak ada di data Consumer.`, 'warning');
+                    $submitBtn.prop('disabled', false).html('<i class="fas fa-save"></i> Proses');
+                    return { ok: false };
+                }
+                if (!r.ok) {
+                    const respText = await r.text().catch(() => '(no body)');
+                    console.error('❌ Response (non-2xx):', respText);
+                    Swal.fire('Error', `Gagal memeriksa nomor perjanjian (${r.status}).`, 'error');
+                    $submitBtn.prop('disabled', false).html('<i class="fas fa-save"></i> Proses');
+                    return { ok: false };
+                }
+                try { return { ok: true, data: await r.json() }; }
+                catch (e) {
+                    const raw = await r.text().catch(() => '(no body)');
+                    console.error('❌ JSON parse error. Body:', raw);
+                    Swal.fire('Error', 'Respon cek nomor bukan JSON valid.', 'error');
+                    $submitBtn.prop('disabled', false).html('<i class="fas fa-save"></i> Proses');
+                    return { ok: false };
+                }
+            })
+            .then(async (res) => {
+                if (!res?.ok) return false;
+                const confirmRes = await Swal.fire({
+                    title: 'Konfirmasi',
+                    html: `Proses data untuk Nomor Perjanjian <b>${agreementNumber}</b> ke Perubahan Fidusia?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, proses',
+                    cancelButtonText: 'Batal'
+                });
+                return confirmRes.isConfirmed;
+            })
+            .then((confirmed) => {
+                if (!confirmed) {
+                    $submitBtn.prop('disabled', false).html('<i class="fas fa-save"></i> Proses');
+                    return;
+                }
+                
+                $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memproses...');
+                
+                console.group('📦 Payload yang dikirim');
+                Object.entries(formDataObj).forEach(([k,v]) => console.log(k, '=>', v));
+                console.groupEnd();
+                
+                return new Promise((resolve) => {
+                    $.ajax({
+                        url: '/perubahan-fidusia/proses/',
+                        type: 'POST',
+                        headers: {'X-CSRFToken': "{{ csrf_token }}"},
+                        contentType: 'application/json',
+                        data: JSON.stringify(formDataObj)
+                    })
+                    .done((resp) => {
+                        $('#modalProcessFidusia').modal('hide');
+                        Swal.fire({
+                            title: 'Berhasil',
+                            html: resp && resp.id ? `Data berhasil diproses (ID: <b>${resp.id}</b>).` : 'Data berhasil diproses.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => window.location.reload());
+                        resolve(true);
+                    })
+                    .fail((xhr, textStatus, errorThrown) => {
+                        const j = xhr.responseJSON || {};
+                        const details = j.details || j.error || j.message || xhr.responseText || 'Gagal memproses data.';
+                        
+                        console.group("❌ AJAX POST Error - Perubahan Fidusia");
+                        console.error("Status:", xhr.status, textStatus, errorThrown);
+                        console.error("Response JSON:", j);
+                        console.error("Response Text:", xhr.responseText);
+                        console.error("Request Payload:", formDataObj);
+                        console.error("Headers:", xhr.getAllResponseHeaders());
+                        console.groupEnd();
+                        
+                        if (xhr.status === 401 || xhr.status === 403) {
+                            Swal.fire('Sesi Habis', 'Silakan login kembali.', 'warning').then(() => { 
+                                window.location.href = '/login/'; 
+                            });
+                            return resolve(false);
+                        }
+                        
+                        Swal.fire(
+                        'Error',
+                        typeof details === 'string' ? details : JSON.stringify(details, null, 2),
+                        'error'
+                        );
+                        resolve(false);
+                    })
+                    .always(() => {
+                        $submitBtn.prop('disabled', false).html('<i class="fas fa-save"></i> Proses');
+                    });
+                });
+            })
+            .catch((err) => {
+                console.error('❌ Error cek consumer (network/exception):', err);
+                Swal.fire('Error', 'Terjadi kesalahan saat memeriksa nomor perjanjian (network/exception).', 'error');
+                $submitBtn.prop('disabled', false).html('<i class="fas fa-save"></i> Proses');
+            });
+        });
+        
+        /* --------------------------------------
+        UI Init: Hide all conditional sections
+        -------------------------------------- */
+        $('#newAgreementNumberWrapper').addClass('d-none');
+        $('#jnsperubahan').closest('.mb-3').addClass('d-none');
+        $('#debtorTypePerorangan').closest('.mb-3').hide();
+        $('#debtorTypePT').closest('.mb-3').hide();
+        $('#chooseChangeWrapper').addClass('d-none');
+        $('#change_bpkb_address').addClass('d-none');
+        $('#choose_change_name_org_wrapper').addClass('d-none');
+        $('#choose_mistake').addClass('d-none');
+        $('#choose_mistake_2nama_wrapper').addClass('d-none');
+        $('#form_bpkb_fields_wrapper').addClass('d-none'); // inisialisasi
+        
+        /* --------------------------------------
+        UI: Toggle nomor perjanjian baru
+        -------------------------------------- */
+        $('#changeAgreementNumberCheckbox').on('change', function () {
+            $('#newAgreementNumberWrapper').toggleClass('d-none', !this.checked);
+            $('#newAgreementNumber').prop('required', this.checked);
+        });
+        
+        /* --------------------------------------
+        UI: Perubahan Nama → tampilkan form BPKB
+        -------------------------------------- */
+        $('#choose_change_name').on('change', function () {
+            const val = $(this).val();
+            const wrapper = $('#form_bpkb_fields_wrapper');
+            
+            // tampil/ sembunyi blok
+            const show = (val === 'perubahan1nama' || val === 'perubahan2nama');
+            wrapper.toggleClass('d-none', !show);
+            if (!show) return;
+            
+            // daftar field DEBITUR (setelah komentar FIELD DEBITUR)
+            const debtorFields = [
+            'new_debtor_name',
+            'new_gender',
+            'new_marital_status',
+            'new_birth_place',
+            'new_birth_date',
+            'new_occupation',
+            'new_nationality',
+            'new_id_type',
+            'new_id_number',
+            'new_address',       // textarea
+            'new_rt_rw',
+            'new_subdistrict',
+            'new_district',
+            'new_city',
+            'new_province',
+            'new_postal_code'
+            ];
+            
+            // aturan:
+            // - perubahan2nama (2→1)  : disabled (tidak bisa diinput & tidak tersubmit)
+            // - perubahan1nama (1→2)  : editable (bisa diinput & tersubmit)
+            const isDisable = (val === 'perubahan2nama');   // 2→1
+            const isEditable = (val === 'perubahan1nama');  // 1→2
+            
+            debtorFields.forEach(nm => {
+                const $el = wrapper.find(`[name="${nm}"]`);
+                // reset dulu
+                $el.prop('readonly', false).prop('disabled', false);
+                
+                if (isDisable) {
+                    $el.prop('disabled', true); // kunci total saat 2→1
+                } else if (isEditable) {
+                    // pastikan editable
+                    $el.prop('readonly', false).prop('disabled', false);
+                }
+            });
+        });
+        
+        // set state awal saat halaman load
+        $(function(){
+            $('#choose_change_name').trigger('change');
+        });
+        
+        if ($('#form_bpkb_fields_wrapper').length) {
+            $('#form_bpkb_fields_wrapper').addClass('d-none');
+        }
+        
+        /* --------------------------------------
+        UI: Otomatis isi Terbilang Tanggal Lahir
+        -------------------------------------- */
+        /* --------------------------------------
+        UI: Otomatis isi Terbilang Tanggal Lahir (BPKB)
+        - cover semua kandidat input tanggal (id & name)
+        - tulis ke semua kandidat output terbilang
+        -------------------------------------- */
+        function writeBpkbBirthTerbilang(val) {
+            const teks = toDateTerbilangIndo(val) || '';
+            setTargetValue({ name: 'new_bpkb_birth_terbilang' }, teks);
+            setTargetValue({ selector: '#bpkb_birth_terbilang' }, teks);
+            setTargetValue({ selector: '#bpkb_birth_date_words' }, teks);
+        }
+        
+        $(document).on(
+        'change input',
+        '#bpkb_birth_date, #bpkb_birth_date_onbpkb, [name="new_bpkb_birth_date"]',
+        function () {
+            const tgl = $(this).val();
+            writeBpkbBirthTerbilang(tgl);
+        }
+        );
+        
+        // inisialisasi awal kalau sudah ada nilai dari server
+        (function initBpkbBirthTerbilangOnLoad() {
+            const kandidat = [
+            $('#bpkb_birth_date').val(),
+            $('#bpkb_birth_date_onbpkb').val(),
+            $('[name="new_bpkb_birth_date"]').first().val()
+            ].filter(Boolean);
+            if (kandidat.length) writeBpkbBirthTerbilang(kandidat[0]);
+        })();
+        
+        /* --------------------------------------
+        Helpers: Enable/Disable field Subjek
+        -------------------------------------- */
+        function setSubjectFieldsEnabled(enabled) {
+            // daftar wrapper / kontrol yang termasuk "Subjek"
+            const $subjectBlocks = $()
+            .add($('#chooseChangeWrapper'))
+            .add($('#change_bpkb_address'))
+            .add($('#choose_change_name'))               // select perubahan nama
+            .add($('#choose_change_name_org_wrapper'))   // pilih organisasi
+            .add($('#choose_mistake'))                   // pilih kesalahan
+            .add($('#choose_mistake_2nama_wrapper'))     // pilih kesalahan 2 nama
+            .add($('#form_bpkb_fields_wrapper'))         // form detail BPKB
+            .add($('#form_object_fields_wrapper_bpkb'))  // form kesalahan 1 nama
+            .add($('#form_object_fields_wrapper_onbpkb'))
+            .add($('#form_object_fields_wrapper_debitur'));
+            
+            // nonaktifkan/aktifkan input di dalamnya (tidak disembunyikan)
+            $subjectBlocks.find('input, select, textarea, button').each(function () {
+                const $el = $(this);
+                if (!enabled) {
+                    if (!$el.data('req-init')) $el.data('req-init', $el.prop('required'));
+                    $el.prop('required', false).prop('disabled', true);
+                } else {
+                    if ($el.data('req-init') !== undefined) $el.prop('required', $el.data('req-init'));
+                    $el.prop('disabled', false);
+                }
+            });
+        }
+        
+        /* --------------------------------------
+        UI: Jenis Perubahan dipilih
+        -------------------------------------- */
+        $('#changeType').off('change').on('change', function () {
+            const val = $(this).val();
+            resetAllConditionalForms(); // (punyamu)
+            
+            if (val === 'subject') {
+                setSubjectFieldsEnabled(true);                                        // aktifkan subjek
+                $('#chooseChangeWrapper').removeClass('d-none');
+            } else if (val === 'object') {
+                setSubjectFieldsEnabled(false);                                       // matikan subjek
+                $('#jnsperubahan').closest('.mb-3').removeClass('d-none');            // object jalan terus
+                let value = $('#jnsperubahan').text();
+                value = value === 'Personal' ? 'I' : value === 'Company' ? 'C' : '';
+                handleDebtorTypeFields(value)
+            } else {
+                setSubjectFieldsEnabled(false);
+            }
+        });
+        
+        /* --------------------------------------
+        Helper: Terbilang Rupiah dari OTR
+        -------------------------------------- */
+        function terbilang(nilai) {
+            const satuan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+            function konversi(n) {
+                n = Math.floor(n);
+                if (n < 12) return satuan[n];
+                if (n < 20) return konversi(n - 10) + ' Belas';
+                if (n < 100) return konversi(Math.floor(n / 10)) + ' Puluh ' + konversi(n % 10);
+                if (n < 200) return 'Seratus ' + konversi(n - 100);
+                if (n < 1000) return konversi(Math.floor(n / 100)) + ' Ratus ' + konversi(n % 100);
+                if (n < 2000) return 'Seribu ' + konversi(n - 1000);
+                if (n < 1000000) return konversi(Math.floor(n / 1000)) + ' Ribu ' + konversi(n % 1000);
+                if (n < 1000000000) return konversi(Math.floor(n / 1000000)) + ' Juta ' + konversi(n % 1000000);
+                if (n < 1000000000000) return konversi(Math.floor(n / 1000000000)) + ' Miliar ' + konversi(n % 1000000000);
+                if (n < 1000000000000000) return konversi(Math.floor(n / 1000000000000)) + ' Triliun ' + konversi(n % 1000000000000);
+                return 'Angka terlalu besar';
+            }
+            return konversi(nilai).replace(/\s+/g, ' ').trim();
+        }
+        
+        // OTR → Terbilang (huruf)
+        $('input[name="new_otr_values"]').on('input', function () {
+            const raw = String($(this).val() ?? '');
+            const val = parseFloat(raw.replace(/\./g,'').replace(/,/g,''));
+            if (!Number.isNaN(val)) {
+                $('input[name="new_otr_terbilang"]').val(terbilang(val) + ' Rupiah');
+            } else {
+                $('input[name="new_otr_terbilang"]').val('');
+            }
+        });
+        
+        // (Contoh, tidak dipakai)
+        function formatRupiahTerbilang(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(angka);
+        }
+        
+        /* --------------------------------------
+        UI: Jenis Entitas dipilih
+        -------------------------------------- */
+        $('#jnsperubahan').on('change', function () {
+            const val = $(this).val();
+            handleDebtorTypeFields(val);
+        });
+        
+        function handleDebtorTypeFields(val) {
+            $('#form_object_fields_wrapper').addClass('d-none');
+            $('#debtorTypePerorangan, #debtorTypePT').closest('.mb-3').hide();
+            $('input[name="debtor_type"], input[name="debtor_type_PT"]').prop('required', false);
+            
+            if (val === 'I') {
+                $('#debtorTypePerorangan').closest('.mb-3').show();
+                $('input[name="debtor_type"]').prop('required', true);
+                $('#form_object_fields_wrapper').removeClass('d-none');
+            } else if (val === 'C') {
+                $('#debtorTypePT').closest('.mb-3').show();
+                $('input[name="debtor_type_PT"]').prop('required', true);
+                $('#form_object_fields_wrapper').removeClass('d-none');
+            }
+        }
+        
+        
+        /* --------------------------------------
+        UI: Jenis perubahan (subjek)
+        -------------------------------------- */
+        $('#choose_change').on('change', function () {
+            const val = $(this).val();
+            
+            // Reset yang mungkin tampil
+            $('#form_object_fields_wrapper').addClass('d-none');
+            $('#form_object_fields_wrapper_bpkb').addClass('d-none');
+            
+            $('#form_bpkb_fields_wrapper').addClass('d-none');
+            $('#change_bpkb_address').addClass('d-none');
+            $('#choose_change_name_org_wrapper').addClass('d-none');
+            $('#choose_mistake').addClass('d-none');
+            $('#choose_mistake_2nama_wrapper').addClass('d-none');
+            $('#choose_change_name').val('');
+            
+            if (val === 'perubahan1') {
+                $('#change_bpkb_address').removeClass('d-none');
+            } else if (val === 'perubahan2') {
+                $('#choose_change_name_org_wrapper').removeClass('d-none');
+                let value = $('#choose_change_name_org').text();
+                value = value === 'Personal' ? 'I' : value === 'Company' ? 'C' : '';
+                updateDebtorMistakeFields(value);
+            }
+        });
+        
+        /* --------------------------------------
+        UI: Perubahan organisasi → pilih kesalahan
+        -------------------------------------- */
+        $('#choose_change_name_org').on('change', function () {
+            const val = $(this).val();
+            
+            updateDebtorMistakeFields(val);
+        });
+        
+        function updateDebtorMistakeFields(val) {
+            $('#form_object_fields_wrapper').addClass('d-none');
+            $('#form_object_fields_wrapper_bpkb').addClass('d-none');
+            $('#choose_mistake, #choose_mistake_2nama_wrapper').addClass('d-none');
+            
+            if (val === 'I') {
+                $('#choose_mistake').removeClass('d-none');
+                let value = $('#choose_mistake_select').text();
+                value = value === '1 Nama' ? 'pilih_kesalahan1' : value === '2 Nama' ? 'pilih_kesalahan2' : '';
+                choose_mistake_select(value);
+            }
+            else if (val === 'C') {
+                $('#choose_mistake').removeClass('d-none');
+                let value = $('#choose_mistake_select').text();
+                value = value === '1 Nama' ? 'pilih_kesalahan1' : value === '2 Nama' ? 'pilih_kesalahan2' : '';
+                choose_mistake_select(value);
+            }
+        }
+        
+        
+        /* --------------------------------------
+        UI: Pilih kesalahan (subjek)
+        -------------------------------------- */
+        $('#choose_mistake_select').on('change', function () {
+            const val = $(this).val();
+            
+            choose_mistake_select(val);
+        });
+        
+        function choose_mistake_select(val) {
+            $('#form_object_fields_wrapper').addClass('d-none');
+            $('#form_object_fields_wrapper_bpkb').addClass('d-none');
+            $('#choose_mistake_2nama_wrapper').addClass('d-none');
+            
+            if (val === 'pilih_kesalahan1') {
+                $('#form_object_fields_wrapper_bpkb').removeClass('d-none');
+            } else if (val === 'pilih_kesalahan2') {
+                $('#choose_mistake_2nama_wrapper').removeClass('d-none');
+            }
+        }
+        
+        /* --------------------------------------
+        UI: Pilih kesalahan 2 nama
+        -------------------------------------- */
+        $('#choose_mistake_2nama').on('change', function () {
+            const val = $(this).val();
+            
+            // Reset: sembunyikan kedua wrapper
+            $('#form_object_fields_wrapper_onbpkb').addClass('d-none');
+            $('#form_object_fields_wrapper_debitur').addClass('d-none');
+            
+            // Tampilkan sesuai pilihan
+            if (val === 'pilih_bpkb') {
+                $('#form_object_fields_wrapper_onbpkb').removeClass('d-none');
+            } else if (val === 'pilih_debitur') {
+                $('#form_object_fields_wrapper_debitur').removeClass('d-none');
+            } else if (val === 'pilih_bpkb&debitur') {
+                $('#form_object_fields_wrapper_onbpkb').removeClass('d-none');
+                $('#form_object_fields_wrapper_debitur').removeClass('d-none');
+            }
+        });
+        
+        /* --------------------------------------
+        Inisialisasi Gate & Lock (opsional)
+        -------------------------------------- */
+        setGateEnabled(false);
+        if (typeof lockSubjectOption === 'function') {
+            lockSubjectOption();
+        }
+    });
+    
+    /* =========================
+    Helper: Reset Kondisional
+    ========================= */
+    function resetAllConditionalForms() {
+        $('#form_bpkb_fields_wrapper').addClass('d-none');
+        $('#form_object_fields_wrapper_bpkb').addClass('d-none');
+        $('#form_object_fields_wrapper').addClass('d-none');
+        $('#change_bpkb_address').addClass('d-none');
+        $('#chooseChangeWrapper').addClass('d-none');
+        $('#choose_change_name_org_wrapper').addClass('d-none');
+        $('#choose_mistake').addClass('d-none');
+        $('#choose_mistake_2nama_wrapper').addClass('d-none');
+        $('#jnsperubahan').closest('.mb-3').addClass('d-none');
+        $('#debtorTypePerorangan, #debtorTypePT').closest('.mb-3').hide();
+        $('input[name="debtor_type"]').prop('required', false);
+        $('input[name="debtor_type_PT"]').prop('required', false);
+    }
+    
+    /* =========================
+    READ/EDIT/DELETE: Modal
+    ========================= */
+    // Tampilkan modal proses
+    $('#btn-process-fidusia').on('click', function () {
+        $('#modalProcessFidusia').modal('show');
+    });
+    
+    // Prefill form saat modal terbuka
+    $('#modalProcessFidusia').on('shown.bs.modal', function () {
+        console.log('✅ Modal Process Fidusia terbuka');
+        const agreementNumber = $('#inputAgreementNumber').val().trim();
+        console.log('📄 Agreement number diinput:', agreementNumber);
+        
+        if (!agreementNumber) {
+            console.warn('❌ Agreement number kosong, abort');
+            return;
+        }
+        
+        fetch(`/api/consumer-by-agreement/${agreementNumber}/`, {
+            method: 'GET',
+            headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' },
+            credentials: 'include'
+        })
+        .then(async (response) => {
+            console.log('📥 Response status:', response.status);
+            if (response.status === 401 || response.status === 403) {
+                console.warn('🔒 Tidak memiliki izin atau sesi kadaluarsa');
+                window.location.href = '';
+                return;
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log('📦 Data berhasil diambil:', data);
+            fillConsumerFields(data);
+        })
+        .catch((err) => {
+            console.error('❌ Gagal mengambil data consumer:', err);
+            Swal.fire('Gagal', 'Nomor perjanjian tidak ditemukan atau terjadi kesalahan.', 'error');
+        });
+    });
+    
+    // Isi field sesuai mapping
+    function fillConsumerFields(data) {
+        if (!data) return;
+        // tampilkan section umum kalau perlu
+        $('#form_object_fields_wrapper').removeClass('d-none');
+        // isi semua field new_* sesuai mapping
+        fillFromData(data);
+    }
+    
+    // Action tombol di tabel: Lihat / Edit / Hapus
+    $('#consumerTable').on('click', '.btn-upload-additional', function () {
+        const id = $(this).data('id');
+        const icon = $(this).find('i').attr('class');
+        
+        // READ: Lihat detail
+        if (icon.includes('fa-eye')) {
+            Swal.fire({
+                title: 'Lihat Data',
+                text: `Sedang menampilkan data untuk ID: ${id}`,
+                icon: 'info',
+                timer: 800,
+                showConfirmButton: false,
+                didClose: () => {
+                    $('#modalView').modal('show');
+                    $('#modalViewBody').html(`<div class="text-muted">Loading detail untuk ID: ${id}...</div>`);
+                    $.get(`/PF/${id}/`, (res) => {
+                        let html = '<table class="table table-sm table-striped table-bordered">';
+                            for (const [key, val] of Object.entries(res)) {
+                                const label = key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+                                html += `<tr><th style="width: 30%">${label}</th><td>${val ?? '-'}</td></tr>`;
+                            }
+                            html += '</table>';
+                            $('#modalViewBody').html(html);
+                        }).fail(() => {
+                            $('#modalViewBody').html('<div class="alert alert-danger">Gagal memuat data detail.</div>');
+                        });
+                    }
+                });
+                
+                // UPDATE: Edit data
+            } else if (icon.includes('fa-pencil-alt')) {
+                Swal.fire({
+                    title: 'Edit Data',
+                    text: `Membuka form edit untuk ID: ${id}`,
+                    icon: 'warning',
+                    timer: 800,
+                    showConfirmButton: false,
+                    didClose: () => {
+                        $('#modalEdit').modal('show').find('#modalEditBody').html('<div class="text-muted">Memuat form edit untuk ID: ${id}...</div>');
+                        $.get(`/PF/${id}/`, (res) => {
+                            let html = `<form id="editForm" data-id="${id}">`;
+                                for (const [key, val] of Object.entries(res)) {
+                                    if (['id', 'created_at', 'updated_at'].includes(key)) continue;
+                                    const label = key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+                                    html += `
+                <div class="mb-2">
+                  <label class="form-label">${label}</label>
+                  <input type="text" name="${key}" value="${val ?? ''}" class="form-control">
+                </div>`;
+                                }
+                                html += '<button type="submit" class="btn btn-primary">Simpan Semua</button></form>';
+                                $('#modalEditBody').html(html);
+                            }).fail(() => {
+                                $('#modalEditBody').html('<div class="alert alert-danger">Gagal memuat data untuk edit.</div>');
+                            });
+                        }
+                    });
+                    
+                    // DELETE: Hapus data
+                } else if (icon.includes('fa-trash')) {
+                    Swal.fire({
+                        title: 'Konfirmasi Hapus',
+                        text: `Apakah kamu yakin ingin menghapus ID: ${id}?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Hapus',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $('#btnConfirmDelete').data('id', id).trigger('click');
+                        }
+                    });
+                }
+            });
+        </script>
+        {% endblock %}
+        {% endblock %}

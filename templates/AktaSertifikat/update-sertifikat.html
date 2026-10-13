@@ -1,0 +1,358 @@
+{% extends "../base.html" %} 
+{% load static %} 
+{% block title %} Update Sertifikat {% endblock %} 
+{% block content %}
+<div class="app-content content">
+  <div class="content-overlay"></div>
+  <div class="content-wrapper">
+    <div class="content-header row">
+      <div class="content-header-left col-md-6 col-12 mb-2">
+        <div class="row breadcrumbs-top">
+          <div class="breadcrumb-wrapper col-12">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}">Home</a>
+              </li>
+              <li class="breadcrumb-item"><a href="#">Reguler</a></li>
+              <li class="breadcrumb-item active">Update Sertifikat</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="content-body">
+      <section id="base-style">
+        <div class="row">
+          <div class="col-12">
+            <form id="filterForm" method="get" class="row g-2 mb-3 align-items-center">
+              <div class="col-auto">
+                <label for="deed_date" class="col-form-label" >Tanggal Akta:</label>
+              </div>
+              <div class="col-md-3">
+                <label>Dari</label>
+                <input type="date" id="deed_date" name="deed_date" value="{{ deed_date }}" class="form-control"/>
+              </div>
+              
+              <div class="col-md-3">
+                <label>Sampai</label>
+                <input type="date" id="deed_date_to" name="deed_date_to" value="{{ deed_date_to }}" class="form-control"/>
+              </div>
+              <div class="col-md-2">
+                <button type="submit" class="btn btn-success">Cari</button>
+              </div>
+            </form>
+            
+            <div class="row g-2 mb-3 align-items-center">
+              <div class="col-auto">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                  Upload Excel
+                </button>
+              </div>
+              
+              <div class="col-auto">
+                <form id="exportForm" method="get" action="{% url 'export_excel_sertifikat' %}">
+                  <input type="hidden" name="deed_date" value="{{ deed_date }}">
+                  <input type="hidden" name="deed_date_to" value="{{ deed_date_to }}">
+                  <button id="exportBtn" type="button" class="btn btn-success" {% if not deed_date and not deed_date_to %}disabled{% endif %}>
+                    Export Excel
+                  </button>
+                </form>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="card-header">
+                <h4>Form Update No. Sertifikat dan Tagihan</h4>
+              </div>
+              <div class="card-content collapse show">
+                <div class="card-body card-dashboard">
+                  <div class="table-responsive">
+                    <table id="sertifikatTable" class="table table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th>No. Perjanjian</th>
+                          <th>No. Akta</th>
+                          <th>Nama Notaris</th>
+                          <th>Nama</th>
+                          <th>Tanggal Daftar</th>
+                          <th>Kode Voucher</th>
+                          <th>No. Sertifikat</th>
+                          <th>Tanggal Sertifikat</th>
+                          <th>Path Sertifikat</th>
+                          <th>Path PNBP</th>
+                          <th>Bukti Bayar PNBP</th>
+                          <th>Tanggal Pembayaran</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in enriched_consumers %}
+                        <tr>
+                          <td>{{ item.agreement_number }}</td>
+                          <td>{{ item.document_number }}</td>
+                          <td>{{ item.firm_name }}</td>
+                          <td>{{ item.debtor_name }}</td>
+                          <td>
+                            <input type="date" class="form-control editable" data-id="{{ item.id }}" data-field="registration_date" value="{{ item.registration_date|date:'Y-m-d' }}"/>
+                          </td>
+                          <td>
+                            <input type="text" class="form-control editable" data-id="{{ item.id }}" data-field="voucher_code" value="{{ item.voucher_code }}"/>
+                          </td>
+                          <td>
+                            <input type="text" class="form-control editable" data-id="{{ item.id }}" data-field="certificate_number" value="{{ item.certificate_number }}"/>
+                          </td>
+                          <td>
+                            <input type="date" class="form-control editable" data-id="{{ item.id }}" data-field="certificate_date" value="{{ item.certificate_date|date:'Y-m-d' }}"/>
+                          </td>
+                          <td>{{ item.certificate_path }}</td>
+                          <td>{{ item.pnbp_path }}</td>
+                          <td class="text-nowrap">
+                            {% if item.voucher_input %}
+                            <a href="{% url 'download_bukti_bayar' item.id %}" class="btn btn-sm btn-info" title="Unduh Bukti Bayar">
+                              <i class="fa-solid fa-receipt"></i>
+                            </a>
+                            {% endif %}
+                            <label class="btn btn-sm btn-outline-primary mb-0" title="Upload Bukti Bayar (PDF)">
+                              <i class="fa-solid fa-upload"></i> {% if item.voucher_input %}Ganti{% else %}Upload{% endif %}
+                              <input type="file" accept="application/pdf,.pdf" class="d-none bukti-bayar-input" data-id="{{ item.id }}"/>
+                            </label>
+                          </td>
+                          <td>
+                            <input type="date" class="form-control editable" data-id="{{ item.id }}" data-field="payment_date" value="{{ item.payment_date|date:'Y-m-d' }}"/>
+                          </td>
+                          <td>
+                            <span class="badge {% if item.status == 'Done' %}bg-success {% elif item.status == 'Paid' %}bg-primary {% elif item.status == 'Clear' %}bg-warning {% elif item.status == 'Check' %}bg-info {% elif item.status == 'Recheck' %}bg-danger {% elif item.status == 'Pending' %}bg-warning text-dark {% else %}bg-secondary{% endif %}">
+                              {{ item.status|default:"Draft" }}
+                            </span>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    {% comment %} 
+                    <button id="saveAllBtn" class="btn btn-success mb-3">
+                      Simpan Semua
+                    </button> 
+                    {% endcomment %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <form id="uploadForm" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Upload File Excel</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                      <input class="form-control" type="file" name="excel_file" required/>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="submit" class="btn btn-primary">
+                        Upload
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+{% block script %}
+<script>
+  $("#sertifikatTable").DataTable({
+    language: {
+      emptyTable: "Tidak ada data.",
+    },
+  });
+  
+  document.getElementById("filterForm").addEventListener("submit", function(e) {
+    let from = document.getElementById("deed_date").value;
+    let to = document.getElementById("deed_date_to").value;
+    
+    if (from && to) {
+      let d1 = new Date(from + "T00:00:00");
+      let d2 = new Date(to + "T00:00:00");
+      
+      let diff = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+      
+      console.log("FROM:", from);
+      console.log("TO:", to);
+      console.log("DIFF:", diff);
+      
+      if (diff < 0) {
+        e.preventDefault();
+        Swal.fire({
+          icon: "error",
+          title: "Tanggal tidak valid",
+          text: "Tanggal 'Sampai' harus lebih besar dari 'Dari'.",
+        });
+        return;
+      }
+      
+      if (diff > 7) {
+        e.preventDefault();
+        Swal.fire({
+          icon: "warning",
+          title: "Range terlalu panjang",
+          text: "Maksimal pencarian 7 hari.",
+        });
+        return;
+      }
+    }
+  });
+  
+  document.getElementById("exportBtn").addEventListener("click", function () {
+    Swal.fire({
+      title: "Export Data?",
+      text: "Data sertifikat akan diexport ke Excel sesuai tanggal akta.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Ya, Export!",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById("exportForm").submit();
+        Swal.fire({
+          title: "Sedang memproses",
+          text: "File Excel akan segera didownload...",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    });
+  });
+  
+  // SweetAlert for Import Data
+  $("#uploadForm").on("submit", function (e) {
+    e.preventDefault();
+    
+    var formData = new FormData(this);
+    
+    Swal.fire({
+      title: "Sedang mengupload...",
+      text: "Mohon tunggu sebentar.",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+    
+    $.ajax({
+      url: "{% url 'upload_excel_sertifikat' %}",
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function (response) {
+        Swal.fire({
+          title: "Berhasil!",
+          text: response || "Data berhasil diimport dari Excel.",
+          icon: "success",
+          confirmButtonText: "OK",     // ⬅️ tombol
+          allowOutsideClick: false,    // ⬅️ tidak auto close
+        }).then(() => {
+          location.reload();
+        });
+      },
+      error: function (xhr) {
+        Swal.fire({
+          title: "Gagal!",
+          text: xhr.responseText || "Terjadi kesalahan saat upload",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      },
+    });
+  });
+  
+  // Upload bukti bayar PNBP (PDF) per dokumen
+  $("#sertifikatTable").on("change", ".bukti-bayar-input", function () {
+    const file = this.files[0];
+    if (!file) return;
+    const id = $(this).data("id");
+    const formData = new FormData();
+    formData.append("bukti_bayar", file);
+    this.value = "";
+
+    Swal.fire({ title: "Mengupload bukti bayar...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    $.ajax({
+      url: "{% url 'upload_bukti_bayar' 0 %}".replace("/0/", `/${id}/`),
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      headers: { "X-CSRFToken": "{{ csrf_token }}" },
+      success: function () {
+        Swal.fire({ title: "Berhasil!", text: "Bukti bayar tersimpan.", icon: "success", timer: 1500, showConfirmButton: false })
+          .then(() => location.reload());
+      },
+      error: function (xhr) {
+        Swal.fire({ title: "Gagal!", text: xhr.responseJSON?.message || "Upload gagal.", icon: "error" });
+      },
+    });
+  });
+
+  $("#saveAllBtn").on("click", function () {
+    var updates = {};
+    
+    $(".editable").each(function () {
+      var id = $(this).data("id");
+      var field = $(this).data("field");
+      var value = $(this).val();
+      
+      if (!updates[id]) {
+        updates[id] = { id: id, fields: {} };
+      }
+      updates[id].fields[field] = value;
+    });
+    
+    Swal.fire({
+      title: "Menyimpan...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+    
+    $.ajax({
+      url: "{% url 'update_sertifikat_bulk' %}",
+      type: "POST",
+      data: JSON.stringify(Object.values(updates)),
+      contentType: "application/json",
+      headers: { "X-CSRFToken": "{{ csrf_token }}" },
+      success: function () {
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Semua perubahan berhasil disimpan.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        }).then(() => location.reload());
+      },
+      error: function (xhr) {
+        Swal.fire({
+          title: "Gagal!",
+          text: xhr.responseJSON?.message || "Terjadi kesalahan",
+          icon: "error",
+        });
+      },
+    });
+  });
+</script>
+
+{% endblock %} {% endblock %}

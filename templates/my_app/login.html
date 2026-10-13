@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+    <meta name="description" content="Sarana Legalitas Indonesia">
+    <meta name="keywords" content="admin template, stack admin template, dashboard template, flat admin template, responsive admin template, web app">
+    <meta name="author" content="SLI">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="msvalidate.01" content="D019AA21327EA83B892A4AB75B0641A4" />
+    <meta name="robots" content="noindex, nofollow">
+    <title>Login Page</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/SLI-icon1.png' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow p-4" style="width: 400px;">
+            <div class="text-center mb-3">
+                <img src="{% static 'images/SLI.png' %}" alt="SLI Logo" height="50" width="160" loading="eager">
+                <h5 class="mt-2">Login SLI</h5>
+            </div>
+            
+            <form id="login-form" method="POST" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="user-identifier" class="form-label">Email atau Username</label>
+                    <input type="text" class="form-control" id="user-identifier" name="identifier" required autocomplete="username">
+                </div>
+                
+                <div class="mb-3 position-relative" style="max-width: 100%;">
+                    <label for="user-password" class="form-label">Password</label>
+                    <div class="position-relative">
+                        <input type="password" class="form-control pe-5" id="user-password" name="password" required autocomplete="current-password">
+                        <i class="fas fa-eye-slash toggle-password" id="togglePasswordIcon" style="position:absolute;top:50%;right:15px;transform:translateY(-50%);cursor:pointer;color:#6c757d;"></i>
+                    </div>
+                    
+                    <div id="password-validation" class="mt-2 small" hidden>
+                        <div class="row">
+                            <div class="col-6">
+                                <span id="pw-len"   class="text-danger d-block">❌ Min. 8 karakter</span>
+                                <span id="pw-upper" class="text-danger d-block">❌ Huruf besar</span>
+                                <span id="pw-lower" class="text-danger d-block">❌ Huruf kecil</span>
+                            </div>
+                            <div class="col-6">
+                                <span id="pw-number" class="text-danger d-block">❌ Angka</span>
+                                <span id="pw-symbol" class="text-danger d-block">❌ Simbol</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="error-message" class="text-danger mb-3" style="display:none;"></div>
+                <button type="submit" class="btn btn-primary w-100 login-btn">Login</button>
+                
+            </form>
+            <!-- OTP FORM -->
+            <form id="otp-form" style="display:none;">
+                {% csrf_token %}
+                
+                <div class="text-center mb-3">
+                    <h5 class="fw-bold">Verifikasi Keamanan</h5>
+                    <small class="text-muted">
+                        Masukkan 6 digit kode OTP yang dikirim ke email Anda
+                    </small>
+                </div>
+                
+                <div class="d-flex justify-content-between mb-3 otp-container">
+                    <input type="text" maxlength="1" class="otp-input form-control text-center">
+                    <input type="text" maxlength="1" class="otp-input form-control text-center">
+                    <input type="text" maxlength="1" class="otp-input form-control text-center">
+                    <input type="text" maxlength="1" class="otp-input form-control text-center">
+                    <input type="text" maxlength="1" class="otp-input form-control text-center">
+                    <input type="text" maxlength="1" class="otp-input form-control text-center">
+                </div>
+                
+                <div class="text-center mb-2">
+                    <small id="otp-timer" class="text-danger fw-semibold">
+                        Berlaku 05:00
+                    </small>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success">Verifikasi OTP</button>
+                    <button type="button" id="resend-otp" class="btn btn-outline-secondary btn-sm">
+                        Kirim Ulang OTP
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="loading-spinner" style="display:none;text-align:center;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;">
+        <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;"></div>
+        <div style="margin-top:10px;font-weight:bold;">Loading...</div>
+    </div>
+    
+    <script src="{% static 'js/sweetalert2.all.min.js' %}"></script>
+    <script src="{% static 'js/0980f00969.js' %}"></script>
+    <script src="{% static 'js/login.js' %}" defer></script>
+</body>
+</html>

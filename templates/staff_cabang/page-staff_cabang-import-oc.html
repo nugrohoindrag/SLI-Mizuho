@@ -1,0 +1,300 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Cabang - Upload File OC {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Over Credit</a></li>
+                            <li class="breadcrumb-item active">Import Excel OC</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h4>Import Excel OC</h4>
+                                </div>
+                            </div>
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <form id="uploadForm" enctype="multipart/form-data" class="d-flex">
+                                    {% csrf_token %}
+                                    <input type="file" class="form-control me-2" name="excel_file" accept=".xlsx,.xls">
+                                    <button type="submit" class="btn btn-primary">Unggah</button>
+                                </form>
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="d-flex justify-content-end mb-2">
+                                    <button class="btn btn-warning me-2" id="btnResetTable">Reset Tabel</button>
+                                    <button class="btn btn-primary" id="btnSubmitExcel">Simpan ke Database</button>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table id="consumerTable" class="display table table-striped">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Nama Kolom</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Akan diisi dinamis via JS -->
+                                        </tbody>
+                                    </table>                               
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+
+{% block script %}
+<script>
+    window.previewExcelData = window.previewExcelData || [];
+    
+    function getCSRFToken() {
+        return document.querySelector(
+        'input[name="csrfmiddlewaretoken"]'
+        )?.value || '';
+    }
+    
+    $(document).ready(function () {
+        initConsumerTable();
+        
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!(/^GET|HEAD|OPTIONS|TRACE$/i.test(settings.type)) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", getCSRFToken());
+                }
+            }
+        });
+        
+        function initConsumerTable() {
+            if (!$.fn.DataTable.isDataTable('#consumerTable')) {
+                $('#consumerTable').DataTable({
+                    fixedHeader: true,
+                    scrollX: true
+                });
+            }
+        }
+        
+        // === PREVIEW (OC) ===
+        $('#uploadForm').submit(function (e) {
+            e.preventDefault();
+            window.previewExcelFilename = null;
+            
+            const formElement = document.getElementById('uploadForm');
+            const formData = new FormData(formElement);
+            
+            const uploadedFile = formData.get('excel_file');
+            if (!uploadedFile) {
+                Swal.fire('Peringatan', 'Silakan pilih file terlebih dahulu sebelum mengunggah.', 'warning');
+                return;
+            }
+            
+            $.ajax({
+                url: '/api/consumers/preview_excel-oc/',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    window.previewExcelData = response; // {columns, rows, warnings?, message?}
+                    window.previewExcelFilename = response.filename || uploadedFile.name;
+                    
+                    populatePreviewTable(response);
+                    
+                    let msg = 'Silakan tinjau data sebelum mengirim.';
+                    if (response.warnings && response.warnings.length) {
+                        msg += `<br><small>Catatan: ${response.warnings.length} peringatan terdeteksi.</small>`;
+                    }
+                    Swal.fire({ title: 'Pratinjau Dimuat', width: '600px' });
+                },
+                error: function (xhr) {
+                    console.error('Upload error:', xhr.responseText);
+                    
+                    let errorMsg = 'Gagal memuat pratinjau! Periksa konsol untuk detail.';
+                    if (xhr.responseJSON) {
+                        const res = xhr.responseJSON;
+                        
+                        if (res.errors || res.duplikat_di_database) {
+                            let detail = '';
+                            if (res.errors && res.errors.length > 0) {
+                                detail += `<strong>Kesalahan Data:</strong><ul>`;
+                                    res.errors.forEach(err => { detail += `<li>${err}</li>`; });
+                                    detail += `</ul>`;
+                                }
+                                if (res.duplikat_di_database && res.duplikat_di_database.length > 0) {
+                                    detail += `<strong>Nomor Perjanjian Duplikat di Database:</strong><ul>`;
+                                        res.duplikat_di_database.forEach(err => { detail += `<li>${err.agreement_number}</li>`; });
+                                        detail += `</ul>`;
+                                    }
+                                    Swal.fire({ title: 'Validasi Gagal', html: detail, icon: 'error', width: '600px', confirmButtonText: 'Perbaiki Excel' });
+                                    return;
+                                }
+                                
+                                if (res.error) errorMsg = res.error;
+                            }
+                            
+                            Swal.fire('Kesalahan', errorMsg, 'error');
+                        }
+                    });
+                });
+                
+                // === SAVE (OC) ===
+                $('#btnSubmitExcel').click(function () {
+                    const $btn = $(this);
+                    if ($btn.prop('disabled')) return;
+                    
+                    if (!window.previewExcelData || !window.previewExcelData.rows || window.previewExcelData.rows.length === 0) {
+                        Swal.fire('Peringatan', 'Tidak ada data pratinjau untuk dikirim.', 'warning');
+                        return;
+                    }
+                    
+                    const fileInput = $('input[name="excel_file"]')[0];
+                    const file = fileInput?.files[0];
+                    
+                    if (!file) {
+                        Swal.fire('Peringatan', 'File tidak ditemukan. Silakan upload ulang.', 'warning');
+                        return;
+                    }
+                    
+                    $btn.prop('disabled', true).text('Mengunggah...');
+                    
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('filename', file.name);
+                    formData.append('data', JSON.stringify(window.previewExcelData.rows));
+                    
+                    $.ajax({
+                        url: '/api/consumers/save_excel_data-oc/',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (response) {
+                            $btn.prop('disabled', false).text('Simpan ke Database');
+                            
+                            if (response.errors && response.errors.length > 0) {
+                                let html = `<p>Beberapa data gagal disimpan:</p><ul style="text-align:left;">`;
+                                    
+                                    response.errors.forEach(err => {
+                                        const row = err.row !== undefined ? ` (Baris: ${err.row + 1})` : '';
+                                        let errorMsg = typeof err.error === 'object' ? JSON.stringify(err.error) : err.error;
+                                        html += `<li><strong>${err.agreement_number || '-'}</strong>${row}: ${errorMsg}</li>`;
+                                    });
+                                    
+                                    html += `</ul>`;
+                                    
+                                    Swal.fire({
+                                        title: 'Data Tidak Tersimpan',
+                                        html: html,
+                                        icon: 'warning',
+                                        confirmButtonText: 'OK'
+                                    });
+                                } else {
+                                    Swal.fire('Sukses', 'Semua data berhasil disimpan.', 'success').then(() => location.reload());
+                                }
+                            },
+                            
+                            error: function (xhr) {
+                                $btn.prop('disabled', false).text('Simpan ke Database');
+                                console.error('❌ AJAX Error:', xhr);
+                                
+                                let htmlError = 'Gagal menyimpan data.';
+                                if (xhr.responseJSON) {
+                                    if (xhr.responseJSON.error) {
+                                        htmlError = xhr.responseJSON.error;
+                                    } else if (xhr.responseJSON.detail) {
+                                        htmlError = xhr.responseJSON.detail;
+                                    } else if (typeof xhr.responseJSON === 'string') {
+                                        htmlError = xhr.responseJSON;
+                                    }
+                                } else if (xhr.status === 0) {
+                                    htmlError = 'Tidak dapat terhubung ke server. Periksa koneksi Anda.';
+                                }
+                                
+                                Swal.fire({
+                                    title: 'Terjadi Kesalahan',
+                                    html: `<pre style="white-space: pre-wrap;">${htmlError}</pre>`,
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    });
+                    
+                    $('#btnResetTable').click(function() {
+                        window.previewExcelData = { columns: [], rows: [] };
+                        
+                        const $table = $('#consumerTable');
+                        if ($.fn.DataTable.isDataTable('#consumerTable')) {
+                            $table.DataTable().clear().destroy();
+                        }
+                        
+                        $('#consumerTable thead').html('<tr><th>Nama Kolom</th></tr>');
+                        $('#consumerTable tbody').html('<tr><th>Silahkan Unggah Kembali Data Anda</th></tr>');
+                        
+                        Swal.fire('Reset Selesai', 'Tabel telah dibersihkan.', 'info');
+                    });
+                    
+                    function populatePreviewTable(response) {
+                        const columns = response.columns;
+                        const rows = response.rows;
+                        
+                        const $table = $('#consumerTable');
+                        
+                        if ($.fn.DataTable.isDataTable('#consumerTable')) {
+                            $table.DataTable().clear().destroy();
+                        }
+                        
+                        const $thead = $table.find('thead');
+                        const $tbody = $table.find('tbody');
+                        
+                        let headerHtml = '<tr>';
+                            columns.forEach(col => {
+                                headerHtml += `<th>${col.replace(/_/g, ' ').toUpperCase()}</th>`;
+                            });
+                            headerHtml += '</tr>';
+                            $thead.html(headerHtml);
+                            
+                            let bodyHtml = '';
+                            rows.forEach((item) => {
+                                bodyHtml += '<tr>';
+                                    columns.forEach(col => {
+                                        bodyHtml += `<td>${item[col] || ''}</td>`;
+                                    });
+                                    bodyHtml += '</tr>';
+                                });
+                                
+                                $tbody.html(bodyHtml);
+                                
+                                $table.DataTable({
+                                    fixedHeader: true,
+                                    scrollX: true
+                                });
+                            }
+                        });
+                    </script>
+                    {% endblock %}
+                    {% endblock %}

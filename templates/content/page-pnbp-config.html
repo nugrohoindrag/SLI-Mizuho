@@ -1,0 +1,354 @@
+{% extends "../base.html" %}
+
+{% block title %}Konfigurasi PNBP{% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-12 mb-2">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                    <li class="breadcrumb-item">Admin</li>
+                    <li class="breadcrumb-item active">Konfigurasi PNBP</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <div class="alert alert-info">
+                Tarif aktif di halaman ini digunakan otomatis untuk menghitung PNBP berdasarkan
+                nilai penjaminan pada data Regular dan Over Credit.
+            </div>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0">Rentang Biaya PNBP</h4>
+                        <small class="text-muted">Batas atas bersifat inklusif. Gunakan batas bawah eksklusif untuk tier lanjutan.</small>
+                    </div>
+                    <button id="addRateButton" class="btn btn-primary" type="button">Tambah Rentang</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered" id="pnbpRateTable">
+                            <thead>
+                                <tr>
+                                    <th>Urutan</th>
+                                    <th>Kode</th>
+                                    <th>Label</th>
+                                    <th>Rentang</th>
+                                    <th>Biaya PNBP</th>
+                                    <th>Status</th>
+                                    <th>Terakhir diubah</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="rateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rateModalTitle">Tambah Rentang PNBP</h5>
+                <button id="closeRateButton" type="button" class="btn-close" aria-label="Tutup"></button>
+            </div>
+            <form id="rateForm">
+                <div class="modal-body">
+                    <input type="hidden" id="rateId">
+                    <div id="formError" class="alert alert-danger d-none" style="white-space: pre-line;"></div>
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <label for="codeKey">Kode</label>
+                            <input id="codeKey" class="form-control" maxlength="50" required placeholder="PNPB1">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label for="rateLabel">Label</label>
+                            <input id="rateLabel" class="form-control" maxlength="100" required placeholder="PNPB 0 - 50jt">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="sortOrder">Urutan</label>
+                            <input id="sortOrder" class="form-control" type="number" min="0" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label for="minAmount">Batas Bawah (Rp)</label>
+                            <input id="minAmount" class="form-control currency-input" type="text"
+                                   inputmode="numeric" autocomplete="off" required placeholder="Rp 0">
+                            <div class="form-check mt-1">
+                                <input id="minInclusive" class="form-check-input" type="checkbox">
+                                <label class="form-check-label" for="minInclusive">Batas bawah ikut dihitung</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label for="maxAmount">Batas Atas (Rp)</label>
+                            <input id="maxAmount" class="form-control currency-input" type="text"
+                                   inputmode="numeric" autocomplete="off" placeholder="Kosong untuk tanpa batas">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label for="rateFee">Biaya PNBP (Rp)</label>
+                            <input id="rateFee" class="form-control currency-input" type="text"
+                                   inputmode="numeric" autocomplete="off" required placeholder="Rp 0">
+                        </div>
+                        <div class="col-md-6 mb-2 d-flex align-items-end">
+                            <div class="form-check mb-1">
+                                <input id="isActive" class="form-check-input" type="checkbox" checked>
+                                <label class="form-check-label" for="isActive">Aktif</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelRateButton" type="button" class="btn btn-light">Batal</button>
+                    <button id="saveRateButton" type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+(() => {
+    const apiUrl = "{% url 'api_admin_pnbp_rates' %}";
+    const modalElement = document.getElementById('rateModal');
+    const modal = new bootstrap.Modal(modalElement);
+    const form = document.getElementById('rateForm');
+    const tbody = document.querySelector('#pnbpRateTable tbody');
+    let rates = [];
+
+    const rupiah = value => new Intl.NumberFormat('id-ID', {
+        style: 'currency', currency: 'IDR', maximumFractionDigits: 0
+    }).format(Number(value || 0));
+
+    const currencyDigits = value => {
+        const text = String(value ?? '').trim();
+        if (!text) return '';
+
+        // Nilai dari API berbentuk decimal, misalnya "50000.00".
+        if (/^\d+(?:\.\d+)?$/.test(text)) {
+            return (text.split('.')[0].replace(/^0+(?=\d)/, '') || '0');
+        }
+
+        // Nilai dari input sudah memiliki mask, misalnya "Rp 50.000".
+        return (text.replace(/\D/g, '').replace(/^0+(?=\d)/, '') || '0');
+    };
+
+    const rupiahInput = value => {
+        const digits = currencyDigits(value);
+        if (!digits) return '';
+        return `Rp ${new Intl.NumberFormat('id-ID', {
+            maximumFractionDigits: 0
+        }).format(BigInt(digits))}`;
+    };
+
+    document.querySelectorAll('.currency-input').forEach(input => {
+        input.addEventListener('input', () => {
+            input.value = rupiahInput(input.value);
+        });
+    });
+
+    const escapeHtml = value => String(value ?? '')
+        .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+
+    function rangeText(rate) {
+        const lower = `${rate.min_inclusive ? '≥' : '>'} ${rupiah(rate.min_amount)}`;
+        return rate.max_amount === null ? lower : `${lower} s.d. ≤ ${rupiah(rate.max_amount)}`;
+    }
+
+    function render() {
+        if (!rates.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Belum ada konfigurasi.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = rates.map(rate => `
+            <tr>
+                <td>${rate.sort_order}</td>
+                <td>${escapeHtml(rate.code_key)}</td>
+                <td>${escapeHtml(rate.label)}</td>
+                <td>${rangeText(rate)}</td>
+                <td>${rupiah(rate.fee)}</td>
+                <td><span class="badge ${rate.is_active ? 'badge-success' : 'badge-secondary'}">${rate.is_active ? 'Aktif' : 'Nonaktif'}</span></td>
+                <td>${escapeHtml(rate.updated_by_name || '-')}<br><small>${rate.updated_at ? new Date(rate.updated_at).toLocaleString('id-ID') : '-'}</small></td>
+                <td class="text-center text-nowrap">
+                    <button class="btn btn-sm btn-warning edit-rate" data-id="${rate.id}">Edit</button>
+                    <button class="btn btn-sm btn-danger delete-rate" data-id="${rate.id}">Hapus</button>
+                </td>
+            </tr>`).join('');
+    }
+
+    async function loadRates() {
+        const response = await fetch(apiUrl, {credentials: 'same-origin'});
+        if (!response.ok) throw new Error('Gagal mengambil konfigurasi PNBP.');
+        rates = await response.json();
+        render();
+    }
+
+    function openForm(rate = null) {
+        form.reset();
+        document.getElementById('formError').classList.add('d-none');
+        document.getElementById('rateId').value = rate?.id || '';
+        document.getElementById('rateModalTitle').textContent = rate ? 'Edit Rentang PNBP' : 'Tambah Rentang PNBP';
+        document.getElementById('codeKey').value = rate?.code_key || '';
+        document.getElementById('rateLabel').value = rate?.label || '';
+        document.getElementById('sortOrder').value = rate?.sort_order ?? rates.length + 1;
+        document.getElementById('minAmount').value = rate ? rupiahInput(rate.min_amount) : '';
+        document.getElementById('maxAmount').value = rate?.max_amount === null || !rate ? '' : rupiahInput(rate.max_amount);
+        document.getElementById('minInclusive').checked = rate?.min_inclusive ?? (rates.length === 0);
+        document.getElementById('rateFee').value = rate ? rupiahInput(rate.fee) : '';
+        document.getElementById('isActive').checked = rate?.is_active ?? true;
+        modal.show();
+    }
+
+    function errorMessage(data) {
+        if (!data || typeof data !== 'object') return 'Data tidak valid.';
+        return Object.entries(data).flatMap(([field, messages]) => {
+            const values = Array.isArray(messages) ? messages : [messages];
+            return values.map(message => `${field === 'non_field_errors' ? '' : field + ': '}${message}`);
+        }).join('\n');
+    }
+
+    document.getElementById('addRateButton').addEventListener('click', () => openForm());
+    document.getElementById('closeRateButton').addEventListener('click', () => modal.hide());
+    document.getElementById('cancelRateButton').addEventListener('click', () => modal.hide());
+
+    tbody.addEventListener('click', event => {
+        const deleteButton = event.target.closest('.delete-rate');
+        if (deleteButton) {
+            deleteRate(Number(deleteButton.dataset.id));
+            return;
+        }
+        const button = event.target.closest('.edit-rate');
+        if (!button) return;
+        openForm(rates.find(rate => rate.id === Number(button.dataset.id)));
+    });
+
+    async function deleteRate(id) {
+        const rate = rates.find(item => item.id === id);
+        if (!rate) return;
+
+        const confirmation = await Swal.fire({
+            title: 'Hapus rentang?',
+            text: `${rate.code_key} - ${rate.label}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, hapus',
+            cancelButtonText: 'Batal'
+        });
+        if (!confirmation.isConfirmed) return;
+
+        const response = await fetch(`${apiUrl}${id}/`, {
+            method: 'DELETE',
+            credentials: 'same-origin',
+            headers: {'X-CSRFToken': window.csrfToken}
+        });
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            Swal.fire('Gagal', errorMessage(data), 'error');
+            return;
+        }
+
+        await loadRates();
+        Swal.fire('Berhasil', 'Rentang PNBP dihapus.', 'success');
+    }
+
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const id = document.getElementById('rateId').value;
+        const payload = {
+            code_key: document.getElementById('codeKey').value.trim().toUpperCase(),
+            label: document.getElementById('rateLabel').value.trim(),
+            sort_order: Number(document.getElementById('sortOrder').value),
+            min_amount: currencyDigits(document.getElementById('minAmount').value),
+            max_amount: currencyDigits(document.getElementById('maxAmount').value) || null,
+            min_inclusive: document.getElementById('minInclusive').checked,
+            fee: currencyDigits(document.getElementById('rateFee').value),
+            is_active: document.getElementById('isActive').checked
+        };
+        const editedRate = {
+            id: id ? Number(id) : null,
+            ...payload
+        };
+        let completeConfiguration = id
+            ? rates.map(rate => rate.id === Number(id) ? editedRate : rate)
+            : [...rates, editedRate];
+
+        if (id) {
+            const oldIndex = rates.findIndex(rate => rate.id === Number(id));
+            const oldRate = rates[oldIndex];
+            if (editedRate.is_active && oldRate?.is_active) {
+                if (oldIndex > 0 && String(oldRate.min_amount) !== String(editedRate.min_amount)) {
+                    completeConfiguration[oldIndex - 1] = {
+                        ...completeConfiguration[oldIndex - 1],
+                        max_amount: editedRate.min_amount
+                    };
+                }
+                if (
+                    oldIndex < rates.length - 1 &&
+                    editedRate.max_amount !== null &&
+                    String(oldRate.max_amount) !== String(editedRate.max_amount)
+                ) {
+                    completeConfiguration[oldIndex + 1] = {
+                        ...completeConfiguration[oldIndex + 1],
+                        min_amount: editedRate.max_amount,
+                        min_inclusive: false
+                    };
+                }
+            }
+            if (!editedRate.is_active && oldRate?.is_active) {
+                if (oldIndex > 0) {
+                    completeConfiguration[oldIndex - 1] = {
+                        ...completeConfiguration[oldIndex - 1],
+                        max_amount: oldRate.max_amount
+                    };
+                } else if (oldIndex < rates.length - 1) {
+                    completeConfiguration[oldIndex + 1] = {
+                        ...completeConfiguration[oldIndex + 1],
+                        min_amount: 0,
+                        min_inclusive: true
+                    };
+                }
+            }
+        } else if (editedRate.is_active) {
+            const lastActiveIndex = completeConfiguration
+                .map((rate, index) => rate.is_active ? index : -1)
+                .filter(index => index >= 0 && index < completeConfiguration.length - 1)
+                .pop();
+            if (lastActiveIndex !== undefined && lastActiveIndex >= 0) {
+                completeConfiguration[lastActiveIndex] = {
+                    ...completeConfiguration[lastActiveIndex],
+                    max_amount: editedRate.min_amount
+                };
+                editedRate.min_inclusive = false;
+            }
+        }
+        const response = await fetch(apiUrl, {
+            method: 'PUT',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': window.csrfToken},
+            body: JSON.stringify({rates: completeConfiguration})
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            const box = document.getElementById('formError');
+            box.textContent = errorMessage(data);
+            box.classList.remove('d-none');
+            return;
+        }
+        modal.hide();
+        rates = data;
+        render();
+        Swal.fire('Berhasil', 'Konfigurasi PNBP tersimpan.', 'success');
+    });
+
+    loadRates().catch(error => Swal.fire('Gagal', error.message, 'error'));
+})();
+</script>
+{% endblock %}

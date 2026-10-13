@@ -1,0 +1,607 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Profile {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Beranda</a>
+                            </li>
+                            <li class="breadcrumb-item active">Pengaturan Akun
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                <h3 class="content-header-title mb-0">Pengaturan Akun</h3>
+            </div>
+        </div>
+        <div class="content-body">
+            <!-- account setting page start -->
+            <section id="page-account-settings">
+                <div class="row">
+                    <!-- left menu section -->
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <ul class="nav nav-pills flex-column mt-md-0 mt-1">
+                            <li class="nav-item">
+                                <a class="nav-link d-flex {% if force_password_change %}{% else %}active{% endif %}" id="account-pill-general" data-toggle="pill" href="#account-vertical-general" aria-expanded="{% if force_password_change %}false{% else %}true{% endif %}">
+                                    <i class="feather icon-globe"></i>
+                                    Umum
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex {% if force_password_change %}active{% endif %}" id="account-pill-password" data-toggle="pill" href="#account-vertical-password" aria-expanded="{% if force_password_change %}true{% else %}false{% endif %}">
+                                    <i class="feather icon-lock"></i>
+                                    Ganti Kata sandi
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- right content section -->
+                    <div class="col-md-9">
+                        <div class="card">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="tab-content">
+                                        {% if force_password_change %}
+                                        <div class="alert alert-warning mb-2" role="alert">
+                                            Password Anda terdeteksi tidak aman. Anda diwajibkan untuk mengganti kata sandi sebelum dapat mengakses fitur lain.
+                                        </div>
+                                        {% endif %}
+                                        <div role="tabpanel" class="tab-pane {% if force_password_change %}{% else %}active{% endif %}" id="account-vertical-general" aria-labelledby="account-pill-general" aria-expanded="{% if force_password_change %}false{% else %}true{% endif %}">
+                                            <form id="user-profile-form" class="p-2" novalidate enctype="multipart/form-data">
+                                                <div class="media">
+                                                    <a href="javascript: void(0);">
+                                                        <img id="profile-picture-preview" src="#" class="rounded mr-75" alt="profile image" height="64" width="64">
+                                                    </a>
+                                                    <div class="media-body mt-75">
+                                                        <div class="col-12 px-0 d-flex flex-sm-row flex-column justify-content-start">
+                                                            <label class="btn btn-sm btn-primary ml-50 mb-50 mb-sm-0 cursor-pointer" for="account-upload">Unggah Foto Baru</label>
+                                                            <input type="file" id="account-upload" name="profile_picture" hidden>
+                                                            <button type="button" class="btn btn-sm btn-secondary ml-50" id="reset-picture">Atur Ulang</button>
+                                                        </div>
+                                                        <p class="text-muted ml-75 mt-50">
+                                                            <small>File Yang diperbolehkan JPG, GIF or PNG. Max size of 800kB</small>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <h5><strong>Profil Saya</strong></h5>
+                                                <div class="row">
+                                                    <!-- Nama & Email -->
+                                                    <div class="form-group col-md-6 mb-1">
+                                                        <label for="name">Nama Lengkap</label>
+                                                        <input type="text" class="form-control" id="name" name="name" placeholder="Nama Lengkap">
+                                                    </div>
+                                                    <div class="form-group col-md-6 mb-1">
+                                                        <label for="email">Email</label>
+                                                        <input type="email" class="form-control" id="email" name="email" placeholder="Alamat Email">
+                                                    </div>
+                                                    
+                                                    <!-- Tempat & Tanggal Lahir -->
+                                                    <div class="form-group col-md-6 mb-1">
+                                                        <label for="birth_place">Tempat Lahir</label>
+                                                        <input type="text" class="form-control" id="birth_place" name="birth_place" placeholder="Contoh: Jakarta">
+                                                    </div>
+                                                    <div class="form-group col-md-6 mb-1">
+                                                        <label for="birth_date">Tanggal Lahir</label>
+                                                        <input type="date" class="form-control" id="birth_date" name="birth_date">
+                                                    </div>
+                                                    
+                                                    <!-- KTP & Alamat -->
+                                                    <div class="form-group col-md-6 mb-1">
+                                                        <label for="national_id">No KTP</label>
+                                                        <input type="text" class="form-control" id="national_id" name="national_id" placeholder="Nomor KTP">
+                                                    </div>
+                                                    <div class="form-group col-md-6 mb-1">
+                                                        <label for="address">Alamat</label>
+                                                        <input type="text" class="form-control" id="address" name="address" placeholder="Alamat Lengkap">
+                                                    </div>
+                                                    
+                                                    <!-- RT/RW/Subdistrict -->
+                                                    <div class="form-group col-md-2 mb-1">
+                                                        <label for="rt">RT</label>
+                                                        <input type="text" class="form-control" id="rt" name="rt" placeholder="RT">
+                                                    </div>
+                                                    <div class="form-group col-md-2 mb-1">
+                                                        <label for="rw">RW</label>
+                                                        <input type="text" class="form-control" id="rw" name="rw" placeholder="RW">
+                                                    </div>
+                                                    <div class="form-group col-md-2 mb-1">
+                                                        <label for="subdistrict">Kelurahan</label>
+                                                        <input type="text" class="form-control" id="subdistrict" name="subdistrict" placeholder="Kelurahan">
+                                                    </div>
+                                                    
+                                                    <!-- Kecamatan, Kota, Provinsi -->
+                                                    <div class="form-group col-md-4 mb-1">
+                                                        <label for="district">Kecamatan</label>
+                                                        <input type="text" class="form-control" id="district" name="district" placeholder="Kecamatan">
+                                                    </div>
+                                                    <div class="form-group col-md-4 mb-1">
+                                                        <label for="city">Kota</label>
+                                                        <input type="text" class="form-control" id="city" name="city" placeholder="Kota">
+                                                    </div>
+                                                    <div class="form-group col-md-4 mb-1">
+                                                        <label for="province_id">Provinsi</label>
+                                                        <select id="province_id" name="province_id" class="form-control">
+                                                            <option value="">== Pilih Provinsi ==</option>
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <!-- Tombol Simpan -->
+                                                    <div class="form-group col-12 text-right mt-2">
+                                                        <button type="submit" class="btn btn-primary">
+                                                            Save <i class="fa fa-arrow-right ml-1"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>                                            
+                                        </div>
+                                        <div class="tab-pane fade {% if force_password_change %}show active{% endif %}" id="account-vertical-password" role="tabpanel" aria-labelledby="account-pill-password" aria-expanded="{% if force_password_change %}true{% else %}false{% endif %}">
+                                            <form id="change-password-form" class="p-2" novalidate>
+                                                <div class="row">
+                                                    <!-- Password Lama -->
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <div class="controls">
+                                                                <label for="account-old-password">Kata Sandi Lama</label>
+                                                                <div class="input-group">
+                                                                    <input type="password" class="form-control" id="account-old-password" required placeholder="Kata Sandi Lama">
+                                                                    <div class="input-group-append">
+                                                                        <span class="input-group-text toggle-password" data-target="account-old-password" style="cursor:pointer;">
+                                                                            <i class="fa fa-eye"></i>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Password Baru + indikator -->
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <div class="controls">
+                                                                <label for="account-new-password">Kata Sandi Baru</label>
+                                                                <div class="input-group">
+                                                                    <input type="password" id="account-new-password" class="form-control" placeholder="Kata Sandi Baru" required>
+                                                                    <div class="input-group-append">
+                                                                        <span class="input-group-text toggle-password" data-target="account-new-password" style="cursor:pointer;">
+                                                                            <i class="fa fa-eye"></i>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <!-- Indikator kekuatan password -->
+                                                                <div id="password-strength" class="mt-2 text-muted small d-none">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <ul class="list-unstyled mb-0">
+                                                                                <li id="len" class="text-danger mb-1">❌ Minimal 8 karakter</li>
+                                                                                <li id="upper" class="text-danger mb-1">❌ Huruf besar (A-Z)</li>
+                                                                                <li id="lower" class="text-danger mb-1">❌ Huruf kecil (a-z)</li>
+                                                                            </ul>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <ul class="list-unstyled mb-0">
+                                                                                <li id="num" class="text-danger mb-1">❌ Angka (0-9)</li>
+                                                                                <li id="sym" class="text-danger mb-1">❌ Simbol (!@#$% dll)</li>
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Konfirmasi Password -->
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <div class="controls">
+                                                                <label for="account-retype-new-password">Masukkan Ulang Kata Sandi Baru</label>
+                                                                <div class="input-group">
+                                                                    <input type="password" id="account-retype-new-password" class="form-control" placeholder="Masukkan Ulang Kata Sandi Baru" required>
+                                                                    <div class="input-group-append">
+                                                                        <span class="input-group-text toggle-password" data-target="account-retype-new-password" style="cursor:pointer;">
+                                                                            <i class="fa fa-eye"></i>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <small id="confirm-error" class="text-danger d-none">❌ Password tidak cocok</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Tombol -->
+                                                    <div class="col-12 d-flex flex-sm-row flex-column justify-content-end">
+                                                        <button type="submit" class="btn btn-primary mr-sm-1 mb-1 mb-sm-0">Simpan Perubahan</button>
+                                                        <button type="reset" class="btn btn-light">Cancel</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- account setting page end -->
+        </div>
+    </div>
+</div>
+<!-- END: Content-->
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+{% block script %}
+<script>
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        // ==== Toggle show/hide password (guarded) ====
+        // ==== Toggle show/hide password saat mouse ditekan ====
+        document.querySelectorAll('.toggle-password').forEach(function (eyeIcon) {
+            if (eyeIcon.dataset.bound) return; // guard
+            eyeIcon.dataset.bound = 'true';
+            
+            const targetId = eyeIcon.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            const icon = eyeIcon.querySelector('i');
+            
+            if (!input || !icon) return;
+            
+            // Saat mouse ditekan → tampilkan password
+            eyeIcon.addEventListener('mousedown', function (e) {
+                e.preventDefault(); // cegah fokus pindah
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            });
+            
+            // Saat mouse dilepas → sembunyikan password
+            eyeIcon.addEventListener('mouseup', function () {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            });
+            
+            // Jika mouse keluar area icon sebelum dilepas → tetap sembunyikan
+            eyeIcon.addEventListener('mouseleave', function () {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            });
+        });
+        
+        // ==== SECTION: Preview foto profil ====
+        const uploadInput  = document.getElementById('account-upload');
+        const previewImage = document.getElementById('profile-picture-preview');
+        const resetButton  = document.getElementById('reset-picture');
+        
+        if (uploadInput && previewImage && resetButton) {
+            uploadInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { previewImage.src = ev.target.result; };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            resetButton.addEventListener('click', function () {
+                uploadInput.value = '';
+                previewImage.src = '';
+            });
+        }
+        
+        // ==== SECTION: Change password (guarded binding) ====
+        const changePwdForm = document.getElementById('change-password-form');
+        if (changePwdForm && !changePwdForm.dataset.bound) {
+            changePwdForm.dataset.bound = 'true'; // guard agar tidak bind 2x
+            let submitting = false;               // cegah double submit
+            
+            // --- Elemen indikator kekuatan & konfirmasi ---
+            const newPassword     = document.getElementById('account-new-password');
+            const confirmPassword = document.getElementById('account-retype-new-password');
+            const strengthBox     = document.getElementById('password-strength'); // wrapper indikator
+            const confirmErrorEl  = document.getElementById('confirm-error');
+            
+            // Item aturan indikator
+            const rules = {
+                len:   document.getElementById('len'),
+                upper: document.getElementById('upper'),
+                lower: document.getElementById('lower'),
+                num:   document.getElementById('num'),
+                sym:   document.getElementById('sym'),
+            };
+            
+            function setRule(el, ok, label) {
+                if (!el) return;
+                el.className = (ok ? 'text-success' : 'text-danger') + ' mb-1';
+                el.textContent = (ok ? '✅ ' : '❌ ') + label;
+            }
+            
+            function checkStrength(value) {
+                if (strengthBox) {
+                    strengthBox.classList.toggle('d-none', value.length === 0);
+                }
+                const okLen   = value.length >= 8;
+                const okUpper = /[A-Z]/.test(value);
+                const okLower = /[a-z]/.test(value);
+                const okNum   = /\d/.test(value);
+                const okSym   = /[!@#$%^&*(),.?":{}|<>_\-+=;'/\\[\]`~]/.test(value);
+                
+                setRule(rules.len,   okLen,   'Minimal 8 karakter');
+                setRule(rules.upper, okUpper, 'Huruf besar (A-Z)');
+                setRule(rules.lower, okLower, 'Huruf kecil (a-z)');
+                setRule(rules.num,   okNum,   'Angka (0-9)');
+                setRule(rules.sym,   okSym,   'Simbol (!@#$% dll)');
+                
+                return okLen && okUpper && okLower && okNum && okSym;
+            }
+            
+            function checkConfirm() {
+                if (!confirmPassword || !newPassword || !confirmErrorEl) return true;
+                const match = confirmPassword.value === newPassword.value;
+                // tampilkan error hanya kalau user sudah mengetik konfirmasi
+                confirmErrorEl.classList.toggle('d-none', match || confirmPassword.value.length === 0);
+                return match;
+            }
+            
+            // Bind event input (kalau elemen ada di DOM)
+            if (newPassword) {
+                newPassword.addEventListener('input', () => {
+                    checkStrength(newPassword.value);
+                    checkConfirm();
+                });
+            }
+            if (confirmPassword) {
+                confirmPassword.addEventListener('input', () => {
+                    checkConfirm();
+                });
+            }
+            
+            changePwdForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                if (submitting) return;
+                submitting = true;
+                
+                const submitBtn = changePwdForm.querySelector('button[type="submit"], .btn-submit');
+                if (submitBtn) submitBtn.disabled = true;
+                
+                const csrftoken = getCSRFToken();
+                const oldPwd = document.getElementById('account-old-password')?.value.trim() || '';
+                const newPwd = newPassword?.value.trim() || '';
+                const confPwd = confirmPassword?.value.trim() || '';
+                
+                // Validasi dasar
+                if (!oldPwd || !newPwd || !confPwd) {
+                    Swal.fire('Oops', 'Semua field password harus diisi.', 'warning');
+                    submitting = false; if (submitBtn) submitBtn.disabled = false; return;
+                }
+                
+                // Validasi kekuatan password
+                const strong = checkStrength(newPwd);
+                if (!strong) {
+                    Swal.fire('Oops', 'Password baru belum memenuhi kriteria keamanan.', 'warning');
+                    submitting = false; if (submitBtn) submitBtn.disabled = false; return;
+                }
+                
+                // Validasi konfirmasi password
+                const match = checkConfirm();
+                if (!match) {
+                    Swal.fire('Oops', 'Password baru dan konfirmasi tidak sama.', 'warning');
+                    submitting = false; if (submitBtn) submitBtn.disabled = false; return;
+                }
+                
+                try {
+                    const res = await fetch('/api/user/change-password/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            old_password: oldPwd,
+                            new_password: newPwd,
+                            confirm_password: confPwd
+                        })
+                    });
+                    
+                    const body = await res.json().catch(() => ({}));
+                    if (res.status === 200) {
+                        Swal.fire('Berhasil', body.message || 'Password berhasil diubah!', 'success')
+                        .then(() => {
+                            window.location.reload();
+                        });
+                        changePwdForm.reset();
+                        // Sembunyikan indikator & reset eye ke "tertutup"
+                        if (strengthBox) strengthBox.classList.add('d-none');
+                        if (confirmErrorEl) confirmErrorEl.classList.add('d-none');
+                        document.querySelectorAll('.toggle-password i.fa-eye-slash')
+                        .forEach(i => { i.classList.remove('fa-eye-slash'); i.classList.add('fa-eye'); });
+                        // pastikan input balik ke type password
+                        [document.getElementById('account-old-password'), newPassword, confirmPassword]
+                        .forEach(inp => { if (inp) inp.type = 'password'; });
+                    } else {
+                        const errorMessage = (typeof body === 'object' && body)
+                        ? (Object.values(body).flat().join('<br>') || body.detail || 'Gagal mengubah password.')
+                        : 'Gagal mengubah password.';
+                        Swal.fire('Gagal', errorMessage, 'error');
+                    }
+                } catch (err) {
+                    console.error('❌ Gagal kirim password:', err);
+                    Swal.fire('Error', 'Terjadi kesalahan saat update password.', 'error');
+                } finally {
+                    submitting = false;
+                    if (submitBtn) submitBtn.disabled = false;
+                }
+            }, { passive: false });
+        }
+        
+        // ==== SECTION: Load & update profil ====
+        const csrftoken = getCSRFToken();
+        
+        function loadSelect({ url, selectId, defaultLabel, labelKey, selectedId }) {
+            fetch(url, { headers: { 'X-CSRFToken': csrftoken }, credentials: 'include' })
+            .then(res => res.json())
+            .then(data => {
+                const select = document.getElementById(selectId);
+                if (!select) return;
+                select.innerHTML = `<option value="">== ${defaultLabel} ==</option>`;
+                data.forEach(item => {
+                    const selected = (item.id == selectedId) ? 'selected' : '';
+                    select.insertAdjacentHTML('beforeend',
+                    `<option value="${item.id}" ${selected}>${item[labelKey] || item.name}</option>`);
+                });
+            })
+            .catch(err => {
+                console.error(`❌ Gagal load ${selectId}:`, err);
+                Swal.fire('Error', `Gagal memuat data ${defaultLabel.toLowerCase()}.`, 'error');
+            });
+        }
+        
+        fetch('/api/user/profile/', { headers: { 'X-CSRFToken': csrftoken }, credentials: 'include' })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('name').value        = data.name || '';
+            document.getElementById('email').value       = data.email || '';
+            document.getElementById('birth_place').value = (data.birth_info || '').split(',')[0]?.trim() || '';
+            document.getElementById('birth_date').value  = (data.birth_info || '').split(',')[1]?.trim()?.split('-').reverse().join('-') || '';
+            document.getElementById('national_id').value = data.national_id || '';
+            document.getElementById('address').value     = data.address || '';
+            document.getElementById('rt').value          = data.rt || '';
+            document.getElementById('rw').value          = data.rw || '';
+            document.getElementById('subdistrict').value = data.subdistrict || '';
+            document.getElementById('district').value    = data.district || '';
+            document.getElementById('city').value        = data.city || '';
+            
+            if (data.profile_picture) {
+                document.querySelector('#profile-picture-preview')?.setAttribute('src', data.profile_picture);
+            }
+            
+            {% if not force_password_change %}
+            loadSelect({
+                url: '/api/provinces/',
+                selectId: 'province_id',
+                defaultLabel: 'Pilih Provinsi',
+                labelKey: 'region_name',
+                selectedId: data.province_id || ''
+            });
+            {% endif %}
+        })
+        .catch(err => {
+            console.error('❌ Gagal mengambil profil:', err);
+            Swal.fire('Error', 'Gagal memuat data profil.', 'error');
+        });
+        
+        {% if force_password_change %}
+        return;
+        {% endif %}
+
+        const profileForm = document.getElementById('user-profile-form');
+        
+        function formatDRFErrors(payload) {
+            // Terima string, array, atau object DRF dan kembalikan HTML rapi tanpa []
+            if (payload == null) return 'Terjadi kesalahan saat menyimpan.';
+            
+            // Jika string biasa
+            if (typeof payload === 'string') return payload;
+            
+            // Jika array (gabungkan isi tanpa tanda kurung siku)
+            if (Array.isArray(payload)) {
+                return payload
+                .map(item => (typeof item === 'string' ? item : formatDRFErrors(item)))
+                .filter(Boolean)
+                .join('<br>');
+            }
+            
+            // Jika object (DRF error per-field)
+            if (typeof payload === 'object') {
+                // Prioritas kunci umum DRF
+                const specialKeys = ['detail', 'non_field_errors'];
+                for (const k of specialKeys) {
+                    if (payload[k]) return formatDRFErrors(payload[k]);
+                }
+                
+                // Render per field: <b>field</b>: pesan
+                const lines = [];
+                for (const [key, val] of Object.entries(payload)) {
+                    const msg = formatDRFErrors(val);
+                    // Jika msg multi-baris, pecah ke bullet
+                    if (msg.includes('<br>')) {
+                        lines.push(`<div><b>${key}</b>:</div><ul>${msg.split('<br>').map(m => `<li>${m}</li>`).join('')}</ul>`);
+                    } else {
+                        lines.push(`<div><b>${key}</b>: ${msg}</div>`);
+                    }
+                }
+                return lines.join('');
+            }
+            
+            // Fallback aman
+            try {
+                return JSON.stringify(payload);
+            } catch {
+                return 'Terjadi kesalahan saat menyimpan.';
+            }
+        }
+        
+        if (profileForm && !profileForm.dataset.bound) {
+            profileForm.dataset.bound = 'true';
+            
+            profileForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                
+                const formData = new FormData(profileForm);
+                
+                fetch('/api/user/profile/update/', {
+                    method: 'PATCH',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    credentials: 'include',
+                    body: formData
+                })
+                .then(async (res) => {
+                    // Coba parse JSON; kalau gagal, pakai text
+                    let data;
+                    try {
+                        data = await res.json();
+                    } catch {
+                        const text = await res.text();
+                        data = { detail: text || 'Terjadi kesalahan saat menyimpan.' };
+                    }
+                    return { status: res.status, body: data };
+                })
+                .then(({ status, body }) => {
+                    if (status >= 200 && status < 300) {
+                        Swal.fire('Berhasil', '✅ Profil berhasil diperbarui!', 'success');
+                    } else {
+                        console.error('❌ Gagal memperbarui:', body);
+                        const errorMsg = formatDRFErrors(body);
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: '❌ Gagal memperbarui:',
+                            html: errorMsg
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('❌ Error saat kirim data:', err);
+                    Swal.fire('Error', 'Terjadi kesalahan saat menyimpan profil.', 'error');
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

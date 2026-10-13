@@ -1,0 +1,520 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Admin-Penerima Fidusia {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+  <div class="content-overlay"></div>
+  <div class="content-wrapper">
+    <div class="content-header row">
+      <div class="content-header-left col-md-6 col-12 mb-2">
+        <div class="row breadcrumbs-top">
+          <div class="breadcrumb-wrapper col-12">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+              <li class="breadcrumb-item"><a href="#">Admin</a></li>
+              <li class="breadcrumb-item active">Penerima Fidusia</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="content-body">
+      <!-- Table Section -->
+      <section id="base-style">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>Penerima Fidusia</h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+                  <i class="feather fa-regular fa-square-plus mr-1"></i>Tambah Data
+                </button>
+              </div>
+              <div class="card-content collapse show">
+                <div class="card-body card-dashboard">
+                  <div class="table-responsive">
+                    <table id="fiduciaTable" class="display table table-striped">
+                      <thead>
+                        <tr>
+                          <th>Nama Badan</th>
+                          <th>Email</th>
+                          <th>Telp</th>
+                          <th>Alamat</th>
+                          <th>RT</th>
+                          <th>RW</th>
+                          <th>Kelurahan</th>
+                          <th>Kecamatan</th>
+                          <th>Kota</th>
+                          <th>Provinsi</th>
+                          <th>Kode Pos</th>
+                          <th>No SK</th>
+                          <th>Tgl SK</th>
+                          <th>Tgl SK Selesai</th>
+                          <th>NPWP</th>
+                          <th>SK AHU</th>
+                          <th style="width:120px;">Aksi</th>
+                        </tr>
+                      </thead>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Tambah Data -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Tambah Penerima Fidusia</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <form id="createForm" method="post">
+          {% csrf_token %}    
+          <div class="form-group">
+            <label for="createName">Badan Usaha</label>
+            <input type="text" class="form-control" id="createName" placeholder="Nama Badan Usaha" required />
+          </div>
+          <div class="form-group">
+            <label for="createEmail">Email</label>
+            <input type="email" class="form-control" id="createEmail" placeholder="email@contoh.com" required />
+          </div>
+          <div class="form-group">
+            <label for="createPhone">Telepon</label>
+            <input type="tel" class="form-control" id="createPhone" placeholder="Contoh: 08123456789" pattern="[0-9]*" inputmode="numeric"required />
+            <div class="invalid-feedback">Nomor telepon hanya boleh berisi angka.</div>
+          </div>
+          <div class="form-group">
+            <label for="createAddress">Alamat</label>
+            <textarea class="form-control" id="createAddress" placeholder="Jl.Contoh No.123 Jakarta" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="createRT">RT</label>
+            <input type="text" class="form-control" id="createRT" placeholder="RT"/>
+          </div>
+          <div class="form-group">
+            <label for="createRW">RW</label>
+            <input type="text" class="form-control" id="createRW" placeholder="RW" required />
+          </div>
+          <div class="form-group">
+            <label for="createSubdistrict">Kelurahan</label>
+            <input type="text" class="form-control" id="createSubdistrict" placeholder="Kelurahan" required/>
+          </div>
+          <div class="form-group">
+            <label for="createDistrict">Kecamatan</label>
+            <input type="text" class="form-control" id="createDistrict" placeholder="Kecamatan" required/>
+          </div>
+          <div class="form-group">
+            <label for="createCity">Kota</label>
+            <input type="text" class="form-control" id="createCity" placeholder="Kota" required/>
+          </div>
+          <div class="form-group">
+            <label for="createProvince">Provinsi</label>
+            <input type="text" class="form-control" id="createProvince" placeholder="Provinsi" required/>
+          </div>
+          <div class="form-group">
+            <label for="createPostal">Kode Pos</label>
+            <input type="text" class="form-control" id="createPostal" placeholder="12345" required/>
+          </div>
+          <div class="form-group">
+            <label for="createSK">No. SK</label>
+            <input type="text" class="form-control" id="createSK" placeholder="Nomor SK Badan Usaha" required />
+          </div>
+          <div class="form-group">
+            <label for="createDecreeDate">Tanggal SK</label>
+            <input type="date" class="form-control" id="createDecreeDate" placeholder="(YYYY/MM/DD)" required/>
+          </div>
+          <div class="form-group">
+            <label for="decree_date_end">Tanggal SK Selesai</label>
+            <input type="date" class="form-control" id="decree_date_end" placeholder="(YYYY/MM/DD)" required/>
+          </div>
+          <div class="form-group">
+            <label for="createNPWP">No. NPWP</label>
+            <input type="text" class="form-control" id="createNPWP" placeholder="Nomor NPWP Badan Usaha"required />
+          </div>
+          <div class="form-group">
+            <label for="createAHUSK">No. SK AHU</label> 
+            <input type="text" class="form-control" id="createAHUSK" placeholder="Nomor SK AHU" required/>
+          </div>
+          <div class="mt-3 text-end">
+            <button type="submit" class="btn btn-primary" id="saveCreateBtn">Simpan</button>
+            <button type="reset" class="btn btn-secondary">Reset</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Edit Data -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Penerima Fidusia</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editForm" method="post">
+          {% csrf_token %}
+          <input type="hidden" id="editId" />
+          <div class="form-group">
+            <label for="editName">Badan Usaha</label>
+            <input type="text" class="form-control" id="editName" required />
+          </div>
+          <div class="form-group">
+            <label for="editEmail">Email</label>
+            <input type="email" class="form-control" id="editEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="editPhone">Telepon</label> 
+            <input type="text" class="form-control" id="editPhone" required />
+          </div>
+          <div class="form-group">
+            <label for="editAddress">Alamat</label>
+            <textarea class="form-control" id="editAddress"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editRT">RT</label>
+            <input type="text" class="form-control" id="editRT" />
+          </div>
+          <div class="form-group">
+            <label for="editRW">RW</label>
+            <input type="text" class="form-control" id="editRW" />
+          </div>
+          <div class="form-group">
+            <label for="editSubdistrict">Kelurahan</label>
+            <input type="text" class="form-control" id="editSubdistrict" />
+          </div>
+          <div class="form-group">
+            <label for="editDistrict">Kecamatan</label>
+            <input type="text" class="form-control" id="editDistrict" />
+          </div>
+          <div class="form-group">
+            <label for="editCity">Kota</label>
+            <input type="text" class="form-control" id="editCity" />
+          </div>
+          <div class="form-group">
+            <label for="editProvince">Provinsi</label>
+            <input type="text" class="form-control" id="editProvince" />
+          </div>
+          <div class="form-group">
+            <label for="editPostal">Kode Pos</label>
+            <input type="text" class="form-control" id="editPostal" />
+          </div>
+          <div class="form-group">
+            <label for="editSK">No. SK</label>
+            <input type="text" class="form-control" id="editSK" required />
+          </div>
+          <div class="form-group">
+            <label for="editDecreeDate">Tanggal SK</label>
+            <input type="date" class="form-control" id="editDecreeDate" />
+          </div>
+          <div class="form-group">
+            <label for="edit_decree_date_end">Tanggal SK Selesai</label>
+            <input type="date" class="form-control" id="edit_decree_date_end" />
+          </div>
+          <div class="form-group">
+            <label for="editNPWP">No. NPWP</label>
+            <input type="text" class="form-control" id="editNPWP" required />
+          </div>
+          <div class="form-group">
+            <label for="editAHUSK">No. SK AHU</label>
+            <input type="text" class="form-control" id="editAHUSK" />
+          </div>
+          <div class="mt-3 text-end">
+            <button type="submit" class="btn btn-primary" id="saveEditBtn">Simpan Perubahan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: View Data -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewModalLabel">Detail Penerima Fidusia</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Badan Usaha:</strong> <span id="viewName"></span></p>
+            <p><strong>Email:</strong> <span id="viewEmail"></span></p>
+            <p><strong>Telepon:</strong> <span id="viewPhone"></span></p>
+            <p><strong>Alamat:</strong> <span id="viewAddress"></span></p>
+            <p><strong>RT/RW:</strong> <span id="viewRT"></span>/<span id="viewRW"></span></p>
+            <p><strong>Kelurahan:</strong> <span id="viewSubdistrict"></span></p>
+            <p><strong>Kecamatan:</strong> <span id="viewDistrict"></span></p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Kota:</strong> <span id="viewCity"></span></p>
+            <p><strong>Provinsi:</strong> <span id="viewProvince"></span></p>
+            <p><strong>Kode Pos:</strong> <span id="viewPostal"></span></p>
+            <p><strong>No. SK:</strong> <span id="viewSK"></span></p>
+            <p><strong>Tanggal SK:</strong> <span id="viewDecreeDate"></span></p>
+            <p><strong>NPWP:</strong> <span id="viewNPWP"></span></p>
+            <p><strong>No. SK AHU:</strong> <span id="viewAHUSK"></span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+  
+  function getCSRFToken() {
+    let token = null;
+    document.cookie.split(";").forEach(cookie => {
+      const [name, value] = cookie.trim().split("=");
+      if (name === "csrftoken") token = decodeURIComponent(value);
+    });
+    return token;
+  }
+  
+  document.addEventListener('DOMContentLoaded', function () {
+    // input numeric-only
+    ['createPhone','editPhone'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', function(){let v = this.value.replace(/[^0-9+]/g,'');v = v.replace(/\+/g, (m, i) => i === 0 ? m : '');if (v.indexOf('+') > 0) v = v.replace(/\+/g,'');this.value = v;});
+    });
+    
+    ['createPostal','editPostal'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', function(){ this.value = this.value.replace(/[^0-9]/g,''); });
+    });
+    
+    function normalizePhone(raw) {
+      let v = (raw || '').trim();
+      if (/^62\d{8,13}$/.test(v)) v = '0' + v.slice(2);
+      return v;
+    }
+    
+    function toISODate(dmy) {
+      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec((dmy||'').trim());
+      if (!m) return dmy;
+      const [, dd, mm, yyyy] = m;
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    
+    const table = $('#fiduciaTable').DataTable({
+      processing: true,
+      serverSide: true,
+      deferRender: true,
+      searchDelay: 500,
+      lengthMenu: [[10,25,50,100],[10,25,50,100]],
+      pageLength: 25,
+      order: [[0, 'asc']],
+      ajax: { url: "{% url 'api_pnrmfds_datatable' %}", type: "GET" },
+      columns: [
+      { data: 'business_entity_name'},
+      { data: 'email'},
+      { data: 'phone_number'},
+      { data: 'address'},
+      { data: 'rt'},
+      { data: 'rw'},
+      { data: 'subdistrict'},
+      { data: 'district'},
+      { data: 'city'},
+      { data: 'province'},
+      { data: 'postal_code'},
+      { data: 'decree_number'},
+      { data: 'decree_date'},
+      { data: 'decree_date_end'},
+      { data: 'tax_number'},
+      { data: 'ahu_decree_number'},
+      { data: null, orderable:false, searchable:false, className:'text-center',
+      render: row => `
+            <div class="d-grid gap-1">
+              <button class="btn btn-info btn-sm btn-view p-1" data-id="${row.id}">
+                <i class="fas fa-eye"></i> View
+              </button>
+              <button class="btn btn-warning btn-sm btn-edit p-1" data-id="${row.id}">
+                <i class="fas fa-pen-to-square"></i> Edit
+              </button>
+              <button class="btn btn-danger btn-sm btn-delete p-1" data-id="${row.id}">
+                <i class="fas fa-trash-can"></i> Delete
+              </button>
+            </div>`
+    }
+    ]
+  });
+  
+  // CREATE
+  $('#saveCreateBtn').on('click', function (e) {
+    e.preventDefault();
+    const getVal = id => document.getElementById('create'+id)?.value || '';
+    const payload = {
+      business_entity_name: getVal('Name'),
+      email: getVal('Email'),
+      phone_number: normalizePhone(getVal('Phone')),
+      address: getVal('Address'),
+      rt: getVal('RT'),
+      rw: getVal('RW'),
+      subdistrict: getVal('Subdistrict'),
+      district: getVal('District'),
+      city: getVal('City'),
+      province: getVal('Province'),
+      postal_code: getVal('Postal'),
+      decree_number: getVal('SK'),
+      decree_date: toISODate(getVal('DecreeDate')),
+      decree_date_end: document.getElementById('decree_date_end')?.value || '',
+      tax_number: getVal('NPWP'),
+      ahu_decree_number: getVal('AHUSK'),
+    };
+    
+    $.ajax({
+      url: "{% url 'api_pnrmfds_create' %}",
+      type: "POST",
+      headers: { 'X-CSRFToken': getCSRFToken() },
+      data: payload
+    })
+    .done(resp => {
+      Swal.fire('Berhasil!', (resp && resp.message) || 'Data ditambahkan.', 'success');
+      $('#createModal').modal('hide');
+      $('#createForm')[0].reset();
+      table.ajax.reload(null, false);
+    })
+    .fail(xhr => {
+      // tampilkan detail error field kalau ada
+      const errs = xhr.responseJSON?.errors;
+      if (errs && typeof errs === 'object') {
+        const list = Object.entries(errs).map(([k,v]) => `<li><b>${k}</b>: ${Array.isArray(v)?v.join(', '):v}</li>`).join('');
+        Swal.fire({title:'Gagal!', html:`Terjadi kesalahan validasi:<ul style="text-align:left">${list}</ul>`, icon:'error'});
+      } else {
+        Swal.fire('Gagal!', xhr.responseJSON?.message || 'Kesalahan saat menambah data.', 'error');
+      }
+    });
+  });
+  
+  // VIEW
+  $('#fiduciaTable').on('click', '.btn-view', function () {
+    const id = $(this).data('id');
+    $.get(`/api/penerima-fidusia/edit/${id}/`, function (data) {
+      $('#viewName').text(data.business_entity_name);
+      $('#viewEmail').text(data.email);
+      $('#viewPhone').text(data.phone_number);
+      $('#viewAddress').text(data.address);
+      $('#viewRT').text(data.rt);
+      $('#viewRW').text(data.rw);
+      $('#viewSubdistrict').text(data.subdistrict);
+      $('#viewDistrict').text(data.district);
+      $('#viewCity').text(data.city);
+      $('#viewProvince').text(data.province);
+      $('#viewPostal').text(data.postal_code);
+      $('#viewSK').text(data.decree_number);
+      $('#viewDecreeDate').text(data.decree_date);
+      $('#viewNPWP').text(data.tax_number);
+      $('#viewAHUSK').text(data.ahu_decree_number);
+      $('#viewModal').modal('show');
+    });
+  });
+  
+  // EDIT (prefill)
+  $('#fiduciaTable').on('click', '.btn-edit', function () {
+    const id = $(this).data('id');
+    $.get(`/api/penerima-fidusia/edit/${id}/`, function (data) {
+      $('#editId').val(data.id);
+      $('#editName').val(data.business_entity_name);
+      $('#editEmail').val(data.email);
+      $('#editPhone').val(data.phone_number);
+      $('#editAddress').val(data.address);
+      $('#editRT').val(data.rt);
+      $('#editRW').val(data.rw);
+      $('#editSubdistrict').val(data.subdistrict);
+      $('#editDistrict').val(data.district);
+      $('#editCity').val(data.city);
+      $('#editProvince').val(data.province);
+      $('#editPostal').val(data.postal_code);
+      $('#editSK').val(data.decree_number);
+      $('#editDecreeDate').val(data.decree_date);
+      $('#edit_decree_date_end').val(data.decree_date_end);
+      $('#editNPWP').val(data.tax_number);
+      $('#editAHUSK').val(data.ahu_decree_number);
+      $('#editModal').modal('show');
+    });
+  });
+  
+  // UPDATE
+  $('#saveEditBtn').on('click', function (e) {
+    e.preventDefault();
+    const id = $('#editId').val();
+    const get = id => document.getElementById('edit'+id).value;
+    const payload = {
+      business_entity_name: get('Name'),
+      email: get('Email'),
+      phone_number: get('Phone'),
+      address: get('Address'),
+      rt: get('RT'),
+      rw: get('RW'),
+      subdistrict: get('Subdistrict'),
+      district: get('District'),
+      city: get('City'),
+      province: get('Province'),
+      postal_code: get('Postal'),
+      decree_number: get('SK'),
+      decree_date: get('DecreeDate'),
+      decree_date_end: document.getElementById('edit_decree_date_end')?.value || '',
+      tax_number: get('NPWP'),
+      ahu_decree_number: get('AHUSK'),
+    };
+    
+    $.ajax({
+      url: `/api/penerima-fidusia/edit/${id}/`,
+      type: "PATCH",                              // gunakan PATCH/PUT semantik
+      headers: { 'X-CSRFToken': getCSRFToken() },
+      data: payload
+    })
+    .done(() => {
+      Swal.fire('Berhasil!', 'Data berhasil diperbarui!', 'success');
+      $('#editModal').modal('hide');
+      table.ajax.reload(null, false);
+    })
+    .fail(xhr => Swal.fire('Gagal!', xhr.responseJSON?.message || 'Kesalahan saat update.', 'error'));
+  });
+  
+  // DELETE
+  $('#fiduciaTable').on('click', '.btn-delete', function () {
+    const id = $(this).data('id');
+    Swal.fire({
+      title: 'Yakin ingin menghapus?',
+      text: 'Data ini akan dihapus permanen.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal'
+    }).then((res) => {
+      if (!res.isConfirmed) return;
+      $.ajax({
+        url: `/api/penerima-fidusia/delete/${id}/`,
+        type: "DELETE",
+        headers: { 'X-CSRFToken': getCSRFToken() }
+      })
+      .done(() => {
+        Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
+        table.ajax.reload(null, false);
+      })
+      .fail(() => Swal.fire('Gagal!', 'Kesalahan saat menghapus data.', 'error'));
+    });
+  });
+});
+</script>
+{% endblock %}

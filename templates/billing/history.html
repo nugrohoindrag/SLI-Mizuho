@@ -1,0 +1,164 @@
+{% extends "../base.html" %}
+{% load static %}
+{% load format_filters %}
+
+{% block title %} History Billing {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'billing-list' %}">Billing</a></li>
+                            <li class="breadcrumb-item active">History Pembayaran</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        {% if error_message %}
+                        <div class="alert alert-warning">{{ error_message }}</div>
+                        {% endif %}
+
+                        <form method="get" class="row g-2 mb-3 align-items-end">
+                            <div class="col-md-3">
+                                <label for="q" class="form-label mb-0 fw-bold">No. Invoice / No. Perjanjian</label>
+                                <input type="text" id="q" name="q" value="{{ q }}" class="form-control" placeholder="Cari...">
+                            </div>
+                            <div class="col-auto">
+                                <label for="tgl_bayar_from" class="form-label mb-0 fw-bold">Tanggal Bayar</label>
+                                <input type="date" id="tgl_bayar_from" name="tgl_bayar_from" value="{{ tgl_bayar_from }}" class="form-control">
+                            </div>
+                            <div class="col-auto">
+                                <label for="tgl_bayar_to" class="form-label mb-0 fw-bold">s/d</label>
+                                <input type="date" id="tgl_bayar_to" name="tgl_bayar_to" value="{{ tgl_bayar_to }}" class="form-control">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Cari</button>
+                                <a href="{% url 'billing-history' %}" class="btn btn-secondary"><i class="fas fa-undo"></i> Reset</a>
+                                <a class="btn btn-success" href="{% url 'billing-history-export' %}?q={{ q|urlencode }}&tgl_bayar_from={{ tgl_bayar_from }}&tgl_bayar_to={{ tgl_bayar_to }}">
+                                    <i class="fas fa-file-excel"></i> Export Excel
+                                </a>
+                            </div>
+                        </form>
+                        {% if not q and not request.GET.tgl_bayar_from %}
+                        <p class="small text-muted">Menampilkan pembayaran 30 hari terakhir. Gunakan pencarian untuk data lebih lama.</p>
+                        {% endif %}
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>History Pembayaran</h4>
+                                <div class="small text-muted">
+                                    {{ totals.count }} kontrak dari {{ totals.invoices }} invoice &middot; <b>Total {{ totals.total|rupiah }}</b>
+                                </div>
+                            </div>
+                            <div class="card-content collapse show">
+                                <div class="card-body card-dashboard">
+                                    <div class="table-responsive">
+                                        <table id="historyTable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>No. Invoice</th>
+                                                    <th>Tanggal Invoice</th>
+                                                    <th>Nama Cabang</th>
+                                                    <th>No. Kontrak</th>
+                                                    <th>Nama Debitur</th>
+                                                    <th>No. Akta</th>
+                                                    <th>Tanggal Akta</th>
+                                                    <th>Biaya Jasa</th>
+                                                    <th>PNBP</th>
+                                                    <th>Total</th>
+                                                    <th>Tanggal Bayar</th>
+                                                    <th>Diupload Oleh</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in rows %}
+                                                <tr>
+                                                    <td>{{ item.no_invoice }}</td>
+                                                    <td data-order="{{ item.tgl_inv|date:'Y-m-d' }}">{{ item.tgl_inv|date:"d-m-Y" }}</td>
+                                                    <td>{{ item.branch_name }}</td>
+                                                    <td>{{ item.agreement_number }}</td>
+                                                    <td>{{ item.debtor_name }}</td>
+                                                    <td>{{ item.document_number }}</td>
+                                                    <td>{{ item.document_date|date:"d-m-Y" }}</td>
+                                                    <td>{{ item.service_fee|rupiah }}</td>
+                                                    <td>{{ item.pnbp_fee|rupiah }}</td>
+                                                    <td>{{ item.total|rupiah }}</td>
+                                                    <td data-order="{{ item.tgl_receive_payment|date:'Y-m-d' }}"><span class="badge bg-success">{{ item.tgl_receive_payment|date:"d-m-Y" }}</span></td>
+                                                    <td>{{ item.paid_by }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Log Upload Pembayaran</h4>
+                            </div>
+                            <div class="card-content collapse show">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Waktu Upload</th>
+                                                    <th>File</th>
+                                                    <th>Oleh</th>
+                                                    <th>Dibayar</th>
+                                                    <th>Belum Dibayar</th>
+                                                    <th>Sudah Dibayar Sebelumnya</th>
+                                                    <th>Tidak Ditemukan</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for up in uploads %}
+                                                <tr>
+                                                    <td>{{ up.uploaded_at|date:"d-m-Y H:i" }}</td>
+                                                    <td>{{ up.file_name }}</td>
+                                                    <td>{{ up.uploaded_by.username|default:"-" }}</td>
+                                                    <td>{{ up.paid_count }}</td>
+                                                    <td>{{ up.unpaid_count }}</td>
+                                                    <td>{{ up.already_paid_count }}</td>
+                                                    <td>{{ up.not_found_count }}</td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr><td colspan="7" class="text-center text-muted">Belum ada upload pembayaran.</td></tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+{% block script %}
+<script>
+    $('#historyTable').DataTable({
+        language: { emptyTable: "Belum ada pembayaran pada filter ini." },
+        order: [[10, 'desc']]
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

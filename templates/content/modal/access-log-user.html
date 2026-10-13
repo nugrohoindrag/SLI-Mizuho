@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Admin - Activity Log User{% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="#">Admin</a></li>
+                            <li class="breadcrumb-item active">Activity Log User</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="upload-log">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <h4>Activity Log User</h4>
+                        </div>
+                        <div class="row justify-content-end align-items-end g-2">
+                            <div class="col-auto">
+                                <div class="form-group mb-0">
+                                    <label for="startDate" class="form-label small text-muted">From</label>
+                                    <input type="date" id="startDate" class="form-control form-control-sm" placeholder="Tanggal Awal">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-group mb-0">
+                                    <label for="endDate" class="form-label small text-muted">To</label>
+                                    <input type="date" id="endDate" class="form-control form-control-sm" placeholder="Tanggal Akhir">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-group mb-0">
+                                    <label for="branchName" class="form-label small text-muted">Branch</label>
+                                    <select id="branchName" class="form-control form-control-sm">
+                                        
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <button id="filterBtn" class="btn btn-primary btn-sm mt-3">Filter</button>
+                                <button id="resetFilterBtn" class="btn btn-warning btn-sm mt-3">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="uploadLogTable" class="display table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Pengguna</th>
+                                            <th>Aktivitas</th>
+                                            <th>Cabang</th>
+                                            <th>Waktu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="data-body">
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function () {
+        function getCSRFToken() {
+            let token = null;
+            document.cookie.split(';').forEach(cookie => {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') token = decodeURIComponent(value);
+            });
+            return token;
+        }
+        
+        async function loadBranches() {
+            try {
+                const res = await fetch('/api/branches/', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error(await res.text());
+                const branches = await res.json();
+                const $branch = $('#branchName');
+                $branch.empty().append(`<option value="">-- Semua Cabang --</option>`);
+                branches.forEach(b => $branch.append(`<option value="${b.branch_name}">${b.branch_name}</option>`));
+            } catch (e) {
+                console.error('❌ Error load branches:', e);
+                Swal.fire('Error', 'Gagal memuat daftar cabang.', 'error');
+            }
+        }
+        
+        const uploadLogTable = $('#uploadLogTable').DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            autoWidth: false,
+            deferRender: true,
+            pageLength: 10,
+            order: [[4, 'desc']],
+            language: {
+                processing: "Memuat...",
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ entri",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                infoEmpty: "Menampilkan 0 sampai 0 dari 0 entri",
+                zeroRecords: "Tidak ditemukan data yang cocok",
+                paginate: { previous: "Sebelumnya", next: "Berikutnya" }
+            },
+            columns: [
+            { data: null, orderable: false },
+            { data: 'user_name', defaultContent: '-' },
+            { data: 'status',    defaultContent: '-' },
+            { data: 'branch_name', defaultContent: '-' },
+            { data: 'timestamp', defaultContent: '-' }
+            ],
+            columnDefs: [
+            {
+                targets: 0,
+                className: 'text-center',
+                render: function (data, type, row, meta) {
+                    const start = meta.settings._iDisplayStart;
+                    return start + meta.row + 1;
+                }
+            },
+            {
+                targets: 2,
+                render: function (data, type, row) {
+                    if (type === 'display') {
+                        if (row.status === 'success') return '<span class="badge badge-success">Success</span>';
+                        if (row.status === 'failed')  return '<span class="badge badge-danger">Failed</span>';
+                        return `<span class="badge badge-secondary">${row.status || '-'}</span>`;
+                    }
+                    return data;
+                }
+            },
+            {
+                targets: 4,
+                render: function (data) {
+                    if (!data) return '-';
+                    const d = new Date(data);
+                    if (isNaN(d)) return data;
+                    
+                    const pad = (n) => String(n).padStart(2, '0');
+                    
+                    const tgl = pad(d.getDate());
+                    const bln = pad(d.getMonth() + 1);
+                    const thn = d.getFullYear();
+                    
+                    const jam = pad(d.getHours());
+                    const mnt = pad(d.getMinutes());
+                    const dtk = pad(d.getSeconds());
+                    
+                    return `${tgl}-${bln}-${thn} ${jam}:${mnt}:${dtk}`;
+                }
+            }
+            ],
+            ajax: function (data, callback, settings) {
+                const params = new URLSearchParams();
+                params.append('draw',   data.draw);
+                params.append('start',  data.start);
+                params.append('length', data.length);
+                
+                if (data.search && data.search.value) {
+                    params.append('search', data.search.value);
+                }
+                
+                if (data.order && data.order.length > 0) {
+                    const order = data.order[0];
+                    const colMap = {
+                        1: 'user_name',
+                        2: 'status',
+                        3: 'branch_name',
+                        4: 'timestamp'
+                    };
+                    const orderCol = colMap[order.column] || 'timestamp';
+                    const orderDir = order.dir || 'desc';
+                    params.append('order_col', orderCol);
+                    params.append('order_dir', orderDir);
+                }
+                
+                const startDate  = $('#startDate').val();
+                const endDate    = $('#endDate').val();
+                const branchName = $('#branchName').val();
+                if (startDate)  params.append('start_date', startDate);
+                if (endDate)    params.append('end_date', endDate);
+                if (branchName) params.append('branch_name', branchName);
+                
+                const url = '/api/upload-log-user/?' + params.toString();
+                
+                fetch(url, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+                        'X-CSRFToken': getCSRFToken(),
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include'
+                })
+                .then(async (res) => {
+                    if (!res.ok) {
+                        const text = await res.text();
+                        throw new Error(`HTTP ${res.status} – ${text.substring(0, 500)}`);
+                    }
+                    const json = await res.json();
+                    
+                    if (!('data' in json) || !('recordsTotal' in json) || !('recordsFiltered' in json)) {
+                        throw new Error('Response tidak sesuai format DataTables server-side.');
+                    }
+                    
+                    callback({
+                        draw: json.draw ?? data.draw,
+                        recordsTotal: json.recordsTotal,
+                        recordsFiltered: json.recordsFiltered,
+                        data: json.data
+                    });
+                })
+                .catch((err) => {
+                    console.error('❌ AJAX DataTables error:', err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error',
+                        html: `<pre style="text-align:left;max-height:400px;overflow:auto;">${String(err)}</pre>`,
+                        width: 600
+                    });
+                    callback({
+                        draw: data.draw,
+                        recordsTotal: 0,
+                        recordsFiltered: 0,
+                        data: []
+                    });
+                });
+            }
+        });
+        
+        $('#filterBtn').on('click', function () {
+            uploadLogTable.ajax.reload(null, true);
+        });
+        
+        $('#resetFilterBtn').on('click', function () {
+            $('#startDate').val('');
+            $('#endDate').val('');
+            $('#branchName').val('');
+            uploadLogTable.ajax.reload(null, true);
+        });
+        
+        loadBranches();
+    });
+</script>
+{% endblock %}

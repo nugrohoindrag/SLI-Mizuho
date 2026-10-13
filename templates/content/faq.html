@@ -1,0 +1,56 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} FREQUENTLY ASKED QUESTIONS (FAQ) {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard' %}">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active">
+                                FREQUENTLY ASKED QUESTIONS (FAQ)
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="faq-section">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h4 class="mb-0">FREQUENTLY ASKED QUESTIONS (FAQ)</h4>
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="embed-responsive embed-responsive-16by9 mb-2">
+                                    <iframe class="embed-responsive-item" src="{% static 'pdf/FAQ.pdf' %}" type="application/pdf"></iframe>
+                                </div>
+                                
+                                <p class="small text-muted mb-0">
+                                    Jika dokumen tidak tampil, silakan
+                                    <a href="{% static 'pdf/FAQ.pdf' %}" target="_blank">
+                                        klik di sini untuk membuka / mengunduh FAQ
+                                    </a>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

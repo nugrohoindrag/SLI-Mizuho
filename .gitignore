@@ -1,0 +1,48 @@
+
+# Virtual environment
+env/
+Env/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Django
+*.log
+db.sqlite3
+
+# Env variables
+.env
+
+# Editor configs
+.vscode/
+.idea/
+
+# Static/media (optional)
+staticfiles/
+media/*
+!media/templatesakta/
+!media/templatesakta-salinan/
+!media/templatesakta-pf/
+!media/templatesakta-pf-salinan/
+!media/templatesakta-mu/
+!media/templatesakta-mu-salinan/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+logs/
+.venv
+certs
+*sql
+!db_scripts/**/*.sql
+k6
+*md
+!docs/PNBP_PRODUCTION_DEPLOYMENT.md
+*sh
+
+# Mizuho: rekaman meeting & file contoh klien
+*.mp4
+/*.xlsx

@@ -1,0 +1,725 @@
+{% extends '../base.html' %} 
+{% load static %} 
+{% block title %} Admin-Notaris {% endblock %} 
+{% block content %}
+<div class="app-content content">
+  <div class="content-overlay"></div>
+  <div class="content-wrapper">
+    <div class="content-header row">
+      <div class="content-header-left col-md-6 col-12 mb-2">
+        <div class="row breadcrumbs-top">
+          <div class="breadcrumb-wrapper col-12">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}">Home</a>
+              </li>
+              <li class="breadcrumb-item">
+                <a href="#">Admin</a>
+              </li>
+              <li class="breadcrumb-item active">Notaris</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content-body">
+      <!-- Base style table -->
+      <section id="base-style">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <div
+                class="d-flex justify-content-between align-items-center mt-3"
+                >
+                <h4>Notaris</h4>
+                <button
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#createModal"
+                >
+                <i class="feather fa-regular fa-square-plus mr-1"></i>Tambah
+                Data
+              </button>
+            </div>
+            <a class="heading-elements-toggle"
+            ><i
+            class="fas fa-solid fa-ellipsis-vertical font-medium-3"
+            ></i
+            ></a>
+            <div class="heading-elements">
+              <ul class="list-inline mb-0">
+                <li>
+                  <a data-action="collapse"
+                  ><i class="feather fa-solid fa-minus"></i
+                    ></a>
+                  </li>
+                  <li>
+                    <a data-action="reload"
+                    ><i class="feather fa-solid fa-rotate-right"></i
+                      ></a>
+                    </li>
+                    <li>
+                      <a data-action="expand"
+                      ><i class="feather fa-solid fa-maximize"></i
+                        ></a>
+                      </li>
+                      <li>
+                        <a data-action="close"
+                        ><i class="feather fa-solid fa-x"></i
+                          ></a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="card-content collapse show">
+                    <div class="card-body card-dashboard">
+                      <div class="table-responsive">
+                        <table id="menuTable" class="display table table-striped">
+                          <thead>
+                            <tr>
+                              <th>Nama Firma</th>
+                              <th>Nama Lengkap</th>
+                              <th>Gelar Pendek</th>
+                              <th>Gelar Panjang</th>
+                              <th>Email</th>
+                              <th>Nomor Telepon</th>
+                              <th>Alamat</th>
+                              <th>Kota</th>
+                              <th>Website</th>
+                              <th>Waktu Pendaftaran</th>
+                              <th>Status</th>
+                              <th class="text-center">Aksi</th> <!-- ✅ Tambahkan kolom aksi -->
+                            </tr>
+                          </thead>
+                          <tbody id="notary-table-body"></tbody>
+                        </table>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Tambah Notaris -->
+  <div class="modal fade"id="createModal"tabindex="-1"aria-labelledby="createModalLabel"aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createModalLabel">Tambah Notaris</h5>
+          <button type="button"class="btn-close"data-bs-dismiss="modal"aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body">
+          <form id="createForm">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="createNickname">Nama Alias</label>
+                <input
+                type="text"
+                class="form-control"
+                id="createNickname"
+                placeholder="Masukkan nama alias"
+                required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="createFullName">Nama Lengkap</label>
+                <input
+                type="text"
+                class="form-control"
+                id="createFullName"
+                placeholder="Masukkan nama lengkap"
+                required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="createShortDegree">Gelar Pendek</label>
+                <input
+                type="text"
+                class="form-control"
+                id="createShortDegree"
+                placeholder="Contoh: SH, M.Kn"
+                required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="createLongDegree">Gelar Panjang</label>
+                <input
+                type="text"
+                class="form-control"
+                id="createLongDegree"
+                placeholder="Contoh: Sarjana Hukum, Magister Kenotariatan"
+                required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="createEmail">Email</label>
+                <input
+                type="email"
+                class="form-control"
+                id="createEmail"
+                placeholder="email@contoh.com"
+                required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="createPhone">Telepon</label>
+                <input
+                type="tel"
+                class="form-control"
+                id="createPhone"
+                name="phone"
+                placeholder="Contoh: 08123456789"
+                required
+                />
+                <div class="invalid-feedback">
+                  Nomor telepon hanya boleh berisi angka.
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="createAddress">Alamat</label>
+                <input
+                type="text"
+                class="form-control"
+                id="createAddress"
+                placeholder="Jl. Contoh No. 123, Jakarta"
+                required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="createCity">Kota</label>
+                <input
+                type="text"
+                class="form-control"
+                id="createCity"
+                placeholder="Contoh: Bandung"
+                required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="createWebsite">Website</label>
+                <input
+                type="text"
+                class="form-control"
+                id="createWebsite"
+                placeholder="https://www.notarisanda.com"
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="createStatus">Status</label>
+                <select class="form-control" id="createStatus" required>
+                  <option value="aktif">Aktif</option>
+                  <option value="tidak_aktif">Tidak Aktif</option>
+                </select>
+              </div>
+            </div>
+            <div class="text-end mt-3">
+              <button type="submit" class="btn btn-primary" id="saveCreateBtn">
+                Simpan
+              </button>
+              <a href="{% url 'admin_notaris' %}" class="btn btn-secondary"
+              >Reset</a
+              >
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Edit Notaris -->
+  <div
+  class="modal fade"
+  id="editModal"
+  tabindex="-1"
+  aria-labelledby="editModalLabel"
+  aria-hidden="true"
+  >
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Edit Notaris</h5>
+        <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="modal"
+        aria-label="Tutup"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="editForm">
+          <input type="hidden" id="editNotaryId" />
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="editNickname">Nama Alias</label>
+              <input
+              type="text"
+              class="form-control"
+              id="editNickname"
+              placeholder="Masukkan nama alias"
+              required
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editFullName">Nama Lengkap</label>
+              <input
+              type="text"
+              class="form-control"
+              id="editFullName"
+              placeholder="Masukkan nama lengkap"
+              required
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editShortDegree">Gelar Pendek</label>
+              <input
+              type="text"
+              class="form-control"
+              id="editShortDegree"
+              placeholder="Contoh: SH, M.Kn"
+              required
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editLongDegree">Gelar Panjang</label>
+              <input
+              type="text"
+              class="form-control"
+              id="editLongDegree"
+              placeholder="Contoh: Sarjana Hukum, Magister Kenotariatan"
+              required
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editEmail">Email</label>
+              <input
+              type="email"
+              class="form-control"
+              id="editEmail"
+              placeholder="email@contoh.com"
+              required
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editPhone">Telepon</label>
+              <input
+              type="tel"
+              class="form-control"
+              id="editPhone"
+              name="phone"
+              placeholder="Contoh: 08123456789"
+              required
+              />
+              <div class="invalid-feedback">
+                Nomor telepon hanya boleh berisi angka.
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editAddress">Alamat</label>
+              <input
+              type="text"
+              class="form-control"
+              id="editAddress"
+              placeholder="Jl. Contoh No. 123, Jakarta"
+              required
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editCity">Kota</label>
+              <input
+              type="text"
+              class="form-control"
+              id="editCity"
+              placeholder="Contoh: Bandung"
+              required
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editWebsite">Website</label>
+              <input
+              type="text"
+              class="form-control"
+              id="editWebsite"
+              placeholder="https://www.notarisanda.com"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editStatus">Status</label>
+              <select class="form-control" id="editStatus" required>
+                <option value="aktif">Aktif</option>
+                <option value="tidak_aktif">Tidak Aktif</option>
+              </select>
+            </div>
+          </div>
+          <div class="text-end mt-3">
+            <button type="button" class="btn btn-primary" id="saveEditBtn">
+              Simpan Perubahan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal View Notaris -->
+<div
+class="modal fade"
+id="viewModal"
+tabindex="-1"
+aria-labelledby="viewModalLabel"
+aria-hidden="true"
+>
+<div class="modal-dialog modal-lg">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="viewModalLabel">Detail Notaris</h5>
+      <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="modal"
+      aria-label="Tutup"
+      ></button>
+    </div>
+    <div class="modal-body">
+      <table class="table">
+        <tr>
+          <th>Nama Alias</th>
+          <td id="viewNickname"></td>
+        </tr>
+        <tr>
+          <th>Nama Lengkap</th>
+          <td id="viewFullName"></td>
+        </tr>
+        <tr>
+          <th>Gelar Pendek</th>
+          <td id="viewShortDegree"></td>
+        </tr>
+        <tr>
+          <th>Gelar Panjang</th>
+          <td id="viewLongDegree"></td>
+        </tr>
+        <tr>
+          <th>Email</th>
+          <td id="viewEmail"></td>
+        </tr>
+        <tr>
+          <th>Telepon</th>
+          <td id="viewPhone"></td>
+        </tr>
+        <tr>
+          <th>Alamat</th>
+          <td id="viewAddress"></td>
+        </tr>
+        <tr>
+          <th>Kota</th>
+          <td id="viewCity"></td>
+        </tr>
+        <tr>
+          <th>Website</th>
+          <td id="viewWebsite"></td>
+        </tr>
+        <tr>
+          <th>Tanggal Daftar</th>
+          <td id="viewRegDate"></td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td id="viewStatus"></td>
+        </tr>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        Tutup
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
+{% endblock %} 
+{% block script %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const phoneInput = document.getElementById("createPhone");
+    const phoneEdit  = document.getElementById("editPhone");
+    
+    function onlyDigits(e){ e.target.value = e.target.value.replace(/[^0-9]/g, ""); }
+    phoneInput?.addEventListener("input", onlyDigits);
+    phoneEdit?.addEventListener("input", onlyDigits);
+    
+    // === CSRF header untuk non-GET ===
+    function getCookie(name){
+      const v = `; ${document.cookie}`.split(`; ${name}=`); 
+      if (v.length === 2) return decodeURIComponent(v.pop().split(';').shift());
+    }
+    $.ajaxSetup({
+      beforeSend: function (xhr, settings) {
+        if (!(/^GET|HEAD|OPTIONS|TRACE$/i.test(settings.type))) {
+          const token = getCookie('csrftoken') || document.querySelector("[name=csrfmiddlewaretoken]")?.value;
+          if (token) xhr.setRequestHeader("X-CSRFToken", token);
+        }
+      }
+    });
+    
+    // View button (tetap sama)
+    $("#menuTable").on("click", ".btn-view", function () {
+      const row = $(this).closest("tr");
+      const data = {
+        firm_name:     row.find("td:eq(0)").text(),
+        fullname:      row.find("td:eq(1)").text(),
+        short_title:   row.find("td:eq(2)").text(),
+        full_title:    row.find("td:eq(3)").text(),
+        email:         row.find("td:eq(4)").text(),
+        phone_number:  row.find("td:eq(5)").text(),
+        firm_address:  row.find("td:eq(6)").text(),
+        city_name:     row.find("td:eq(7)").text(),
+        website:       row.find("td:eq(8)").text(),
+        register_date: row.find("td:eq(9)").text(),
+        status:        row.find("td:eq(10)").text(),
+      };
+      
+      $("#viewNickname").text(data.firm_name);
+      $("#viewFullName").text(data.fullname);
+      $("#viewShortDegree").text(data.short_title);
+      $("#viewLongDegree").text(data.full_title);
+      $("#viewEmail").text(data.email);
+      $("#viewPhone").text(data.phone_number);
+      $("#viewAddress").text(data.firm_address);
+      $("#viewCity").text(data.city_name);
+      $("#viewWebsite").text(data.website);
+      $("#viewRegDate").text(data.register_date);
+      $("#viewStatus").text(data.status);
+      
+      const modal = new bootstrap.Modal(document.getElementById("viewModal"));
+      modal.show();
+    });
+    
+    // Validasi input phone hanya angka (tetap sama)
+    phoneInput?.addEventListener("input", function () {
+      this.value = this.value.replace(/[^0-9]/g, "");
+    });
+    phoneEdit?.addEventListener("input", function () {
+      this.value = this.value.replace(/[^0-9]/g, "");
+    });
+    
+    // ====== DataTable reference (global di scope ini) ======
+    let dt = null;
+    
+    // Fungsi untuk load daftar Notaris dari API (NAMA TIDAK DIUBAH)
+    function loadNotaries() {
+      const sel = '#menuTable';
+      if ($.fn.DataTable.isDataTable(sel) && dt) { dt.ajax.reload(null, false); return; }
+      
+      dt = $(sel).DataTable({
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        searching: true,
+        ordering: true,
+        lengthChange: true,
+        pageLength: 10,
+        ajax: {
+          url: "{% url 'api_notaris_list' %}",   // <-- pakai route yg sudah ada
+          type: "GET",
+          dataSrc: function (json) { return json.data || json; },
+          error: function (xhr) {
+            Swal.fire({icon:"error",title:"Gagal!",text:xhr.responseJSON?.message||"Terjadi kesalahan saat mengambil data notaris."});
+          }
+        },
+        columns: [
+        { data: "firm_name" },
+        { data: "full_name" },
+        { data: "short_title" },
+        { data: "full_title" },
+        { data: "email" },
+        { data: "phone_number" },
+        { data: "firm_address" },
+        { data: "city_name" },
+        { data: "website" },
+        { data: "register_date" },
+        { data: "status" },
+        {
+          data: "id",
+          orderable: false,
+          searchable: false,
+          className: "text-center",
+          render: function () {
+            return `
+              <div class="d-flex justify-content-center gap-1">
+                <button class="btn btn-sm btn-info btn-view"   title="Lihat"><i class="fas fa-eye"></i></button>
+                <button class="btn btn-sm btn-warning btn-edit" title="Edit"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger btn-delete" title="Hapus"><i class="fas fa-trash"></i></button>
+              </div>`;
+          },
+          createdCell: function (td, cellData, rowData) {
+            $(td).closest('tr').attr('data-id', rowData.id);
+          }
+        }
+        ],
+        language: {
+          search: "Cari:",
+          lengthMenu: "Tampilkan _MENU_ data",
+          zeroRecords: "Tidak ditemukan data",
+          info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+          infoEmpty: "Menampilkan 0 dari 0 data",
+          infoFiltered: "(disaring dari _MAX_ data keseluruhan)",
+          processing: "Memproses…"
+        }
+      });
+    }
+    
+    // Panggil fungsi loadNotaries ketika halaman dimuat (NAMA TIDAK DIUBAH)
+    loadNotaries();
+    
+    // Tambahkan Notaris (Form Tambah) — tetap panggil loadNotaries() sesudah sukses
+    document.getElementById("createForm")?.addEventListener("submit", function (e) {
+      e.preventDefault();
+      
+      const data = {
+        firm_name:     document.getElementById("createNickname").value,
+        full_name:     document.getElementById("createFullName").value,
+        short_title:   document.getElementById("createShortDegree").value,
+        full_title:    document.getElementById("createLongDegree").value,
+        email:         document.getElementById("createEmail").value,
+        phone_number:  document.getElementById("createPhone").value,
+        firm_address:  document.getElementById("createAddress").value,
+        city_name:     document.getElementById("createCity").value,
+        website:       document.getElementById("createWebsite").value,
+        status:        document.getElementById("createStatus").value,
+        csrfmiddlewaretoken: document.querySelector("[name=csrfmiddlewaretoken]").value,
+      };
+      
+      $.ajax({
+        url: "{% url 'api_notaris_create' %}",
+        type: "POST",
+        data: data,
+        success: function (response) {
+          if (response.status === "success") {
+            Swal.fire({ icon: "success", title: "Data berhasil ditambahkan!", confirmButtonText: "OK" })
+            .then(() => {
+              $("#createModal").modal("hide");
+              document.getElementById("createForm").reset();
+              loadNotaries(); // <— tetap pakai nama function yang sama
+            });
+          } else {
+            Swal.fire({ icon: "error", title: "Gagal!", text: response.message || "Terjadi kesalahan saat menambah data." });
+          }
+        },
+        error: function (xhr) {
+          Swal.fire({ icon: "error", title: "Gagal!", text: xhr.responseJSON?.message || "Terjadi kesalahan saat menambah data." });
+        },
+      });
+    });
+    
+    // Edit Notaris (tetap sama, ambil id dari data-id di <tr>)
+      $("#menuTable").on("click", ".btn-edit", function () {
+        const row      = $(this).closest("tr");
+        const notaryId = row.data("id");
+        
+        $.ajax({
+          url: `/admin/notaris/edit/${notaryId}/`,
+          type: "GET",
+          success: function (notary) {
+            $("#editNotaryId").val(notary.id);
+            $("#editNickname").val(notary.firm_name);
+            $("#editFullName").val(notary.full_name);
+            $("#editShortDegree").val(notary.short_title);
+            $("#editLongDegree").val(notary.full_title);
+            $("#editEmail").val(notary.email);
+            $("#editPhone").val(notary.phone_number);
+            $("#editAddress").val(notary.firm_address);
+            $("#editCity").val(notary.city_name);
+            $("#editWebsite").val(notary.website);
+            $("#editStatus").val(notary.status);
+            
+            $("#editModal").modal("show");
+          },
+          error: function () {
+            Swal.fire({
+              icon: "error",
+              title: "Gagal!",
+              text: "Terjadi kesalahan saat memuat data notaris. Cek kembali koneksi atau server Anda.",
+            });
+          },
+        });
+      });
+      
+      // Save Edit (tetap sama, lalu panggil loadNotaries())
+      document.getElementById("saveEditBtn")?.addEventListener("click", function () {
+        const data = {
+          firm_name:     document.getElementById("editNickname").value,
+          full_name:     document.getElementById("editFullName").value,
+          short_title:   document.getElementById("editShortDegree").value,
+          full_title:    document.getElementById("editLongDegree").value,
+          email:         document.getElementById("editEmail").value,
+          phone_number:  document.getElementById("editPhone").value,
+          firm_address:  document.getElementById("editAddress").value,
+          city_name:     document.getElementById("editCity").value,
+          website:       document.getElementById("editWebsite").value,
+          status:        document.getElementById("editStatus").value,
+          csrfmiddlewaretoken: document.querySelector("[name=csrfmiddlewaretoken]").value,
+        };
+        
+        $.ajax({
+          url: `/admin/notaris/edit/${document.getElementById("editNotaryId").value}/`,
+          type: "POST",
+          data: data,
+          success: function (response) {
+            if (response.status === "success") {
+              Swal.fire({ icon: "success", title: "Data berhasil diperbarui!", confirmButtonText: "OK" })
+              .then(() => {
+                $("#editModal").modal("hide");
+                loadNotaries(); // <— tetap
+              });
+            } else {
+              Swal.fire({ icon: "error", title: "Gagal!", text: response.message || "Terjadi kesalahan saat mengupdate data." });
+            }
+          },
+          error: function (xhr) {
+            Swal.fire({ icon: "error", title: "Gagal!", text: xhr.responseJSON?.message || "Terjadi kesalahan saat mengupdate data." });
+          },
+        });
+      });
+      
+      // Hapus Notaris (tetap sama, lalu panggil loadNotaries())
+      $("#menuTable").on("click", ".btn-delete", function () {
+        const row      = $(this).closest("tr");
+        const notaryId = row.data("id");
+        
+        Swal.fire({
+          title: "Yakin ingin menghapus?",
+          text: "Data ini akan dihapus secara permanen.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Ya, Hapus!",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $.ajax({
+              url: `/admin/notaris/delete/${notaryId}/`,
+              type: "POST",
+              data: { csrfmiddlewaretoken: document.querySelector("[name=csrfmiddlewaretoken]").value },
+              success: function () {
+                Swal.fire({ icon: "success", title: "Terhapus!", text: "Data berhasil dihapus.", showConfirmButton: false, timer: 1500 })
+                .then(() => { loadNotaries(); }); // <— tetap
+              },
+              error: function () {
+                Swal.fire({ icon: "error", title: "Gagal!", text: "Terjadi kesalahan saat menghapus data." });
+              },
+            });
+          }
+        });
+      });
+      
+    });
+  </script>
+  {% endblock %}

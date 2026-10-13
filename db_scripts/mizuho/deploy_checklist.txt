@@ -1,0 +1,27 @@
+Checklist deploy instance Mizuho (branch `mizuho`)
+==================================================
+
+1. .env (tambahan untuk Mizuho)
+   APP_ORIGINS=https://<domain-mizuho>        # CSRF_TRUSTED_ORIGINS & CSP frame-ancestors, pisah koma
+   APP_BRAND_NAME=E-Fidusia SLI Mizuho        # nama aplikasi di email OTP
+
+2. Database
+   python manage.py migrate                   # termasuk billing (tabel log upload, menu & permission Billing)
+   psql -f db_scripts/mizuho/001_common_codes.sql      # 5 akta per menit
+   psql -f db_scripts/mizuho/002_service_fee_flat.sql  # biaya jasa flat Rp70.000 (sudah termasuk PPN)
+   psql -f db_scripts/mizuho/003_cleanup_taf_adira.sql # permission Adira & email tagihan Adira
+   Semua script aman dijalankan ulang.
+
+3. Template akta
+   Sudah di-commit (nama PT Mizuho + T2–T5). Bila redaksi direvisi notaris:
+   ubah teks di db_scripts/mizuho/patch_akta_templates.py lalu jalankan dari root repo.
+
+4. Data master yang masih harus diisi (bukan kode)
+   - Cabang Mizuho (kode 4 digit, mis. 0015) di menu master cabang
+   - Penerima Fidusia/Recipient: alamat & SK Mizuho (sekarang masih alamat TAF)
+   - SK kuasa Mizuho untuk staf notaris (penerima kuasa)
+   - Email penerima tagihan Mizuho (common_codes PENERIMA_EMAIL_TAGIHAN)
+
+5. Belum dikerjakan
+   - .github/workflows/deploy.yml masih menunjuk runner & path TAF. Jangan push branch ini ke
+     main repo TAF. Arahkan ulang setelah server & runner Mizuho tersedia.

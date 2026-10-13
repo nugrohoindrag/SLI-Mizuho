@@ -1,0 +1,558 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Admin-Penerima Kuasa {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+  <div class="content-overlay"></div>
+  <div class="content-wrapper">
+    <div class="content-header row">
+      <div class="content-header-left col-md-6 col-12 mb-2">
+        <div class="row breadcrumbs-top">
+          <div class="breadcrumb-wrapper col-12">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+              <li class="breadcrumb-item"><a href="#">Admin</a></li>
+              <li class="breadcrumb-item active">Penerima Kuasa</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="content-body">
+      <!-- Table Section -->
+      <section id="base-style">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>Penerima Kuasa</h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+                  <i class="feather fa-regular fa-square-plus mr-1"></i>Tambah Data
+                </button>
+              </div>
+              <div class="card-content collapse show">
+                <div class="card-body card-dashboard">
+                  <div class="table-responsive">
+                    <table id="menuTable" class="display table table-striped">
+                      <thead>
+                        <tr>
+                          <th>Nama</th>
+                          <th>Gelar Pendek</th>
+                          <th>Gelar Panjang</th>
+                          <th>TTL</th>
+                          <th>Kewarganegaraan</th>
+                          <th>Alamat</th>
+                          <th>RT</th>
+                          <th>RW</th>
+                          <th>Kelurahan</th>
+                          <th>Kecamatan</th>
+                          <th>Kota</th>
+                          <th>Provinsi</th>
+                          <th>No. KTP</th>
+                          <th class="text-center">Aksi</th>
+                        </tr>
+                      </thead>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Tambah Data -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Tambah Penerima Kuasa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <form id="createForm" method="post">
+          {% csrf_token %}    
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="createFullName">Nama Lengkap</label>
+              <input type="text" class="form-control" id="createFullName" placeholder="Masukkan nama lengkap" required />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="createShortDegree">Gelar Pendek</label>
+              <input type="text" class="form-control" id="createShortDegree" placeholder="Contoh: SH, M.Kn" required />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="createLongDegree">Gelar Panjang</label>
+              <input type="text" class="form-control" id="createLongDegree" placeholder="Contoh: Sarjana Hukum, Magister Kenotariatan" required />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Tempat & Tanggal Lahir</label>
+              <div class="row">
+                <div class="col-md-6">
+                  <input type="text" class="form-control" id="createBirthPlace" placeholder="Tempat Lahir" required />
+                </div>
+                <div class="col-md-6">
+                  <input type="date" class="form-control" id="createBirthDate" required />
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="createNationality">Kewarganegaraan</label>
+              <input type="text" class="form-control" id="createNationality" placeholder="Contoh: Indonesia" required />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="createKTP">No. KTP</label>
+              <input type="text" class="form-control" id="createKTP" placeholder="Contoh: 327XXXXXXXXXXXXX" required />
+            </div>
+            <div class="col-md-12 mb-3">
+              <label for="createAddress">Alamat</label>
+              <textarea class="form-control" id="createAddress" placeholder="Jl. Contoh No.123 Jakarta" rows="2" required></textarea>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="createRT">RT</label>
+              <input type="text" class="form-control" id="createRT" placeholder="RT" />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="createRW">RW</label>
+              <input type="text" class="form-control" id="createRW" placeholder="RW" required />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="createSubdistrict">Kelurahan</label>
+              <input type="text" class="form-control" id="createSubdistrict" placeholder="Kelurahan" required />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="createDistrict">Kecamatan</label>
+              <input type="text" class="form-control" id="createDistrict" placeholder="Kecamatan" required />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="createCity">Kota</label>
+              <input type="text" class="form-control" id="createCity" placeholder="Kota" required />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="createProvince">Provinsi</label>
+              <input type="text" class="form-control" id="createProvince" placeholder="Provinsi" required />
+            </div>
+          </div>
+          <div class="mt-3 text-end">
+            <button type="submit" class="btn btn-primary" id="saveCreateBtn">Simpan</button>
+            <button type="reset" class="btn btn-secondary">Reset</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Edit Data -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Penerima Kuasa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editForm" method="post">
+          {% csrf_token %}
+          <input type="hidden" id="editId" />
+          <div class="form-group">
+            <label for="editFullName">Nama Lengkap</label>
+            <input type="text" class="form-control" id="editFullName" placeholder="Masukkan nama lengkap" required />
+          </div>
+          <div class="form-group">
+            <label for="editShortDegree">Gelar Pendek</label>
+            <input type="text" class="form-control" id="editShortDegree" placeholder="Contoh: SH, M.Kn" required />
+          </div>
+          <div class="form-group">
+            <label for="editLongDegree">Gelar Panjang</label>
+            <input type="text" class="form-control" id="editLongDegree" placeholder="Contoh: Sarjana Hukum, Magister Kenotariatan" required />
+          </div>
+          <div class="form-group">
+            <label for="editBirthPlaceDate">Tempat & Tanggal Lahir</label>
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <input type="text" class="form-control" id="editBirthPlace" placeholder="Tempat Lahir" required />
+              </div>
+              <div class="col-md-6 mb-2">
+                <input type="date" class="form-control" id="editBirthDate" required />
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="editNationality">Kewarganegaraan</label>
+            <input type="text" class="form-control" id="editNationality" placeholder="Contoh: Indonesia" required />
+          </div>
+          <div class="form-group">
+            <label for="editAddress">Alamat</label>
+            <textarea class="form-control" id="editAddress"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editRT">RT</label>
+            <input type="text" class="form-control" id="editRT" />
+          </div>
+          <div class="form-group">
+            <label for="editRW">RW</label>
+            <input type="text" class="form-control" id="editRW" />
+          </div>
+          <div class="form-group">
+            <label for="editSubdistrict">Kelurahan</label>
+            <input type="text" class="form-control" id="editSubdistrict" />
+          </div>
+          <div class="form-group">
+            <label for="editDistrict">Kecamatan</label>
+            <input type="text" class="form-control" id="editDistrict" />
+          </div>
+          <div class="form-group">
+            <label for="editCity">Kota</label>
+            <input type="text" class="form-control" id="editCity" />
+          </div>
+          <div class="form-group">
+            <label for="editProvince">Provinsi</label>
+            <input type="text" class="form-control" id="editProvince" />
+          </div>
+          <div class="form-group">
+            <label for="editKTP">No. KTP</label>
+            <input type="text" class="form-control" id="editKTP" placeholder="Contoh: 327XXXXXXXXXXXXX" required />
+          </div>
+          <div class="mt-3 text-end">
+            <button type="submit" class="btn btn-primary" id="saveEditBtn">Simpan Perubahan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: View Data -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detail Penerima Kuasa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered">
+          <tbody>
+            <tr>
+              <th>Nama Lengkap</th>
+              <td id="viewFullName"></td>
+            </tr>
+            <tr>
+              <th>Gelar Pendek</th>
+              <td id="viewShortDegree"></td>
+            </tr>
+            <tr>
+              <th>Gelar Panjang</th>
+              <td id="viewLongDegree"></td>
+            </tr>
+            <tr>
+              <th>Tempat & Tanggal Lahir</th>
+              <td><span id="viewBirthPlace"></span>, <span id="viewBirthDate"></span></td>
+            </tr>
+            <tr>
+              <th>Kewarganegaraan</th>
+              <td id="viewNationality"></td>
+            </tr>
+            <tr>
+              <th>Alamat</th>
+              <td id="viewAddress"></td>
+            </tr>
+            <tr>
+              <th>RT / RW</th>
+              <td><span id="viewRT"></span> / <span id="viewRW"></span></td>
+            </tr>
+            <tr>
+              <th>Kelurahan</th>
+              <td id="viewSubdistrict"></td>
+            </tr>
+            <tr>
+              <th>Kecamatan</th>
+              <td id="viewDistrict"></td>
+            </tr>
+            <tr>
+              <th>Kota</th>
+              <td id="viewCity"></td>
+            </tr>
+            <tr>
+              <th>Provinsi</th>
+              <td id="viewProvince"></td>
+            </tr>
+            <tr>
+              <th>No. KTP</th>
+              <td id="viewKTP"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const ktpInput = document.getElementById('createKTP');
+    const ktpEdit  = document.getElementById('editKTP');
+    
+    if (ktpInput) {
+      ktpInput.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '');
+      });
+    }
+    if (ktpEdit) {
+      ktpEdit.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '');
+      });
+    }
+    
+    const getCSRF = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // === penting: set CSRF header untuk semua AJAX ===
+    $.ajaxSetup({
+      beforeSend: function (xhr, settings) {
+        // hanya untuk metode non-GET
+        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+          xhr.setRequestHeader('X-CSRFToken', getCSRF());
+        }
+      }
+    });
+    
+    // helper ambil nilai
+    const val = (idPrefix, id) => document.getElementById(`${idPrefix}${id}`)?.value?.trim() || '';
+    
+    // === KUMPULKAN DATA: versi MODEL FIELD (BUKAN alias) ===
+    function collectModelPayload(prefix = '') {
+      const full_name   = val(prefix, 'FullName');
+      const short_title = val(prefix, 'ShortDegree');  // <— map ke field model
+      const full_title  = val(prefix, 'LongDegree');   // <— map ke field model
+      const birth_place = val(prefix, 'BirthPlace');
+      const birth_date  = val(prefix, 'BirthDate');
+      const nationality = val(prefix, 'Nationality');
+      const address     = val(prefix, 'Address');
+      const rt          = val(prefix, 'RT');
+      const rw          = val(prefix, 'RW');
+      const subdistrict = val(prefix, 'Subdistrict');
+      const district    = val(prefix, 'District');
+      const city        = val(prefix, 'City');         // UI
+      const province_id = val(prefix, 'Province');     // harus ID (angka)
+      const national_id = val(prefix, 'KTP');          // <— map ke field model
+      
+      // gabungkan jadi birth_info "Tempat, YYYY-MM-DD"
+      let birth_info = '';
+      if (birth_place && birth_date) birth_info = `${birth_place}, ${birth_date}`;
+      else if (birth_place)           birth_info = birth_place;
+      else if (birth_date)           birth_info = birth_date;
+      
+      // kirim 'residence' (bukan 'city') sesuai field model
+      const payload = {
+        full_name,
+        short_title,
+        full_title,
+        birth_info,
+        nationality,
+        address,
+        rt,
+        rw,
+        subdistrict,
+        district,
+        residence: city,   // map ke field model
+        province_id,       // pastikan ini ID valid
+        national_id        // map ke field model
+      };
+      
+      // ikutkan CSRF kalau kamu ingin juga di body (opsional, header sudah ada)
+      payload.csrfmiddlewaretoken = getCSRF();
+      return payload;
+    }
+    
+    // === DataTables server-side ===
+    const table = $('#menuTable').DataTable({
+      processing: true,
+      serverSide: true,
+      searching: true,
+      ordering: true,
+      lengthChange: true,
+      ajax: {
+        url: "{% url 'api_pnrmks_list' %}",
+        type: "GET",
+        dataSrc: "data"
+      },
+      columns: [
+      { data: 'full_name' },
+      { data: 'short_degree' },
+      { data: 'long_degree' },
+      { data: null, render: (row) => `${row.birth_place || ''}, ${row.birth_date || ''}` },
+      { data: 'nationality' },
+      { data: 'address' },
+      { data: 'rt' },
+      { data: 'rw' },
+      { data: 'subdistrict' },
+      { data: 'district' },
+      { data: 'city' },
+      { data: 'province' },
+      { data: 'ktp_number' },
+      {
+        data: null,
+        orderable: false,
+        searchable: false,
+        className: 'text-center',
+        render: (row) => `
+            <button class="btn btn-info btn-sm btn-view" data-id="${row.id}">
+              <i class="fas fa-eye"></i> View
+            </button>
+            <button class="btn btn-warning btn-sm btn-edit mt-1" data-id="${row.id}">
+              <i class="fas fa-pen-to-square"></i> Edit
+            </button>
+            <button class="btn btn-danger btn-sm btn-delete mt-1" data-id="${row.id}">
+              <i class="fas fa-trash-can"></i> Delete
+            </button>
+          `
+      }
+      ],
+      order: [[0, 'asc']]
+    });
+    
+    function showSerializerErrors(xhr, fallback = 'Terjadi kesalahan.') {
+      // tampilkan detail error dari DRF serializer biar kelihatan fieldnya
+      const errs = xhr?.responseJSON?.errors;
+      if (!errs) {
+        Swal.fire('Gagal!', xhr?.responseJSON?.message || fallback, 'error');
+        return;
+      }
+      let html = '<ul style="text-align:left;margin-left:10px">';
+        for (const [field, msgs] of Object.entries(errs)) {
+          const list = Array.isArray(msgs) ? msgs : [msgs];
+          list.forEach(m => {
+            html += `<li><b>${field}</b>: ${m}</li>`;
+          });
+        }
+        html += '</ul>';
+        Swal.fire({ title: 'Gagal!', html, icon: 'error' });
+      }
+      
+      // CREATE
+      $('#saveCreateBtn').on('click', function (e) {
+        e.preventDefault();
+        const data = collectModelPayload('create'); // <— kirim field model
+        $.ajax({
+          url: "{% url 'api_pnrmks_create' %}",
+          type: "POST",
+          data: data
+        })
+        .done(function (response) {
+          Swal.fire('Berhasil!', response.message || 'Data berhasil ditambahkan.', 'success');
+          $('#createModal').modal('hide');
+          $('#createForm')[0].reset();
+          table.ajax.reload(null, false);
+        })
+        .fail((xhr) => {
+          console.error("Create error:", xhr);
+          showSerializerErrors(xhr, 'Terjadi kesalahan saat menambah data.');
+        });
+      });
+      
+      // EDIT (open modal)
+      $('#menuTable').on('click', '.btn-edit', function () {
+        const id = $(this).data('id');
+        $.get(`/api/penerima-kuasa/edit/${id}/`, function (data) {
+          $('#editId').val(data.id);
+          $('#editFullName').val(data.full_name);
+          $('#editShortDegree').val(data.short_degree || data.short_title);
+          $('#editLongDegree').val(data.long_degree || data.full_title);
+          $('#editBirthPlace').val(data.birth_place);
+          $('#editBirthDate').val(data.birth_date);
+          $('#editNationality').val(data.nationality);
+          $('#editAddress').val(data.address);
+          $('#editRT').val(data.rt);
+          $('#editRW').val(data.rw);
+          $('#editSubdistrict').val(data.subdistrict);
+          $('#editDistrict').val(data.district);
+          $('#editCity').val(data.city);
+          $('#editProvince').val(data.province); // pastikan ini ID kalau backend minta ID
+          $('#editKTP').val(data.ktp_number || data.national_id);
+          $('#editModal').modal('show');
+        });
+      });
+      
+      // EDIT (submit)
+      $('#saveEditBtn').on('click', function (e) {
+        e.preventDefault();
+        const id = $('#editId').val();
+        const data = collectModelPayload('edit'); // <— kirim field model
+        $.ajax({
+          url: `/api/penerima-kuasa/edit/${id}/`,
+          type: "POST",
+          data: data
+        })
+        .done(function () {
+          Swal.fire('Berhasil!', 'Data berhasil diperbarui.', 'success');
+          $('#editModal').modal('hide');
+          table.ajax.reload(null, false);
+        })
+        .fail((xhr) => {
+          console.error("Edit error:", xhr);
+          showSerializerErrors(xhr, 'Terjadi kesalahan saat mengupdate data.');
+        });
+      });
+      
+      // VIEW
+      $('#menuTable').on('click', '.btn-view', function () {
+        const id = $(this).data('id');
+        $.get(`/api/penerima-kuasa/edit/${id}/`, function (data) {
+          $('#viewFullName').text(data.full_name);
+          $('#viewShortDegree').text(data.short_degree || data.short_title);
+          $('#viewLongDegree').text(data.long_degree || data.full_title);
+          $('#viewBirthPlace').text(data.birth_place);
+          $('#viewBirthDate').text(data.birth_date);
+          $('#viewNationality').text(data.nationality);
+          $('#viewAddress').text(data.address);
+          $('#viewRT').text(data.rt);
+          $('#viewRW').text(data.rw);
+          $('#viewSubdistrict').text(data.subdistrict);
+          $('#viewDistrict').text(data.district);
+          $('#viewCity').text(data.city);
+          $('#viewProvince').text(data.province);
+          $('#viewKTP').text(data.ktp_number || data.national_id);
+          $('#viewModal').modal('show');
+        });
+      });
+      
+      // DELETE
+      $('#menuTable').on('click', '.btn-delete', function () {
+        const id = $(this).data('id');
+        Swal.fire({
+          title: 'Yakin ingin menghapus?',
+          text: 'Data ini akan dihapus permanen.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Ya, hapus!',
+          cancelButtonText: 'Batal'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $.ajax({
+              url: `/api/penerima-kuasa/delete/${id}/`,
+              type: "POST",
+              data: { csrfmiddlewaretoken: getCSRF() }
+            })
+            .done(() => {
+              Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
+              table.ajax.reload(null, false);
+            })
+            .fail(() => Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus data.', 'error'));
+          }
+        });
+      });
+    });
+  </script>
+  {% endblock %}

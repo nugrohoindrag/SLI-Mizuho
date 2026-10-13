@@ -1,0 +1,667 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Admin-Saksi {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Admin</a></li>
+                            <li class="breadcrumb-item active">Saksi</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <!-- Base style table -->
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h4>Saksi</h4>
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+                                        <i class="feather fa-regular fa-square-plus mr-1"></i>Tambah Data
+                                    </button>
+                                </div>
+                                <a class="heading-elements-toggle"><i class="fas fa-solid fa-ellipsis-vertical font-medium-3"></i></a>
+                                <div class="heading-elements">
+                                    <ul class="list-inline mb-0">
+                                        <li><a data-action="collapse"><i class="feather fa-solid fa-minus"></i></a></li>
+                                        <li><a data-action="reload"><i class="feather fa-solid fa-rotate-right"></i></a></li>
+                                        <li><a data-action="expand"><i class="feather fa-solid fa-maximize"></i></a></li>
+                                        <li><a data-action="close"><i class="feather fa-solid fa-x"></i></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="card-content collapse show">
+                                <div class="card-body card-dashboard">
+                                    <div class="table-responsive">
+                                        <table id="witnessTable" class="display table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nama Saksi</th>
+                                                    <th>Gelar Pendek</th>
+                                                    <th>Gelar Panjang</th>
+                                                    <th>Nama Notaris</th>
+                                                    <th>Tempat dan Tanggal Lahir</th>
+                                                    <th>Kewarganegaraan</th>
+                                                    <th>Tempat Tinggal</th>
+                                                    <th>Alamat</th>
+                                                    <th>RT</th>
+                                                    <th>RW</th>
+                                                    <th>Kelurahan</th>
+                                                    <th>Kecamatan</th>
+                                                    <th>Provinsi</th>
+                                                    <th>No. KTP</th>
+                                                    <th class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody><!-- diisi via JS --></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- Modal View -->
+                                <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="viewModalLabel">Detail Saksi</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <table class="table table-bordered">
+                                                    <tr><th>Nama</th><td id="nama"></td></tr>
+                                                    <tr><th>Tempat Tanggal Lahir</th><td id="ttl"></td></tr>
+                                                    <tr><th>Kewarganegaraan</th><td id="kwn"></td></tr>
+                                                    <tr><th>Tempat Tinggal</th><td id="tempattinggal"></td></tr>
+                                                    <tr><th>Alamat</th><td id="alamat"></td></tr>
+                                                    <tr><th>RT</th><td id="rt"></td></tr>
+                                                    <tr><th>RW</th><td id="rw"></td></tr>
+                                                    <tr><th>Kelurahan</th><td id="Kelurahan"></td></tr>
+                                                    <tr><th>Kecamatan</th><td id="Kecamatan"></td></tr>
+                                                    <tr><th>Provinsi</th><td id="Provinsi"></td></tr>
+                                                    <tr><th>No. KTP</th><td id="ktp"></td></tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Modal Edit -->
+                                <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editModalLabel">Edit Saksi</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="editForm">
+                                                    {% csrf_token %}
+                                                    <div class="row">
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="editName">Nama</label>
+                                                            <input type="text" class="form-control" id="editName" placeholder="Nama lengkap">
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="editgelarpendek">Gelar Pendek</label>
+                                                            <input type="text" class="form-control" id="editgelarpendek" placeholder="Contoh: SH, M.Kn">
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="editGelarPanjang">Gelar Panjang</label>
+                                                            <input type="text" class="form-control" id="editGelarPanjang" placeholder="Contoh: Sarjana Hukum, Magister Kenotariatan">
+                                                        </div>
+                                                        
+                                                        <div class="col-12 mb-3">
+                                                            <label>Tempat, Tanggal Lahir</label>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="edittempatLahir" placeholder="Contoh: Jakarta" required>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="date" class="form-control" id="edittanggalLahir" required>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="editkwn">Kewarganegaraan</label>
+                                                            <input type="text" class="form-control" id="editkwn" placeholder="Contoh: Indonesia">
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="edittinggal">Tempat Tinggal</label>
+                                                            <input type="text" class="form-control" id="edittinggal" placeholder="Contoh: Jakarta Selatan">
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="editalamat">Alamat</label>
+                                                            <input type="text" class="form-control" id="editalamat" placeholder="Contoh: Jl. Contoh No. 123">
+                                                        </div>
+                                                        <div class="col-md-3 mb-3">
+                                                            <label for="editrt">RT</label>
+                                                            <input type="text" class="form-control" id="editrt" placeholder="001">
+                                                        </div>
+                                                        <div class="col-md-3 mb-3">
+                                                            <label for="editrw">RW</label>
+                                                            <input type="text" class="form-control" id="editrw" placeholder="002">
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="editkelurahan">Kelurahan</label>
+                                                            <input type="text" class="form-control" id="editkelurahan" placeholder="Kelurahan">
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="editkecamatan">Kecamatan</label>
+                                                            <input type="text" class="form-control" id="editkecamatan" placeholder="Kecamatan">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="editProvince">Provinsi</label>
+                                                            <select class="form-control" id="editProvince">
+                                                                <option selected disabled>Pilih Provinsi</option>
+                                                                <!-- options via JS -->
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="editNotary">Notaris</label>
+                                                            <select class="form-control" id="editNotary">
+                                                                <option selected disabled>Pilih Notaris</option>
+                                                                <!-- options via JS -->
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-3">
+                                                            <label for="editktp">No. KTP</label>
+                                                            <input type="text" class="form-control" id="editktp" placeholder="Nomor KTP">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="text-end mt-3">
+                                                        <button id="saveEditBtn" type="button" class="btn btn-primary">Simpan Perubahan</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Modal Create -->
+                                <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="createModalLabel">Tambah Saksi</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="createForm">
+                                                    {% csrf_token %}
+                                                    <div class="row">
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createnama">Nama</label>
+                                                            <input type="text" class="form-control" id="createnama" placeholder="Nama lengkap">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="creategelarpndk">Gelar Pendek</label>
+                                                            <input type="text" class="form-control" id="creategelarpndk" placeholder="Contoh: SH, M.Kn">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createglrpnjg">Gelar Panjang</label>
+                                                            <input type="text" class="form-control" id="createglrpnjg" placeholder="Contoh: Sarjana Hukum, Magister Kenotariatan">
+                                                        </div>
+                                                        
+                                                        <div class="col-12 mb-2">
+                                                            <label>Tempat, Tanggal Lahir</label>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <input type="text" class="form-control" id="createtempatLahir" placeholder="Contoh: Jakarta" required>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <input type="date" class="form-control" id="createtanggalLahir" required>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createkwn">Kewarganegaraan</label>
+                                                            <input type="text" class="form-control" id="createkwn" placeholder="Contoh: Indonesia">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createtmpttggl">Tempat Tinggal</label>
+                                                            <input type="text" class="form-control" id="createtmpttggl" placeholder="Contoh: Jakarta Selatan">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createalamat">Alamat</label>
+                                                            <input type="text" class="form-control" id="createalamat" placeholder="Contoh: Jl. Contoh No. 123">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-3 mb-2">
+                                                            <label for="creatert">RT</label>
+                                                            <input type="text" class="form-control" id="creatert" placeholder="001">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-3 mb-2">
+                                                            <label for="createrw">RW</label>
+                                                            <input type="text" class="form-control" id="createrw" placeholder="002">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createkelurahan">Kelurahan</label>
+                                                            <input type="text" class="form-control" id="createkelurahan" placeholder="Kelurahan">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createkecamatan">Kecamatan</label>
+                                                            <input type="text" class="form-control" id="createkecamatan" placeholder="Kecamatan">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createProvince">Provinsi</label>
+                                                            <select class="form-control" id="createProvince">
+                                                                <option selected disabled>Pilih Provinsi</option>
+                                                                <!-- options via JS -->
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createNotary">Notaris</label>
+                                                            <select class="form-control" id="createNotary">
+                                                                <option selected disabled>Pilih Notaris</option>
+                                                                <!-- options via JS -->
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createktp">No. KTP</label>
+                                                            <input type="text" class="form-control" id="createktp" placeholder="Nomor KTP">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="text-end mt-3">
+                                                        <button id="saveCreateBtn" type="button" class="btn btn-success">Simpan</button>
+                                                        <a href="{% url 'admin_saksi' %}" type="button" class="btn btn-light">Cancel</a>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div><!-- /.card-content -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!--/ Base style table -->
+        </div>
+    </div>
+</div>
+<!-- END: Content-->
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+
+{% block script %}
+<script>
+    (function () {
+        // ====== CONFIG ======
+        const baseUrl = ""; // contoh: "" atau "/admin"
+        let dt = null;
+        let currentEditId = null;
+        
+        // ====== UTIL ======
+        function getCSRFToken(){
+            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        }
+        function idemKey(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+        function ajaxJSON(url, method="GET", data=null, extraHeaders={}){
+            return $.ajax({
+                url, method,
+                data: data ? JSON.stringify(data) : null,
+                contentType: "application/json; charset=utf-8",
+                headers: {
+                    "X-CSRFToken": getCSRFToken(),
+                    ...extraHeaders
+                }
+            });
+        }
+        function lockButton($btn, txt="Menyimpan..."){
+            $btn.data("orig-html",$btn.html());
+            $btn.prop("disabled",true).attr("aria-busy","true")
+            .html(`<span class="spinner-border spinner-border-sm me-1"></span>${txt}`);
+        }
+        function unlockButton($btn){
+            const orig=$btn.data("orig-html");
+            $btn.prop("disabled",false).removeAttr("aria-busy").html(orig||"Save");
+        }
+        // Ambil data row saat responsive child row
+        function getRowDataFromBtn(btn){
+            const $tr = $(btn).closest('tr');
+            return dt.row($tr.hasClass('child') ? $tr.prev() : $tr).data();
+        }
+        
+        // ====== OPTIONS (Provinsi & Notaris) ======
+        function loadOptions(){
+            ajaxJSON(`${baseUrl}/api/witnesses/options/provinces/`).done(res=>{
+                const $create=$("#createProvince").empty().append(`<option selected disabled>Pilih Provinsi</option>`);
+                const $edit  =$("#editProvince").empty().append(`<option selected disabled>Pilih Provinsi</option>`);
+                res.forEach(p=>{ $create.append(`<option value="${p.id}">${p.name}</option>`); $edit.append(`<option value="${p.id}">${p.name}</option>`);});
+            });
+            ajaxJSON(`${baseUrl}/api/witnesses/options/notaries/`).done(res=>{
+                const $create=$("#createNotary").empty().append(`<option selected disabled>Pilih Notaris</option>`);
+                const $edit  =$("#editNotary").empty().append(`<option selected disabled>Pilih Notaris</option>`);
+                res.forEach(n=>{ $create.append(`<option value="${n.id}">${n.full_name}</option>`); $edit.append(`<option value="${n.id}">${n.full_name}</option>`);});
+            });
+        }
+        
+        // ====== DATATABLES (server-side) ======
+        function initWitnessDT(){
+            if ($.fn.DataTable.isDataTable('#witnessTable')) {
+                return $('#witnessTable').DataTable(); // retrieve instance
+            }
+            return $('#witnessTable').DataTable({
+                processing: true,
+                serverSide: true,
+                searchDelay: 500,         // debounce pencarian
+                lengthChange: true,
+                pageLength: 10,
+                retrieve: true,           // aman kalau init terpanggil 2x
+                ajax: {
+                    url: `${baseUrl}/api/witnesses/datatables/`,
+                    type: "GET",
+                    dataSrc: "data",
+                    error: function(xhr){
+                        let msg = "Gagal memuat data.";
+                        try { const j = JSON.parse(xhr.responseText); if (j.detail) msg = j.detail; } catch(_){}
+                        Swal.fire({icon:"error", title:"Oops", text: msg});
+                    }
+                },
+                rowId: "id",
+                columns: [
+                { data: "full_name",     title: "Nama Saksi" },
+                { data: "short_title",   title: "Gelar Pendek" },
+                { data: "full_title",    title: "Gelar Panjang" },
+                { data: "notary_name",   title: "Nama Notaris" },
+                { data: "birth_info",    title: "Tempat dan Tanggal Lahir" },
+                { data: "nationality",   title: "Kewarganegaraan" },
+                { data: "residence",     title: "Tempat Tinggal" },
+                { data: "address",       title: "Alamat" },
+                { data: "rt",            title: "RT" },
+                { data: "rw",            title: "RW" },
+                { data: "subdistrict",   title: "Kelurahan" },
+                { data: "district",      title: "Kecamatan" },
+                { data: "province_name", title: "Provinsi" },
+                { data: "national_id",   title: "No. KTP" },
+                { data: null,            title: "Action", orderable:false, searchable:false,
+                render: () => `
+            <div class="d-flex justify-content-center align-items-center gap-1">
+              <button class="btn btn-sm btn-info btn-view p-1 mt-1"><i class="feather fas fa-solid fa-eye"></i></button>
+              <button class="btn btn-sm btn-warning btn-edit p-1 mt-1"><i class="feather fas fa-solid fa-pen-to-square"></i></button>
+              <button class="btn btn-sm btn-danger btn-del p-1 mt-1"><i class="feather fas fa-solid fa-trash-can"></i></button>
+            </div>`
+            }
+            ],
+            order: [[0, 'desc']]
+        });
+    }
+    
+    // ====== DOC READY ======
+    $(document).ready(function(){
+        loadOptions();
+        dt = initWitnessDT();
+        
+        // ===== VIEW =====
+        $('#witnessTable').on('click', '.btn-view', function(){
+            const row = getRowDataFromBtn(this); if (!row) return;
+            $("#nama").text(row.full_name||"");
+            $("#ttl").text(row.birth_info||"");
+            $("#kwn").text(row.nationality||"");
+            $("#tempattinggal").text(row.residence||"");
+            $("#alamat").text(row.address||"");
+            $("#rt").text(row.rt||"");
+            $("#rw").text(row.rw||"");
+            $("#Kelurahan").text(row.subdistrict||"");
+            $("#Kecamatan").text(row.district||"");
+            $("#Provinsi").text(row.province_name||"");
+            $("#ktp").text(row.national_id||"");
+            new bootstrap.Modal(document.getElementById("viewModal")).show();
+        });
+        
+        // ===== OPEN EDIT =====
+        $('#witnessTable').on('click', '.btn-edit', function(){
+            const row = getRowDataFromBtn(this); if (!row) return;
+            currentEditId = row.id;
+            
+            $("#editName").val(row.full_name||"");
+            $("#editgelarpendek").val(row.short_title||"");
+            $("#editGelarPanjang").val(row.full_title||"");
+            if (row.birth_info){
+                const parts = row.birth_info.split(",");
+                $("#edittempatLahir").val((parts[0]||"").trim());
+                $("#edittanggalLahir").val((parts[1]||"").trim());
+            } else {
+                $("#edittempatLahir").val(""); $("#edittanggalLahir").val("");
+            }
+            $("#editkwn").val(row.nationality||"");
+            $("#edittinggal").val(row.residence||"");
+            $("#editalamat").val(row.address||"");
+            $("#editrt").val(row.rt||"");
+            $("#editrw").val(row.rw||"");
+            $("#editkelurahan").val(row.subdistrict||"");
+            $("#editkecamatan").val(row.district||"");
+            
+            ajaxJSON(`${baseUrl}/api/witnesses/${row.id}/`).done(item=>{
+                $("#editProvince").val(item.province || "");
+                $("#editNotary").val(item.notary || "");
+                $("#editktp").val(item.national_id || "").data("original", item.national_id || "");
+            }).always(()=>{
+                new bootstrap.Modal(document.getElementById("editModal")).show();
+            });
+        });
+        
+        let editInFlight = false;
+        $('#saveEditBtn').off('click').on('click', function(e){
+            e.preventDefault(); 
+            e.stopPropagation();
+            if (!currentEditId || editInFlight) return;
+            const $btn = $(this);
+            
+            const place = $("#edittempatLahir").val()?.trim()||"";
+            const date  = $("#edittanggalLahir").val()?.trim()||"";
+            const payload = {
+                full_name: $("#editName").val(),
+                short_title: $("#editgelarpendek").val(),
+                full_title: $("#editGelarPanjang").val(),
+                birth_info: place && date ? `${place}, ${date}` : (place || date),
+                nationality: $("#editkwn").val(),
+                residence: $("#edittinggal").val(),
+                address: $("#editalamat").val(),
+                rt: $("#editrt").val(),
+                rw: $("#editrw").val(),
+                subdistrict: $("#editkelurahan").val(),
+                district: $("#editkecamatan").val(),
+                province: $("#editProvince").val(),
+                national_id: $("#editktp").val(),
+                notary: $("#editNotary").val()
+            };
+            
+            const originalKtp = $("#editktp").data("original");
+            let method = "PATCH";
+            if (payload.national_id === originalKtp) {
+                delete payload.national_id;
+            }
+            
+            editInFlight = true;
+            lockButton($btn, "Menyimpan...");
+            
+            ajaxJSON(`${baseUrl}/api/witnesses/${currentEditId}/`, method, payload, { "X-Idempotency-Key": idemKey() })
+            .done(() => {
+                const modalEl = document.getElementById("editModal");
+                bootstrap.Modal.getInstance(modalEl)?.hide();
+                
+                const showToast = Swal.fire({
+                    icon: "success",
+                    title: "Berhasil!",
+                    text: "Data berhasil diperbarui.",
+                    timer: 900,
+                    showConfirmButton: false
+                });
+                
+                Promise.resolve(showToast).then(() => {
+                    window.onbeforeunload = null;
+                    window.location.reload();
+                });
+            })
+            .fail(xhr => {
+                let msg = "Gagal memperbarui data";
+                let fieldErrors = {};
+                try {
+                    const j = xhr.responseJSON || JSON.parse(xhr.responseText);
+                    if (j) {
+                        Object.keys(j).forEach(k => { fieldErrors[k] = Array.isArray(j[k]) ? j[k].join(", ") : j[k]; });
+                        msg = fieldErrors.national_id || fieldErrors.detail || msg;
+                    }
+                } catch(_) {
+                    if (xhr.responseText) msg = xhr.responseText;
+                }
+                
+                if (fieldErrors.national_id) {
+                    const $ktp = $("#editktp");
+                    $ktp.addClass("is-invalid");
+                    $ktp.next(".invalid-feedback").remove();
+                    $ktp.after(`<div class="invalid-feedback">${fieldErrors.national_id}</div>`);
+                }
+                
+                Swal.fire({ icon: "error", title: "Gagal update", text: msg });
+            })
+            .always(() => {
+                editInFlight = false;
+                unlockButton($btn);
+            });
+        });
+        
+        // bersihkan state invalid saat user mengubah KTP
+        $('#editktp').off('input change').on('input change', function(){
+            $(this).removeClass('is-invalid');
+            $(this).next('.invalid-feedback').remove();
+        });
+        
+        // ===== CREATE submit (anti double click) =====
+        let createInFlight = false;
+        $('#saveCreateBtn').off('click').on('click', function(e){
+            e.preventDefault(); 
+            e.stopPropagation();
+            if (createInFlight) return;
+            const $btn = $(this);
+            
+            const place = $("#createtempatLahir").val()?.trim()||"";
+            const date  = $("#createtanggalLahir").val()?.trim()||"";
+            const payload = {
+                full_name: $("#createnama").val(),
+                short_title: $("#creategelarpndk").val(),
+                full_title: $("#createglrpnjg").val(),
+                birth_info: place && date ? `${place}, ${date}` : (place || date),
+                nationality: $("#createkwn").val(),
+                residence: $("#createtmpttggl").val(),
+                address: $("#createalamat").val(),
+                rt: $("#creatert").val(),
+                rw: $("#createrw").val(),
+                subdistrict: $("#createkelurahan").val(),
+                district: $("#createkecamatan").val(),
+                province: $("#createProvince").val(),
+                national_id: $("#createktp").val(),
+                notary: $("#createNotary").val(),
+                is_active: 1
+            };
+            if (!payload.full_name){
+                return Swal.fire({icon:"warning", title:"Oops!", text:"Nama wajib diisi."});
+            }
+            
+            createInFlight = true;
+            lockButton($btn, "Menyimpan...");
+            ajaxJSON(`${baseUrl}/api/witnesses/`, "POST", payload, { "X-Idempotency-Key": idemKey() })
+            .done(()=>{
+                Swal.fire({title:"Data berhasil ditambahkan!", icon:"success"}).then(()=>{
+                    bootstrap.Modal.getInstance(document.getElementById("createModal"))?.hide();
+                    $("#createForm")[0].reset();
+                    dt.ajax.reload(null, false);
+                });
+            })
+            .fail(xhr=>{
+                Swal.fire({icon:"error", title:"Gagal", text: xhr.responseText || "Gagal menambah data"});
+            })
+            .always(()=>{ createInFlight=false; unlockButton($btn); });
+        });
+        
+        // ===== DELETE (anti double click) =====
+        let deleteInFlight = false;
+        $('#witnessTable').on('click', '.btn-del', function(e){
+            e.preventDefault(); 
+            e.stopPropagation();
+            
+            if (deleteInFlight) return;
+            const row = getRowDataFromBtn(this); 
+            if (!row) return;
+            
+            Swal.fire({
+                title:`Hapus "${row.full_name}"?`,
+                text:"Data akan dihapus secara permanen.",
+                icon:'warning',
+                showCancelButton:true,
+                confirmButtonColor:'#d33',
+                cancelButtonColor:'#3085d6',
+                confirmButtonText:'Ya, hapus!',
+                cancelButtonText:'Batal'
+            }).then((res)=>{
+                if(res.isConfirmed){
+                    deleteInFlight = true;
+                    ajaxJSON(`${baseUrl}/api/witnesses/${row.id}/`, "DELETE", null, { "X-Idempotency-Key": idemKey() })
+                    .done(()=>{
+                        Swal.fire({
+                            icon:'success',
+                            title:'Terhapus!',
+                            text:'Data berhasil dihapus.',
+                            timer: 800,
+                            showConfirmButton: false
+                        }).then(()=>{
+                            // opsi 1: pakai reload full page
+                            window.onbeforeunload = null;
+                            window.location.reload();
+                            
+                            // opsi 2 (kalau cukup datatable reload saja, tanpa full page):
+                            // dt.ajax.reload(null, true); 
+                        });
+                    })
+                    .fail(()=>{
+                        Swal.fire('Gagal','Tidak dapat menghapus data.','error');
+                    })
+                    .always(()=>{ deleteInFlight=false; });
+                }
+            });
+        });
+        
+        // (opsional) reset form saat modal ditutup
+        $('#createModal').on('hidden.bs.modal', ()=> $("#createForm")[0]?.reset());
+        $('#editModal').on('hidden.bs.modal',   ()=> { currentEditId=null; $("#editForm")[0]?.reset(); });
+        
+    });
+})();
+</script>
+{% endblock %}
+
+{% endblock %}

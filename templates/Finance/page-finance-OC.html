@@ -1,0 +1,280 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Finance Over Credit {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Finance</a></li>
+                            <li class="breadcrumb-item active">Finance Over Credit</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <form method="get" class="row g-2 mb-3 align-items-center">
+                            <div class="col-auto">
+                                <label for="deed_date" class="col-form-label">Tanggal Akta:</label>
+                            </div>
+                            <div class="col-finance-reg-listmd-3">
+                                <input type="date" id="deed_date" name="deed_date" value="{{ deed_date }}" class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-success">Cari</button>
+                            </div>
+                        </form>
+
+                        <div class="row g-2 mb-3 align-items-center">
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                                    Upload Excel
+                                </button>
+                            </div>
+
+                            <div class="col-auto">
+                                <form id="exportForm" method="get" action="{% url 'export_excel_finance_oc' %}">
+                                    <input type="hidden" name="deed_date" id="deed_date_hidden" value="{{ deed_date }}">
+                                    <input type="hidden" name="export_status" id="export_status_hidden">
+                                    <button id="exportClearBtn" type="button" class="btn btn-info" {% if not deed_date %}disabled{% endif %}>
+                                        Export Data Clear
+                                    </button>
+                                    <button id="exportCheckBtn" type="button" class="btn btn-warning" {% if not deed_date %}disabled{% endif %}>
+                                        Export Data Check
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Form Update No. Perjanjian dan Tanggal Bayar</h4>
+                            </div>
+                            <div class="card-content collapse show">
+                                <div class="card-body card-dashboard">
+                                    <div class="table-responsive">
+                                        <table id="financeTable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Kode Cabang</th>
+                                                    <th>Nama Cabang</th>
+                                                    <th>No. Akta</th>
+                                                    <th>Tanggal Akta</th>
+                                                    <th>No. Perjanjian</th>
+                                                    <th>Nama Debitur</th>
+                                                    <th>Kode Voucher</th>
+                                                    <th>No. Sertifikat</th>
+                                                    <th>Tanggal Sertifikat</th>
+                                                    <th>Nilai Penjaminan</th>
+                                                    <th>Nominal PNBP</th>
+                                                    {% comment %} <th>Jasa</th> {% endcomment %}
+                                                    <th>Nama Notaris</th>
+                                                    <th>Tanggal Pembayaran</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in enriched_docs %}
+                                                    <tr>
+                                                        <td>{{ item.branch_code }}</td> 
+                                                        <td>{{ item.branch_name }}</td> 
+                                                        <td>{{ item.document_number }}</td> 
+                                                        <td>{{ item.document_date|date:"d-m-Y" }}</td> 
+                                                        <td>{{ item.agreement_number }}</td> 
+                                                        <td>{{ item.debtor_name }}</td> 
+                                                        <td>{{ item.voucher_code }}</td> 
+                                                        <td>{{ item.certificate_number }}</td> 
+                                                        <td>{{ item.certificate_date|date:"d-m-Y" }}</td> 
+                                                        <td>{{ item.guarantee_value }}</td>
+                                                        <td>{{ item.fee_pnbp }}</td> 
+                                                        {% comment %} <td>{{ item.service_fee }}</td> {% endcomment %}
+                                                        <td>{{ item.notary_name }}</td> 
+                                                        <td>{{ item.payment_date|date:"d-m-Y" }}</td>
+                                                        <td>
+                                                            <span class="badge {% if item.status == 'Done' %}bg-success 
+                                                            {% elif item.status == 'Paid' %}bg-primary
+                                                            {% elif item.status == 'Clear' %}bg-warning
+                                                            {% elif item.status == 'Check' %}bg-info
+                                                            {% elif item.status == 'Recheck' %}bg-danger
+                                                            {% elif item.status == 'Pending' %}bg-warning text-dark
+                                                            {% elif item.status == 'Gagal' %}bg-danger
+                                                            {% else %}bg-secondary{% endif %}">
+                                                            {{ item.status|default:"Draft" }}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form id="uploadForm" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Upload File Excel</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input class="form-control" type="file" name="excel_file" required>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-primary">Upload</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+{% block script %}
+<script>
+    $('#financeTable').DataTable({
+    language: {
+        emptyTable: "Tidak ada data."
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const exportForm = document.getElementById('exportForm');
+    const exportStatusInput = document.getElementById('export_status_hidden');
+    const exportClearBtn = document.getElementById('exportClearBtn');
+    const exportCheckBtn = document.getElementById('exportCheckBtn');
+    
+    function handleExportClick(status) {
+        exportStatusInput.value = status;
+
+        Swal.fire({
+            title: `Export Data Status "${status}"?`,
+            text: `Data sertifikat dengan status "${status}" akan diexport ke Excel.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Export!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                exportForm.submit();
+                Swal.fire({
+                    title: 'Sedang memproses',
+                    text: 'File Excel akan segera didownload...',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
+
+    if (exportClearBtn) {
+        exportClearBtn.addEventListener('click', function() {
+            handleExportClick('Clear');
+        });
+    }
+
+    if (exportCheckBtn) {
+        exportCheckBtn.addEventListener('click', function() {
+            handleExportClick('Check');
+        });
+    }
+});
+
+$("#uploadForm").on("submit", function(e) {
+    e.preventDefault();
+    var formData = new FormData(this);
+
+    Swal.fire({
+        title: 'Sedang mengupload...',
+        text: 'Mohon tunggu sebentar.',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    $.ajax({
+        url: "{% url 'upload_excel_finance_oc' %}",
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            let title = 'Berhasil!';
+            let text = `Data berhasil diimport. (${response.updated_count} baris diupdate).`;
+            let icon = 'success';
+
+            if (response.skipped_count > 0 || response.failed_count > 0) {
+                icon = 'warning';
+                title = 'Upload Selesai dengan Catatan';
+                
+                let html_message = `<strong>Berhasil diupdate: ${response.updated_count} baris.</strong><br><br>`;
+                
+                if (response.skipped_count > 0) {
+                    html_message += `<strong>Dilewati: ${response.skipped_count} baris karena status tidak valid (bukan CLEAR/GAGAL).</strong><br>`;
+                    html_message += `<ul style="text-align: left; font-size: 0.8em; margin-top: 5px;">`;
+                    response.skipped_details.forEach(detail => {
+                        html_message += `<li>${detail}</li>`;
+                    });
+                    if (response.skipped_details.length < (response.skipped_count)) {
+                        html_message += `<li>...dan lainnya.</li>`;
+                    }
+                    html_message += `</ul>`;
+                }
+
+                Swal.fire({
+                    title: title,
+                    html: html_message,
+                    icon: icon,
+                }).then(() => {
+                    location.reload();
+                });
+
+            } else {
+                Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: icon,
+                    showConfirmButton: false,
+                    timer: 2000
+                }).then(() => {
+                    location.reload();
+                });
+            }
+        },
+        error: function(xhr) {
+            Swal.fire({
+                title: 'Gagal!',
+                text: xhr.responseText || 'Terjadi kesalahan fundamental saat upload.',
+                icon: 'error',
+            });
+        }
+    });
+});
+</script>
+
+{% endblock %}
+
+{% endblock %}

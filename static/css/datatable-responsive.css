@@ -1,0 +1,142 @@
+/* DataTables with Bootstrap 5 - Responsive Styling */
+
+/* Full width and responsive behavior */
+.dataTables_wrapper {
+    width: 100% !important;
+    margin: 0 !important;
+    max-width: none !important;
+}
+
+.table-responsive, .table-responsive-xl {
+    width: 100% !important;
+    margin: 0 !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* Make sure the table takes full width of its container */
+table.dataTable {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin: 0 !important;
+    table-layout: auto !important;
+}
+
+/* Header styling */
+table.dataTable thead th {
+    background-color: #f8f9fa !important;
+    color: #495057 !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    padding: 0.75rem !important;
+    border-bottom: 2px solid #dee2e6 !important;
+    white-space: nowrap !important;
+}
+
+/* Cell styling */
+table.dataTable tbody td {
+    padding: 0.75rem !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* DataTables controls styling */
+.dataTables_wrapper .dataTables_length, 
+.dataTables_wrapper .dataTables_filter, 
+.dataTables_wrapper .dataTables_info, 
+.dataTables_wrapper .dataTables_processing, 
+.dataTables_wrapper .dataTables_paginate {
+    color: #495057 !important;
+    margin: 1rem 0 !important;
+    width: 100% !important;
+}
+
+/* Ensure filter and length controls are responsive */
+@media (max-width: 767.98px) {
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        text-align: left !important;
+        float: none !important;
+        display: block !important;
+        margin-bottom: 0.5rem !important;
+        width: 100% !important;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+        width: 100% !important;
+        margin-left: 0 !important;
+        display: block !important;
+        margin-top: 0.25rem !important;
+    }
+}
+
+/* Pagination styling */
+.dataTables_wrapper .dataTables_paginate {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    text-align: center !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.375rem 0.75rem !important;
+    margin-left: 0.25rem !important;
+    border-radius: 0.25rem !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #0d6efd !important;
+    color: white !important;
+    border: 1px solid #0d6efd !important;
+}
+
+/* Responsive DataTables specific styling */
+table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before,
+table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
+    background-color: #0d6efd !important;
+    border: 1.5px solid white !important;
+}
+
+/* Fix for horizontal scrolling on mobile */
+.dataTables_scrollBody {
+    overflow-x: auto !important;
+    width: 100% !important;
+}
+
+/* Fix for DataTables search box alignment */
+.dataTables_filter {
+    text-align: right !important;
+}
+
+/* Fix for DataTables info and pagination alignment */
+.dataTables_info {
+    padding-top: 0.5rem !important;
+}
+
+/* Fix for DataTables length dropdown */
+.dataTables_length select {
+    min-width: 70px !important;
+}
+
+/* Fix for DataTables search input */
+.dataTables_filter input {
+    min-width: 150px !important;
+}
+
+/* Fix for DataTables row hover */
+table.dataTable tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+/* Fix for DataTables row selected */
+table.dataTable tbody tr.selected {
+    background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+/* Fix for DataTables loading state */
+.dataTables_processing {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    color: #495057 !important;
+    border-radius: 0.25rem !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}

@@ -1,0 +1,226 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Operator - Log Perubahan Fidusia {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Perubahan Fidusia</a></li>
+                            <li class="breadcrumb-item active">Log Aktivitas Perubahan Fidusia</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="log-section">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h4>Activity Log PF</h4>
+                                </div>
+                                <div class="row justify-content-end align-items-end g-2">
+                                    <div class="col-auto">
+                                        <div class="form-group mb-0">
+                                            <label for="startDate" class="form-label small text-muted">Dari</label>
+                                            <input type="date" id="startDate" class="form-control form-control-sm" placeholder="Tanggal Awal">
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="form-group mb-0">
+                                            <label for="endDate" class="form-label small text-muted">Sampai</label>
+                                            <input type="date" id="endDate" class="form-control form-control-sm" placeholder="Tanggal Akhir">
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="form-group mb-0">
+                                            <label for="branchName" class="form-label small text-muted">Branch</label>
+                                            <select id="branchName" class="form-control form-control-sm">
+                                                
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button id="filterBtn" class="btn btn-primary btn-sm mt-3">Filter</button>
+                                        <button id="resetFilterBtn" class="btn btn-warning btn-sm mt-3">Reset</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Overlay Spinner -->
+                                <div id="loading-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(255,255,255,0.6);z-index:1050;cursor:wait;"></div>
+                                <div id="loading-message" style="display:none;position:fixed;z-index:1060;top:50%;left:50%;transform:translate(-50%, -50%);text-align:center;display:flex;flex-direction:column;align-items:center;">
+                                    <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;"></div>
+                                    <div style="margin-top:10px;font-weight:bold;">Loading data...</div>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table id="logTable" class="table table-striped table-bordered display nowrap" style="width:100%">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Pengguna</th>
+                                                <th>Nomor Perjanjian</th>
+                                                <th>Jenis Perubahan</th>
+                                                <th>Pilih Perubahan</th>
+                                                <th>Pilih Perubahan Nama</th>
+                                                <th>Jenis Nasabah</th>
+                                                <th>Debitur</th>
+                                                <th>Cabang</th>
+                                                <th>Waktu Unggah</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card -->
+                    </div> <!-- end col -->
+                </div> <!-- end row -->
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function () {
+        const $overlay = $('#loading-overlay');
+        const $message = $('#loading-message');
+        
+        function getProp(obj, ...keys) {
+            try {
+                const p = typeof obj === 'string' ? JSON.parse(obj) : (obj || {});
+                for (const k of keys) {
+                    if (p && p[k] != null && p[k] !== '') return p[k];
+                }
+                const cands = [p.before, p.after];
+                for (const sect of cands) {
+                    if (!sect) continue;
+                    for (const k of keys) {
+                        if (sect && sect[k] != null && sect[k] !== '') return sect[k];
+                    }
+                }
+            } catch(e) {}
+            return '';
+        }
+        
+        // === DataTable ===
+        const table = $('#logTable').DataTable({
+            processing: true,
+            serverSide: true,
+            deferRender: true,
+            pageLength: 10,
+            lengthMenu: [10,25,50,100],
+            order: [[9, 'desc']], // created_at kolom ke-9
+            ajax: {
+                url: "{% url 'pf_log_data_json' %}",
+                type: 'GET',
+                data: function (d) {
+                    d.start_date  = $('#startDate').val()  || '';
+                    d.end_date    = $('#endDate').val()    || '';
+                    d.branch_name = $('#branchName').val() || '';
+                    
+                    // debug: lihat apa yg terkirim dari DataTables (termasuk d.search.value)
+                    console.log('[PF] DT payload:', JSON.parse(JSON.stringify(d)));
+                },
+                error: function (xhr, status, error) {
+                    $overlay.hide(); $message.hide();
+                    let msg = "Gagal memuat data log. Coba lagi nanti.";
+                    if (xhr.status === 500) msg += " (Kesalahan Server)";
+                    else if (xhr.status === 403) msg += " (Akses ditolak)";
+                    Swal.fire({
+                        icon:'error', title:'Oops!', text:msg,
+                        footer:`<pre style="text-align:left;white-space:pre-wrap;">${xhr.responseText || ''}</pre>`,
+                        width:600, confirmButtonText:'Tutup'
+                    });
+                    console.error('[PF] ajax error:', status, error);
+                }
+            },
+            columns: [
+            { data: null, orderable:false, render: (d,t,r,m) => m.row + 1 + (table.page.info().start || 0) },
+            { data: 'causer_name', defaultContent: '' },
+            { data: 'agreement_number', defaultContent: '' },
+            { data: 'description', defaultContent: '' },
+            { data: 'subject_type', defaultContent: '' },
+            { data: 'subject_id', defaultContent: '' },
+            { data: 'causer_type', defaultContent: '' },
+            { data: 'causer_id', defaultContent: '' },
+            {
+                data: 'properties',
+                render: (props) => {
+                    const code = getProp(props,'branch_code','kode_cabang','branchCode');
+                    const name = getProp(props,'branch_name','cabang','branchName');
+                    return (code && name) ? `${code} - ${name}` : (name || code || '');
+                }
+            },
+            { data: 'created_at', defaultContent: '' }
+            ],
+            language: {
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ data",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                paginate: { previous: "Sebelumnya", next: "Berikutnya" }
+            }
+        });
+        
+        // Spinner otomatis via event DataTables
+        $('#logTable').on('preXhr.dt', function () { $overlay.show(); $message.show(); });
+        $('#logTable').on('xhr.dt', function () { $overlay.hide(); $message.hide(); });
+        
+        // Tombol filter
+        $('#filterBtn').on('click', function () {
+            table.ajax.reload();
+        });
+        
+        // Tombol reset
+        $('#resetFilterBtn').on('click', function () {
+            $('#startDate').val('');
+            $('#endDate').val('');
+            $('#branchName').val('');
+            $('#global_search').val('');
+            $('#agreementNumber').val('');
+            table.ajax.reload();
+        });
+        
+        // Auto reload saat filter berubah (opsional)
+        $('.filter-input').on('change keyup', function () {
+            table.ajax.reload();
+        });
+        
+        // === Load daftar cabang (jika perlu) ===
+        async function loadBranches() {
+            try {
+                const res = await fetch('/api/branches/', { credentials: 'include' }); // cukup session cookie
+                if (!res.ok) throw new Error(await res.text());
+                const branches = await res.json();
+                const $branch = $('#branchName');
+                $branch.empty().append(`<option value="">-- Semua Cabang --</option>`);
+                branches.forEach(b => {
+                    const name = b.branch_name || b.name || '';
+                    $branch.append(`<option value="${name}">${name}</option>`);
+                });
+            } catch (err) {
+                console.error('❌ Error ambil branch:', err);
+                Swal.fire('Error', 'Gagal memuat daftar cabang.', 'error');
+            }
+        }
+        loadBranches(); // <— panggil
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "../base.html" %}
+{% load tz %}
+{% load static %}
+
+{% block title %} Akta Minuta Log MU {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Multi Unit</a></li>
+                            <li class="breadcrumb-item active">Akta Minuta Log MU</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <form class="form-inline my-2 my-lg-0" method="get">
+                                {% comment %} <input class="form-control mr-sm-2" name="q" type="search" placeholder="No. Perjanjian" aria-label="Search" value="{{ query }}">
+                                <button class="btn btn-outline-success" type="submit">Search</button> {% endcomment %}
+                            </form>
+
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                                Upload Excel
+                            </button>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Akta Minuta Log MU</h4>
+                            </div>
+                            <div class="card-content collapse show">
+                                <div class="card-body card-dashboard">
+                                    <div class="table-responsive">
+                                        <table id="aktaMinutaLogTable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>No</th>
+                                                    <th>No Perjanjian</th>
+                                                    <th>PIC</th>
+                                                    <th>Tanggal Cetak</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form method="post" enctype="multipart/form-data" action="{% url 'upload_excel_akta_minuta_log_mu' %}">
+                                {% csrf_token %}
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title" id="uploadModalLabel">Upload File Excel</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="excelFile" class="form-label">Pilih File Excel</label>
+                                        <input class="form-control" type="file" name="excel_file" id="excelFile" accept=".xlsx,.xls" required>
+                                    </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Upload</button>
+                                    </div>
+                                </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+{% block script %}
+<script>
+    $('#aktaMinutaLogTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '/api/akta-minuta-log-mu/',
+            type: 'GET'
+        },
+        pageLength: 10,
+        searching: true, // ini search bawaan
+        language: {
+            search: "Cari:",
+            emptyTable: "Tidak ada data.",
+            paginate: {
+                next: "Berikutnya",
+                previous: "Sebelumnya"
+            }
+        }
+    });
+</script>
+
+{% endblock %}
+
+{% endblock %}

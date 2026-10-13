@@ -1,0 +1,275 @@
+{% extends "../base.html" %}
+{% load static %}
+{% load format_filters %}
+
+{% block title %} Akta & Sertifikat PF {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Akta & Sertifikat PF</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            {% if error_message %}
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    Swal.fire({
+                                        icon: "warning",
+                                        title: "Filter Tidak Valid",
+                                        text: "{{ error_message|escapejs }}",
+                                    });
+                                });
+                            </script>
+                            {% endif %}
+                            <form method="get" class="mb-3" id="filterForm">
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-auto">
+                                        <label for="tanggal_mulai" class="form-label mb-0 fw-bold">Tanggal Upload</label>
+                                        <input type="date" class="form-control form-control-sm" id="tanggal_mulai" name="tanggal_mulai" value="{{ tanggal_mulai }}">
+                                    </div>
+                                    <div class="col-auto">
+                                        <label class="form-label mb-0 fw-bold">&nbsp;</label>
+                                        <span class="d-block">s/d</span>
+                                    </div>
+                                    <div class="col-auto">
+                                        <label for="tanggal_selesai" class="form-label mb-0 fw-bold">Tanggal Selesai</label>
+                                        <input type="date" class="form-control form-control-sm" id="tanggal_selesai" name="tanggal_selesai" value="{{ tanggal_selesai }}">
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-filter"></i> Filter
+                                        </button>
+                                        <a href="{% url 'akser-pf-list' %}" class="btn btn-secondary">
+                                            <i class="fas fa-undo"></i> Reset
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+                            
+                            <!-- Reporting & Upload Section -->
+                            <div class="d-flex align-items-center" style="gap: 0.5rem;">
+                                <div class="col-auto">
+                                    <form
+                                    method="get"
+                                    action="{% url 'export_excel_akser_pf' %}"
+                                    id="exportForm"
+                                    >
+                                    <input
+                                    type="hidden"
+                                    name="tanggal_mulai"
+                                    id="export_tanggal_mulai"
+                                    />
+                                    <input
+                                    type="hidden"
+                                    name="tanggal_selesai"
+                                    id="export_tanggal_selesai"
+                                    />
+                                    
+                                    <label for="buttonExport" class="mb-0">Reporting : </label>
+                                    <button type="submit" id="btnExport" class="btn btn-success">
+                                        Export Excel
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            {% if can_upload %}
+                            <button type="button" id="btnExport" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                                Upload File
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Daftar Akta & Sertifikat PF</h4>
+                        </div>
+                        <div class="card-content collapse show">
+                            <div class="card-body card-dashboard">
+                                <div class="table-responsive">
+                                    <table id="akserTable" class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Action</th>
+                                                <th>Status Dokumen</th>
+                                                <th>No. Kontrak</th>
+                                                <th>Nama Cabang</th>
+                                                <th>Nama Debitur</th>
+                                                <th>Pemberi Fidusia</th>
+                                                <th>Nama Notaris</th>
+                                                <th>No. Akta</th>
+                                                <th>Tanggal Akta</th>
+                                                <th>Biaya PNBP</th>
+                                                <th>Kode Voucher</th>
+                                                <th>No. Sertifikat</th>
+                                                <th>Tanggal Sertifikat</th>
+                                                <th>Tgl Upload Excel</th>
+                                                <th>Tgl Upload Dokumen</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in enriched_data %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td>
+                                                    {% if item.can_download_akta %}
+                                                    <a href="{% url 'download_akta_pf' item.document_id %}" class="btn btn-sm btn-success">
+                                                        <i class="fa-solid fa-certificate"></i>
+                                                    </a>
+                                                    {% endif %}
+                                                    
+                                                    {% if item.can_download_certificate %}
+                                                    <a href="{% url 'download_sertifikat_pf' item.document_id %}" class="btn btn-sm btn-primary">
+                                                        <i class="fa-solid fa-file-contract"></i>
+                                                    </a>
+                                                    {% endif %}
+                                                    
+                                                    {% if not item.can_download_akta and not item.can_download_certificate %}
+                                                    {% if item.is_process_done and not item.has_legal_document %}
+                                                    <span class="badge bg-warning">Dokumen belum tersedia</span>
+                                                    {% else %}
+                                                    <button class="btn btn-sm btn-secondary" disabled>Pending</button>
+                                                    {% endif %}
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ item.document_status_label }}</td>
+                                                <td>{{ item.agreement_number }}</td>
+                                                <td>{{ item.branch_name }}</td>
+                                                <td>{{ item.debtor_name }}</td>
+                                                <td>{{ item.display_fiducia }}</td>
+                                                <td>{{ item.firm_name }}</td>
+                                                <td>{{ item.document_number }}</td>
+                                                <td>{{ item.document_date|date:"d-m-Y" }}</td>
+                                                <td>{{ item.pnbp_fee|rupiah }}</td>
+                                                <td>{{ item.voucher_code }}</td>
+                                                <td>{{ item.certificate_number }}</td>
+                                                <td>{{ item.certificate_date|date:"d-m-Y" }}</td>
+                                                <td>{{ item.created_at|date:"d-m-Y" }}</td>
+                                                <td>{{ item.consumer_document_created_at|date:"d-m-Y" }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+</div>
+
+{% block script %}
+<script>
+    $('#akserTable').DataTable({
+        language: {
+            emptyTable: "Tidak ada data."
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const filterForm = document.getElementById("filterForm");
+        const exportForm = document.getElementById("exportForm");
+        
+        const inputMulai = document.getElementById("tanggal_mulai");
+        const inputSelesai = document.getElementById("tanggal_selesai");
+        
+        const exportMulai = document.getElementById("export_tanggal_mulai");
+        const exportSelesai = document.getElementById("export_tanggal_selesai");
+        
+        filterForm.addEventListener("submit", function (e) {
+            const start = inputMulai.value;
+            const end = inputSelesai.value;
+            
+            if (start && end) {
+                const startDate = new Date(start);
+                const endDate = new Date(end);
+                
+                if (endDate < startDate) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: "error",
+                        title: "Tanggal Tidak Valid",
+                        text: "Tanggal selesai tidak boleh sebelum tanggal mulai.",
+                    });
+                    return;
+                }
+                
+                const diffDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
+                
+                if (diffDays > 30) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Rentang Terlalu Panjang",
+                        text: "Maksimal rentang tanggal untuk filter adalah 31 hari.",
+                    });
+                }
+            }
+        });
+        
+        exportForm.addEventListener("submit", function (e) {
+            exportMulai.value = inputMulai.value;
+            exportSelesai.value = inputSelesai.value;
+            
+            const start = exportMulai.value;
+            const end = exportSelesai.value;
+            
+            if (!start || !end) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: "info",
+                    title: "Filter Diperlukan",
+                    text: "Silakan filter data terlebih dahulu sebelum melakukan export.",
+                });
+                return;
+            }
+            
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            const diffDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
+            
+            if (diffDays > 31) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: "warning",
+                    title: "Rentang Terlalu Panjang",
+                    text: "Maksimal rentang tanggal untuk export adalah 31 hari.",
+                });
+            }
+        });
+    });
+</script>
+
+{% endblock %}
+
+{% endblock %}

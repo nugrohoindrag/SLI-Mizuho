@@ -1,0 +1,1071 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Operator - Prekonsumen {% endblock %}
+
+{% block content %}
+
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Reguler</a></li>
+                            <li class="breadcrumb-item active">New Konsumen</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h4>New Konsumen</h4>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end align-items-center mb-3">
+                                <label for="docFilter" class="mb-0 mr-1">Status Dokumen</label>
+                                <select id="docFilter" class="form-control form-control-sm mr-1" style="width:auto;">
+                                    <option value="all">All</option>
+                                    <option value="complete">Complete</option>
+                                </select>
+                                {% if can_mark_otd %}
+                                <button id="btnUploadOtd" class="btn btn-warning ml-1">
+                                    <i class="fas fa-upload"></i> Upload OTD
+                                </button>
+                                {% endif %}
+                                <button id="btnExportExcel" class="btn btn-success ml-1 mr-2">
+                                    <i class="fas fa-file-excel"></i> Excel
+                                </button>
+                            </div>
+                            
+                            <div class="card-body">
+                                
+                                <h4><b>Total Data : {{ data_list }}</b></h4>
+                                
+                                <div id="loading-overlay" style="display: none;position: fixed;top: 0;left: 0;width: 100vw;height: 100vh;background: rgba(255, 255, 255, 0.6);z-index: 1050; cursor: wait;"></div>
+                                
+                                <!-- Spinner loading (sudah kamu punya) -->
+                                <div id="loading-message" style="display: none;position: fixed;z-index: 1060;top: 50%;left: 50%;transform: translate(-50%, -50%);text-align: center;display: flex;flex-direction: column;align-items: center;">
+                                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                                    <div style="margin-top: 10px; font-weight: bold;">Loading data...</div>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table id="consumerTable" class="display table table-striped">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Id</th>
+                                                <th>Status Dokumen</th>
+                                                <th>Nama Cabang</th>
+                                                <th>Jenis Nasabah</th>
+                                                <th>Nama Pada BPKB</th>
+                                                <th>Nama Debitur</th>
+                                                <th>Jenis Kelamin</th>
+                                                <th>Status Pernikahan</th>
+                                                <th>Tmp Lahir</th>
+                                                <th>Tgl Lahir</th>
+                                                <th>Pekerjaan</th>
+                                                <th>Kewarganegaraan</th>
+                                                <th>Jenis Identitas</th>
+                                                <th>No Identitas</th>
+                                                <th>Alamat</th>
+                                                <th>Rt Rw</th>
+                                                <th>Kelurahan</th>
+                                                <th>Kecamatan</th>
+                                                <th>Kota</th>
+                                                <th>Provinsi</th>
+                                                <th>Kode Pos</th>
+                                                <th>Jenis Badan</th>
+                                                <th>NPWP Badan</th>
+                                                <th>No Akta Badan</th>
+                                                <th>Tgl Akta badan</th>
+                                                <th>Nama PJ Badan</th>
+                                                <th>Nama Pasangan</th>
+                                                <th>JK Pasangan</th>
+                                                <th>Status Pasangan</th>
+                                                <th>Tempat Lahir Pasangan</th>
+                                                <th>Tgl Lahir Pasangan</th>
+                                                <th>Kewarganegaraan PJ Badan</th>
+                                                <th>TypeId PJ Badan</th>
+                                                <th>NoID PJ Badan</th>
+                                                <th>Alamat PJ Badan</th>
+                                                <th>RT RW PJ Badan</th>
+                                                <th>Kelurahan PJ Badan</th>
+                                                <th>Kecamatan PJ Badan</th>
+                                                <th>Kota PJ Badan</th>
+                                                <th>Provinsi PJ Badan</th>
+                                                <th>Jabatan PJ Badan</th>
+                                                <th>Jenis Perjanjian</th>
+                                                <th>Nama Perjanjian</th>
+                                                <th>No Perjanjian</th>
+                                                <th>Tgl Perjanjian</th>
+                                                <th>Tgl Kuasa</th>
+                                                <th>Nilai Hutang Pokok</th>
+                                                <th>Nilai Penjaminan</th>
+                                                <th>Tgl Awal Cicilan</th>
+                                                <th>Tenor</th>
+                                                <th>Kondisi Kendaraan</th>
+                                                <th>Merek</th>
+                                                <th>Tipe</th>
+                                                <th>Warna</th>
+                                                <th>Tahun Perakitan</th>
+                                                <th>Tahun Pembuatan</th>
+                                                <th>No Rangka</th>
+                                                <th>No Mesin</th>
+                                                <th>No BPKB</th>
+                                                <th>No Polisi</th>
+                                                <th>Nilai Objek OTR</th>
+                                                <th>Biaya PNBP</th>
+                                                <th>Biaya Jasa</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Diisi otomatis via DataTables -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Modal -->
+                                <div class="modal fade" id="modalCreate" tabindex="-1" aria-labelledby="modalCreateLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Tambah Konsumen</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="modal-body" id="modalCreateBody">
+                                                <!-- Form dinamis akan dimasukkan via JS -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- View Modal -->
+                                <div class="modal fade" id="modalView" tabindex="-1" aria-labelledby="modalViewLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-info text-white">
+                                                <h5 class="modal-title" id="modalViewLabel"><i class="fas fa-eye"></i> Detail Data Konsumen</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body" id="modalViewBody">
+                                                <!-- Data detail akan dimuat lewat JS -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Edit Modal -->
+                                <div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-warning">
+                                                <h5 class="modal-title" id="modalEditLabel"><i class="fas fa-pencil-alt"></i> Edit Data</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body" id="modalEditBody">
+                                                <!-- Form edit akan dimuat lewat JS -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Revisi Modal -->
+                                <div class="modal fade" id="modalRevisi" tabindex="-1" aria-labelledby="modalRevisiLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-primary text-white">
+                                                <h5 class="modal-title" id="modalRevisiLabel"><i class="fas fa-arrow-rotate-left"></i> Revisi Data</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body" id="modalRevisiBody">
+                                                <!-- Form atau info revisi -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Dokumen Modal -->
+                                <div class="modal fade" id="modalDokumen" tabindex="-1" aria-labelledby="modalDokumenLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-secondary text-white">
+                                                <h5 class="modal-title" id="modalDokumenLabel"><i class="fas fa-right-left"></i> Dokumen</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body" id="modalDokumenBody">
+                                                <!-- Data dokumen -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if can_mark_otd %}
+                <!-- OTD Modal -->
+                <div class="modal fade" id="modalOtd" tabindex="-1" aria-labelledby="modalOtdLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning">
+                                <h5 class="modal-title" id="modalOtdLabel"><i class="fas fa-upload"></i> Upload Status OTD</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-1">Kolom Excel: <b>NOMOR KONTRAK | STATUS</b></p>
+                                <ul class="small mb-2">
+                                    <li><b>OTD</b>: tahan unit yang masih terdaftar fidusia aktif di AHU.</li>
+                                    <li><b>NORMAL</b>: lepas tanda OTD setelah fidusia lama di-roya.</li>
+                                    <li>Data yang sudah di-generate atau cancel tidak diubah.</li>
+                                </ul>
+                                <a href="/api/prekonsumen/otd-template/" class="d-inline-block mb-2"><i class="fas fa-download"></i> Download template</a>
+                                <input type="file" id="otdFile" class="form-control" accept=".xlsx,.xls">
+                                <div id="otdResult" class="mt-3"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                <button type="button" class="btn btn-warning" id="btnSubmitOtd">Upload</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Delete Modal -->
+                                <div class="modal fade" id="modalDelete" tabindex="-1" aria-labelledby="modalDeleteLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-danger text-white">
+                                                <h5 class="modal-title" id="modalDeleteLabel"><i class="fas fa-trash"></i> Konfirmasi Hapus</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body" id="modalDeleteBody">
+                                                Apakah Anda yakin ingin menghapus data ini?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                <button type="button" class="btn btn-danger" id="btnConfirmDelete">Hapus</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card -->
+                    </div> <!-- end col -->
+                </div> <!-- end row -->
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+
+{% block script %}
+<script>
+    var dataTable;
+    
+    $(document).ready(() => {
+        function getCSRFToken() {
+            return document.querySelector(
+            'input[name="csrfmiddlewaretoken"]'
+            )?.value || '';
+        }
+        
+        const inflight = new Set();
+        let redirecting = false;
+        
+        $.ajaxSetup({
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            xhrFields: { withCredentials: true },
+            beforeSend: function (xhr, settings) {
+                inflight.add(xhr);
+                if (redirecting) return false;
+                const csrfSafe = /^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type || '');
+                const sameOrigin = !/^https?:\/\//i.test(settings.url || '');
+                if (!csrfSafe && sameOrigin) {
+                    const token = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+                    if (token) {
+                        xhr.setRequestHeader('X-CSRFToken', token);
+                    }
+                }
+            },
+            complete: function (xhr) {
+                inflight.delete(xhr);
+            },
+            statusCode: {
+                401: function () {
+                    if (redirecting) return;
+                    redirecting = true;
+                    try { $('#loading-overlay,#loading-message').hide(); } catch(e) {}
+                    for (const req of inflight) { try { req.abort(); } catch(e) {} }
+                    inflight.clear();
+                    window.location.replace('/login/');
+                }
+            }
+        });
+        
+        // ===== B. Util =====
+        // function getCookie(name){
+        //    const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        //    return m ? m.pop() : '';
+        //}
+        
+        const ORDER_MAP = [
+        'id','document_status','branch_name','customer_type','name_on_bpkb','debtor_name',
+        'gender','marital_status','birth_place','birth_date','occupation','nationality',
+        'id_type','id_number','address','rt_rw','subdistrict','district','city','province',
+        'postal_code','company_type','company_npwp','deed_number','deed_date','company_director_name',
+        'spouse_name','director_gender','director_status','director_birth_place','director_birth_date',
+        'director_nationality','director_id_type','director_id_number','director_address',
+        'director_rt_rw','director_subdistrict','director_district','director_city',
+        'director_province','director_position','agreement_type','agreement_name',
+        'agreement_number','agreement_date','spb_date','principal_loan','guarantee_value',
+        'installment_start_date','tenor','vehicle_condition','brand','type','color',
+        'assembly_year','production_year','chassis_number','engine_number','bpkb_number',
+        'house_number','otr_value','pnbp_fee','service_fee'
+        ];
+        
+        let dataTable;
+        
+        if (!$.fn.DataTable.isDataTable('#consumerTable')) {
+            dataTable = $('#consumerTable').DataTable({
+                serverSide: true,
+                processing: true,
+                deferRender: true,
+                ajax: {
+                    url: '/api/prekonsumen-json/',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    headers: { 'X-CSRFToken': getCSRFToken() },
+                    data: function (d) {
+                        const ord = (d.order && d.order[0]) ? d.order[0] : { column: 0, dir: 'desc' };
+                        const idx = Math.min(Math.max(parseInt(ord.column || 0, 10), 0), ORDER_MAP.length - 1);
+                        return {
+                            draw: d.draw,
+                            start: d.start,
+                            length: d.length,
+                            search_value: d.search ? (d.search.value || '') : '',
+                            order_col_index: idx,
+                            order_col_name: ORDER_MAP[idx],
+                            order_dir: (ord.dir === 'asc' ? 'asc' : 'desc'),
+                            doc_filter: $('#docFilter').val() || 'all'
+                        };
+                    },
+                    dataSrc: 'data',
+                    beforeSend: function () { $('#loading-overlay,#loading-message').show(); },
+                    error: function (xhr, status, err) {
+                        if (status === 'abort' || xhr?.status === 401) return;
+                        console.error('DataTables AJAX error:', status, err, xhr?.responseText || '');
+                    },
+                    complete: function () { $('#loading-overlay,#loading-message').hide(); }
+                },
+                columns: [
+                { title: 'ID', data: 'id', visible: false },
+                {
+                    title: 'Status Dokumen',
+                    data: 'document_status',
+                    render: (val, type, row) => {
+                        if (type !== 'display') return val;
+                        const safe = $('<span>').text(val ?? '').html();
+                        if (row.is_st_used === 2) return `${safe} <span class="badge bg-danger" title="Masih terdaftar fidusia aktif di AHU, ditahan dari assign akta">OTD</span>`;
+                        if (row.is_st_used === 0) return `${safe} <span class="badge bg-secondary">Cancel</span>`;
+                        return safe;
+                    }
+                },
+                { title: 'Nama Cabang', data: 'branch_name' },
+                { title: 'Jenis Nasabah', data: 'customer_type' },
+                { title: 'Nama pada BPKB', data: 'name_on_bpkb' },
+                { title: 'Nama Debitur', data: 'debtor_name' },
+                { title: 'Jenis Kelamin', data: 'gender' },
+                { title: 'Status Pernikahan', data: 'marital_status' },
+                { title: 'Tempat Lahir', data: 'birth_place' },
+                { title: 'Tanggal Lahir', data: 'birth_date' },
+                { title: 'Pekerjaan', data: 'occupation' },
+                { title: 'Kewarganegaraan', data: 'nationality' },
+                { title: 'Jenis Identitas', data: 'id_type' },
+                { title: 'No. Identitas', data: 'id_number' },
+                { title: 'Alamat', data: 'address' },
+                { title: 'RT/RW', data: 'rt_rw' },
+                { title: 'Kelurahan', data: 'subdistrict' },
+                { title: 'Kecamatan', data: 'district' },
+                { title: 'Kota', data: 'city' },
+                { title: 'Provinsi', data: 'province' },
+                { title: 'Kode Pos', data: 'postal_code' },
+                // Kolom badan usaha / PJ Badan tidak dipakai Mizuho (nasabah perorangan): disembunyikan.
+                // director_gender/status/birth_place/birth_date dipakai ulang untuk data pasangan.
+                { title: 'Jenis Badan', data: 'company_type', visible: false },
+                { title: 'NPWP Badan', data: 'company_npwp', visible: false },
+                { title: 'No. Akta Badan', data: 'deed_number', visible: false },
+                { title: 'Tgl Akta Badan', data: 'deed_date', visible: false },
+                { title: 'Nama PJ Badan', data: 'company_director_name', visible: false },
+                { title: 'Nama Pasangan', data: 'spouse_name' },
+                { title: 'JK Pasangan', data: 'director_gender' },
+                { title: 'Status Pasangan', data: 'director_status' },
+                { title: 'Tempat Lahir Pasangan', data: 'director_birth_place' },
+                { title: 'Tgl Lahir Pasangan', data: 'director_birth_date' },
+                { title: 'Kewarganegaraan PJ Badan', data: 'director_nationality', visible: false },
+                { title: 'Jenis ID PJ Badan', data: 'director_id_type', visible: false },
+                { title: 'No ID PJ Badan', data: 'director_id_number', visible: false },
+                { title: 'Alamat PJ Badan', data: 'director_address', visible: false },
+                { title: 'RT/RW PJ Badan', data: 'director_rt_rw', visible: false },
+                { title: 'Kelurahan PJ Badan', data: 'director_subdistrict', visible: false },
+                { title: 'Kecamatan PJ Badan', data: 'director_district', visible: false },
+                { title: 'Kota PJ Badan', data: 'director_city', visible: false },
+                { title: 'Provinsi PJ Badan', data: 'director_province', visible: false },
+                { title: 'Jabatan PJ Badan', data: 'director_position', visible: false },
+                { title: 'Jenis Perjanjian', data: 'agreement_type' },
+                { title: 'Nama Perjanjian', data: 'agreement_name' },
+                { title: 'No. Perjanjian', data: 'agreement_number' },
+                { title: 'Tgl Perjanjian', data: 'agreement_date' },
+                { title: 'Tgl Kuasa', data: 'spb_date' },
+                { title: 'Nilai Hutang Pokok', data: 'principal_loan' },
+                { title: 'Nilai Penjaminan', data: 'guarantee_value' },
+                { title: 'Tgl Awal Cicilan', data: 'installment_start_date' },
+                { title: 'Tenor', data: 'tenor' },
+                { title: 'Kondisi Kendaraan', data: 'vehicle_condition' },
+                { title: 'Merk', data: 'brand' },
+                { title: 'Tipe', data: 'type' },
+                { title: 'Warna', data: 'color' },
+                { title: 'Thn Perakitan', data: 'assembly_year' },
+                { title: 'Thn Pembuatan', data: 'production_year' },
+                { title: 'No Rangka', data: 'chassis_number' },
+                { title: 'No Mesin', data: 'engine_number' },
+                { title: 'No BPKB', data: 'bpkb_number' },
+                { title: 'No Polisi', data: 'house_number' },
+                { title: 'Nilai objek OTR', data: 'otr_value' },
+                { title: 'Biaya PNBP', data: 'pnbp_fee' },
+                { title: 'Biaya Jasa', data: 'service_fee' },
+                {
+                    title: 'Aksi',
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: (row) => `
+          <div class="d-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+            <button class='btn btn-sm btn-info btn-row-action' data-action="view" data-id='${row.id}' title="Lihat">
+              <i class='fas fa-eye'></i>
+            </button>
+            <button class='btn btn-sm btn-warning btn-row-action' data-action="edit" data-id='${row.id}' title="Edit">
+              <i class="fas fa-pencil-alt"></i>
+            </button>
+            <button class='btn btn-sm btn-danger btn-row-action' data-action="delete" data-id='${row.id}' title="Hapus">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>`
+                }
+                ],
+                fixedHeader: true,
+                scrollX: true,
+                scrollY: '500px',
+                language: { emptyTable: "Tidak ada data yang tersedia hari ini" },
+                order: [[0, 'desc']]
+            });
+            
+            dataTable.on('xhr.dt', function () {
+                $('#loading-overlay,#loading-message').hide();
+            });
+        } else {
+            $('#consumerTable').DataTable().ajax.reload(null, false);
+        }
+        
+        function safeParseDecimalFromStr(v) {
+            if (v == null) return null;
+            let s = String(v).trim();
+            if (!s) return null;
+            
+            // buang spasi
+            s = s.replace(/\s+/g, '');
+            
+            // kalau ada tanda kurung akuntansi (mis. (123,45)) → negatif
+            let negative = false;
+            if (/^\(.*\)$/.test(s)) { negative = true; s = s.slice(1, -1); }
+            
+            // deteksi pemisah desimal: ambil pemisah terakhir di antara '.' atau ','
+            const lastDot = s.lastIndexOf('.');
+            const lastCom = s.lastIndexOf(',');
+            const lastSep = Math.max(lastDot, lastCom);
+            
+            if (lastSep !== -1) {
+                const intPart  = s.slice(0, lastSep).replace(/[.,]/g, '');   // buang pemisah ribuan
+                const fracPart = s.slice(lastSep + 1).replace(/[^\d]/g, ''); // hanya digit
+                s = intPart + (fracPart ? '.' + fracPart : '');
+            } else {
+                // tidak ada pemisah desimal → buang semua non digit/negatif
+                s = s.replace(/[^\d-]/g, '');
+            }
+            
+            // terapkan negatif jika perlu
+            if (negative && s && s[0] !== '-') s = '-' + s;
+            
+            // validasi akhir
+            if (!/^-?\d+(\.\d+)?$/.test(s)) return null;
+            
+            return s; // kembalikan STRING, biar DRF DecimalField presisi
+        }
+        
+        // CREATE
+        $('#modalCreateBody').on('submit', '#createForm', function (e) {
+            e.preventDefault();
+            const formData = Object.fromEntries(new FormData(this).entries());
+            
+            $.ajax({
+                url: '/prekonsumen/',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData)
+            })
+            .done(() => {
+                $('#modalCreate').modal('hide');
+                Swal.fire({
+                    title: 'Berhasil',
+                    text: 'Data berhasil ditambahkan.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    location.reload();
+                });
+            })
+            .fail((xhr) => {
+                if (xhr.status === 401) return;
+                const errorMsg = xhr.responseJSON ? JSON.stringify(xhr.responseJSON, null, 2) : 'Gagal menyimpan data.';
+                Swal.fire('Error', errorMsg, 'error');
+            });
+        });
+        
+        const LABELS_ID = {
+            id: 'ID',
+            document_status: 'Status Dokumen',
+            branch: 'Nama Cabang',
+            customer_type: 'Jenis Nasabah',
+            name_on_bpkb: 'Nama pada BPKB',
+            debtor_name: 'Nama Debitur',
+            gender: 'Jenis Kelamin',
+            marital_status: 'Status Pernikahan',
+            birth_place: 'Tempat Lahir',
+            birth_date: 'Tanggal Lahir',
+            occupation: 'Pekerjaan',
+            nationality: 'Kewarganegaraan',
+            id_type: 'Jenis Identitas',
+            id_number: 'No. Identitas',
+            address: 'Alamat',
+            rt_rw: 'RT / RW',
+            subdistrict: 'Kelurahan',
+            district: 'Kecamatan',
+            city: 'Kota',
+            province: 'Provinsi',
+            postal_code: 'Kode Pos',
+            company_type: 'Jenis Badan',
+            company_npwp: 'NPWP Badan',
+            deed_number: 'No. Akta Badan',
+            deed_date: 'Tanggal Akta Badan',
+            company_director_name: 'Nama PJ Badan',
+            spouse_name: 'Nama Pasangan',
+            director_gender: 'Jenis Kelamin Pasangan',
+            director_status: 'Status Pasangan',
+            director_birth_place: 'Tempat Lahir Pasangan',
+            director_birth_date: 'Tanggal Lahir Pasangan',
+            director_nationality: 'Kewarganegaraan PJ Badan',
+            director_id_type: 'Jenis ID PJ Badan',
+            director_id_number: 'No. ID PJ Badan',
+            director_address: 'Alamat PJ Badan',
+            director_rt_rw: 'RT / RW PJ Badan',
+            director_subdistrict: 'Kelurahan PJ Badan',
+            director_district: 'Kecamatan PJ Badan',
+            director_city: 'Kota PJ Badan',
+            director_province: 'Provinsi PJ Badan',
+            director_position: 'Jabatan PJ Badan',
+            agreement_type: 'Jenis Perjanjian',
+            agreement_name: 'Nama Perjanjian',
+            agreement_number: 'No. Perjanjian',
+            agreement_date: 'Tanggal Perjanjian',
+            principal_loan: 'Nilai Hutang Pokok',
+            guarantee_value: 'Nilai Penjaminan',
+            installment_start_date: 'Tanggal Awal Cicilan',
+            tenor: 'Tenor',
+            vehicle_condition: 'Kondisi Kendaraan',
+            brand: 'Merek',
+            type: 'Tipe',
+            color: 'Warna',
+            assembly_year: 'Tahun Perakitan',
+            production_year: 'Tahun Pembuatan',
+            chassis_number: 'No. Rangka',
+            engine_number: 'No. Mesin',
+            bpkb_number: 'No. BPKB',
+            house_number: 'No. Polisi',
+            otr_value: 'Nilai OTR',
+            pnbp_fee: 'Biaya PNBP',
+            service_fee: 'Biaya Jasa',
+            decree_date: 'Tanggal SK',
+            created_at: 'Tanggal Unggah',
+            bpkb_birth_date: 'Tanggal Lahir (BPKB)',
+            spb_date: 'Tanggal Kuasa',
+            installment_end_date: 'Tanggal Akhir Cicilan',
+            st_process: 'ST Dipakai',
+            over_credit: 'Over Kredit',
+            sync: 'Sinkronisasi'
+        };
+        
+        const DATE_FIELDS = new Set([
+        'deed_date','decree_date','director_birth_date','installment_start_date',
+        'created_at','birth_date','bpkb_birth_date','agreement_date','spb_date','installment_end_date'
+        ]);
+        
+        function formatDateHuman(value) {
+            if (!value) return '–';
+            const d = new Date(value);
+            if (isNaN(d)) return value;
+            
+            const yyyy = d.getFullYear();
+            const mm   = String(d.getMonth() + 1).padStart(2, '0');
+            const dd   = String(d.getDate()).padStart(2, '0');
+            const hh   = String(d.getHours()).padStart(2, '0');
+            const min  = String(d.getMinutes()).padStart(2, '0');
+            
+            return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+        }
+        
+        const getLabel = (key) => LABELS_ID[key] || key.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+        // semula: const fmtVal = (v) => ...
+        const fmtVal = (v, key) => {
+            if (v === true)  return 'Ya';
+            if (v === false) return 'Tidak';
+            if (DATE_FIELDS.has(key) && v) return formatDateHuman(v);
+            return (v ?? '–');
+        };
+        
+        function normalizeDetailKeys(res) {
+            if (res.branch_name && !res.branch) res.branch = res.branch_name;
+            return res;
+        }
+        
+        const USE_HORIZONTAL_VIEW = false;
+        
+        // ====== 2) Konfigurasi layout (URUTAN & SECTION) ======
+        // -- Ubah urutan/field di sini sesuai seleramu --
+        const VIEW_SECTIONS = [
+        { title: 'Informasi Umum', cols: 12, fields: ['id','branch','customer_type'] },
+        { title: 'Identitas Debitur', cols: 6, fields: ['debtor_name','gender','marital_status','birth_place','birth_date','occupation','nationality','id_type','id_number'] },
+        { title: 'Alamat Debitur', cols: 6, fields: ['address','rt_rw','subdistrict','district','city','province','postal_code'] },
+        { title: 'Perjanjian', cols: 6, fields: ['agreement_type','agreement_name','agreement_number','agreement_date','spb_date','principal_loan','guarantee_value','installment_start_date','installment_end_date','tenor'] },
+        { title: 'Kendaraan', cols: 6, fields: ['vehicle_condition','brand','type','color','production_year','assembly_year','chassis_number','engine_number','bpkb_number','house_number','name_on_bpkb','bpkb_birth_date','otr_value','pnbp_fee','service_fee'] },
+        // Kolom director_* dipakai ulang untuk data pasangan (Mizuho tidak punya nasabah badan usaha)
+        { title: 'Pasangan', cols: 12, fields: ['spouse_name','director_gender','director_status','director_birth_place','director_birth_date'] },
+        { title: 'Tanggal & Status Lain', cols: 12, fields: ['decree_date','created_at','st_process','over_credit','sync'] }
+        ];
+        const EXCLUDED_EDIT_FIELDS = new Set(['st_process','over_credit','sync']);
+        const EDIT_SECTIONS = VIEW_SECTIONS.map(sec => ({
+            ...sec,
+            fields: sec.fields.filter(f => !EXCLUDED_EDIT_FIELDS.has(f))
+        }));
+        
+        const VIEW_COLUMNS = [
+        'id','branch','customer_type',
+        'debtor_name','gender','marital_status','birth_place','birth_date','occupation','nationality',
+        'id_type','id_number','address','rt_rw','subdistrict','district','city','province','postal_code',
+        'agreement_type','agreement_name','agreement_number','agreement_date','principal_loan','guarantee_value',
+        'vehicle_condition','brand','type','color','production_year','assembly_year',
+        'chassis_number','engine_number','bpkb_number','name_on_bpkb','bpkb_birth_date',
+        'otr_value','pnbp_fee','service_fee',
+        'decree_date','created_at','spb_date','installment_start_date','installment_end_date',
+        'st_process','over_credit','sync'
+        ];
+        
+        // ====== 3) Helper builder ======
+        function buildSectionTable(res, section) {
+            let rows = '';
+            section.fields.forEach(k => {
+                if (k in res) rows += `<tr><th style="width:38%">${getLabel(k)}</th><td>${fmtVal(res[k], k)}</td></tr>`;
+            });
+            if (!rows) return '';
+            return `
+    <div class="col-md-${section.cols || 12} mb-3">
+      <div class="card shadow-sm">
+        <div class="card-header py-2">${section.title}</div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-striped table-bordered mb-0">${rows}</table>
+        </div>
+      </div>
+    </div>`;
+        }
+        
+        function buildHorizontalTable(res) {
+            let th = '', td = '';
+            VIEW_COLUMNS.forEach(k => {
+                if (k in res) {
+                    th += `<th>${getLabel(k)}</th>`;
+                    td += `<td>${fmtVal(res[k], k)}</td>`;
+                }
+            });
+            return `
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered">
+        <thead class="table-light"><tr>${th}</tr></thead>
+        <tbody><tr>${td}</tr></tbody>
+      </table>
+    </div>`;
+        }
+        
+        function inputTypeFor(key) {
+            const dateFields = new Set(['deed_date','decree_date','director_birth_date','installment_start_date',
+            'created_at','birth_date','bpkb_birth_date','agreement_date','spb_date','installment_end_date']);
+            const numberFields = new Set(['assembly_year','tenor','pnbp_fee','otr_value','service_fee','principal_loan','guarantee_value','production_year']);
+            if (dateFields.has(key)) return 'date';
+            if (numberFields.has(key)) return 'number';
+            return 'text';
+        }
+        
+        function buildSectionForm(res, section) {
+            let body = '';
+            section.fields.forEach(k => {
+                if (EXCLUDED_EDIT_FIELDS.has(k)) return; // ← hard skip di edit
+                if (!['id','created_at','updated_at'].includes(k) && (k in res)) {
+                    const type = inputTypeFor(k);
+                    const val  = res[k] ?? '';
+                    body += `
+        <div class="mb-2">
+          <label class="form-label">${getLabel(k)}</label>
+          <input type="${type}" name="${k}" value="${type==='date' && val ? String(val).slice(0,10) : val}" class="form-control">
+        </div>`;
+                }
+            });
+            if (!body) return '';
+            return `
+    <div class="col-md-${section.cols || 12} mb-3">
+      <div class="card shadow-sm">
+        <div class="card-header py-2">${section.title}</div>
+        <div class="card-body">${body}</div>
+      </div>
+    </div>`;
+        }
+        
+        function formatDateInput(value) {
+            if (!value) return null;
+            const date = new Date(value);
+            if (isNaN(date)) return null;
+            const yyyy = date.getFullYear();
+            const mm   = String(date.getMonth()+1).padStart(2,'0');
+            const dd   = String(date.getDate()).padStart(2,'0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+        function safeParseIntFromFloatStr(val) {
+            if (!val || val === '' || isNaN(val)) return null;
+            return parseInt(parseFloat(val));
+        }
+        
+        // Gantilah selector klik baris ke class yang benar
+        $('#consumerTable').on('click', '.btn-row-action', function () {
+            const id = $(this).data('id');
+            const action = $(this).data('action');
+            
+            if (action === 'view') {
+                $('#modalView').modal('show');
+                $('#modalViewBody').html(`<div class="text-muted">Memuat detail untuk ID: ${id}...</div>`);
+                $.ajax({
+                    url: `/consumers/${id}/`,
+                    type: 'GET'
+                })
+                .done((res) => {
+                    res = normalizeDetailKeys(res);
+                    if (USE_HORIZONTAL_VIEW) {
+                        $('#modalViewBody').html(buildHorizontalTable(res));
+                    } else {
+                        let grid = '<div class="row">';
+                            VIEW_SECTIONS.forEach(sec => grid += buildSectionTable(res, sec));
+                            grid += '</div>';
+                            $('#modalViewBody').html(grid);
+                        }
+                    })
+                    .fail((xhr) => {
+                        if (xhr.status === 401) return; // sudah di-handle global
+                        $('#modalViewBody').html(`<div class="alert alert-danger">Gagal memuat data detail.</div>`);
+                    });
+                    
+                } else if (action === 'edit') {
+                    $('#modalEdit').modal('show');
+                    $('#modalEditBody').html(`<div class="text-muted">Memuat formulir edit untuk ID: ${id}...</div>`);
+                    $.ajax({ url: `/consumers/${id}/`, type: 'GET' })
+                    .done((res) => {
+                        res = normalizeDetailKeys(res);
+                        let form = `<form id="editForm" data-id="${id}"><div class="row">`;
+                            EDIT_SECTIONS.forEach(sec => form += buildSectionForm(res, sec));
+                            form += `</div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary">Simpan Semua</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            </div></form>`;
+                            $('#modalEditBody').html(form);
+                        })
+                        .fail((xhr) => {
+                            if (xhr.status === 401) return;
+                            $('#modalEditBody').html(`<div class="alert alert-danger">Gagal memuat data untuk edit.</div>`);
+                        });
+                        
+                    } else if (action === 'delete') {
+                        Swal.fire({
+                            title: 'Konfirmasi Hapus',
+                            text: `Apakah kamu yakin ingin menghapus ID: ${id}?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Ya, Hapus',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $.ajax({
+                                    url: `/consumers/${id}/`,
+                                    type: 'DELETE'
+                                })
+                                .done(() => {
+                                    Swal.fire({
+                                        title: 'Terhapus',
+                                        text: 'Data berhasil dihapus.',
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        // Refresh seluruh halaman setelah user klik OK
+                                        location.reload();
+                                    });
+                                })
+                                .fail((xhr) => {
+                                    if (xhr.status === 401) return;
+                                    const errMsg = xhr.responseJSON ? JSON.stringify(xhr.responseJSON, null, 2) : 'Gagal menghapus data.';
+                                    Swal.fire('Error', errMsg, 'error');
+                                });
+                            }
+                        });
+                    }
+                });
+                
+                // =====================
+                // Submit Edit (bind sekali)
+                // =====================
+                $('#modalEditBody').off('submit', '#editForm').on('submit', '#editForm', function (e) {
+                    e.preventDefault();
+                    const id  = $(this).data('id');
+                    
+                    const fd  = new FormData(this);
+                    const raw = Object.fromEntries(fd.entries());
+                    
+                    // Field yang TIDAK BOLEH ikut update
+                    const SKIP_FIELDS = new Set(['st_process','over_credit','sync']);
+                    
+                    // Tipe data
+                    const dateFields = ['deed_date','decree_date','director_birth_date','installment_start_date',
+                    'created_at','birth_date','bpkb_birth_date','agreement_date','spb_date','installment_end_date'];
+                    
+                    // Integer murni (kalau mau, pisahkan decimal uang ke array terpisah seperti saran sebelumnya)
+                    const intFields  = ['assembly_year','tenor','production_year'];
+                    
+                    const decimalFields = ['pnbp_fee','otr_value','service_fee','principal_loan','guarantee_value'];
+                    
+                    const payload = {};
+                    
+                    // Dates
+                    dateFields.forEach(f => {
+                        if (SKIP_FIELDS.has(f)) return;
+                        if (raw[f]) payload[f] = formatDateInput(raw[f]);
+                    });
+                    
+                    // Integers
+                    intFields.forEach(f => {
+                        if (SKIP_FIELDS.has(f)) return;
+                        if (raw[f] !== '' && raw[f] != null) payload[f] = safeParseIntFromFloatStr(raw[f]);
+                    });
+                    
+                    // Decimals (kalau belum punya, buat safeParseDecimalFromStr sederhana)
+                    decimalFields.forEach(f => {
+                        if (SKIP_FIELDS.has(f)) return;
+                        if (raw[f] !== '' && raw[f] != null) {
+                            const norm = safeParseDecimalFromStr(raw[f]);
+                            if (norm != null) payload[f] = norm; // kirim STRING "1234.56"
+                        }
+                    });
+                    
+                    // Field lain
+                    Object.keys(raw).forEach(k => {
+                        if (SKIP_FIELDS.has(k)) return;
+                        if (dateFields.includes(k) || intFields.includes(k) || decimalFields.includes(k)) return;
+                        if (raw[k] !== '' && raw[k] != null) payload[k] = raw[k];
+                    });
+                    
+                    $.ajax({
+                        url: `/consumers/${id}/`,
+                        type: 'PATCH',
+                        contentType: 'application/json',
+                        data: JSON.stringify(payload)
+                    })
+                    .done(() => {
+                        $('#modalEdit').modal('hide');
+                        Swal.fire({ title: 'Berhasil', text: 'Data berhasil diperbarui.', icon: 'success', confirmButtonText: 'OK' })
+                        .then(() => location.reload());
+                    })
+                    .fail((xhr) => {
+                        if (xhr.status === 401) return;
+                        const errorMsg = xhr.responseJSON ? JSON.stringify(xhr.responseJSON, null, 2) : 'Gagal memperbarui data.';
+                        Swal.fire('Error', errorMsg, 'error');
+                    });
+                });
+                
+                const EXPORT_URL = '/api/consumer/export/?download=excel';
+                const exportUrl = () => `${EXPORT_URL}&doc_filter=${encodeURIComponent($('#docFilter').val() || 'all')}`;
+
+                $('#docFilter').on('change', function () {
+                    $('#consumerTable').DataTable().ajax.reload();
+                });
+
+                // ===== Upload OTD =====
+                function renderOtdResult(res) {
+                    const s = res.summary || {};
+                    const esc = (v) => $('<span>').text(v ?? '').html();
+                    const list = (items, label) => (items && items.length)
+                        ? `<div class="small mt-1"><b>${label}:</b> ${items.map(i => esc(i.agreement_number)).join(', ')}</div>` : '';
+                    return `
+                        <div class="alert alert-info mb-0">
+                            <div>Berhasil: <b>${s.updated || 0}</b></div>
+                            <div>Tidak ditemukan: <b>${s.not_found || 0}</b></div>
+                            <div>Sudah diproses (generate): <b>${s.already_processed || 0}</b></div>
+                            <div>Status tidak sesuai: <b>${s.status_mismatch || 0}</b></div>
+                            ${list(res.not_found, 'Tidak ditemukan')}
+                            ${list(res.already_processed, 'Sudah diproses')}
+                            ${list(res.status_mismatch, 'Status tidak sesuai')}
+                        </div>`;
+                }
+
+                $('#btnUploadOtd').on('click', function () {
+                    $('#otdFile').val('');
+                    $('#otdResult').empty();
+                    $('#modalOtd').modal('show');
+                });
+
+                $('#btnSubmitOtd').on('click', function () {
+                    const file = $('#otdFile')[0]?.files?.[0];
+                    if (!file) {
+                        Swal.fire('Perhatian', 'Pilih file Excel terlebih dahulu.', 'warning');
+                        return;
+                    }
+                    const btn = $(this).prop('disabled', true);
+                    const fd = new FormData();
+                    fd.append('excel_file', file);
+                    $('#otdResult').html('<div class="text-muted">Memproses...</div>');
+
+                    $.ajax({
+                        url: '/api/prekonsumen/otd-upload/',
+                        type: 'POST',
+                        data: fd,
+                        processData: false,
+                        contentType: false
+                    }).done(function (res) {
+                        $('#otdResult').html(renderOtdResult(res));
+                        $('#consumerTable').DataTable().ajax.reload(null, false);
+                    }).fail(function (xhr) {
+                        if (xhr.status === 401) return;
+                        const body = xhr.responseJSON || {};
+                        const errs = (body.errors || []).map(e => `<li>${$('<span>').text(e).html()}</li>`).join('');
+                        $('#otdResult').html(`<div class="alert alert-danger mb-0">${$('<span>').text(body.detail || 'Upload gagal.').html()}${errs ? `<ul class="mb-0 mt-1 small">${errs}</ul>` : ''}</div>`);
+                    }).always(function () {
+                        btn.prop('disabled', false);
+                    });
+                });
+                
+                function filenameFromContentDisposition(disposition) {
+                    if (!disposition) return null;
+                    // RFC 5987: filename*=
+                    const matchStar = /filename\*\s*=\s*UTF-8''([^;]+)/i.exec(disposition);
+                    if (matchStar) return decodeURIComponent(matchStar[1]);
+                    
+                    // filename="..."
+                    const matchQuoted = /filename\s*=\s*"([^"]+)"/i.exec(disposition);
+                    if (matchQuoted) return matchQuoted[1];
+                    
+                    // filename=plain
+                    const matchPlain = /filename\s*=\s*([^;]+)/i.exec(disposition);
+                    if (matchPlain) return matchPlain[1].trim();
+                    
+                    return null;
+                }
+                
+                // Optional: fallback nama file kalau header ga ada
+                function todayYYYYMMDD() {
+                    const d = new Date();
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth()+1).padStart(2,'0');
+                    const dd = String(d.getDate()).padStart(2,'0');
+                    return `${yyyy}${mm}${dd}`;
+                }
+                
+                // Pastikan tidak double-bind
+                $('#btnExportExcel').off('click.export').on('click.export', async function (e) {
+                    e.preventDefault();
+                    
+                    const btn = this;
+                    
+                    // Guard: kalau lagi proses, langsung keluar
+                    if (btn.dataset.busy === '1') return;
+                    btn.dataset.busy = '1';
+                    
+                    const originalHtml = btn.innerHTML;
+                    
+                    try {
+                        btn.disabled = true;
+                        btn.setAttribute('aria-busy', 'true');
+                        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Memproses…`;
+                        
+                        const res = await fetch(exportUrl(), { method: 'GET', credentials: 'same-origin' });
+                        
+                        if (res.status === 401) {
+                            window.location.href = '/login/';
+                            return;
+                        }
+                        if (!res.ok) {
+                            const msg = `Gagal mengunduh: ${res.status} ${res.statusText}`;
+                            if (window.Swal) Swal.fire('Error', msg, 'error'); else alert(msg);
+                            return;
+                        }
+                        
+                        const blob = await res.blob();
+                        
+                        // Ambil filename dari header jika ada
+                        const cd = res.headers.get('Content-Disposition');
+                        const filename = (typeof filenameFromContentDisposition === 'function'
+                        ? filenameFromContentDisposition(cd)
+                        : null) || `Konsumen${todayYYYYMMDD()}.xlsx`;
+                        
+                        // Trigger download
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        URL.revokeObjectURL(url);
+                        
+                        if (window.Swal) Swal.fire('Berhasil', 'File Excel berhasil diunduh.', 'success');
+                    } catch (err) {
+                        const msg = `Terjadi kesalahan saat mengunduh file. ${err?.message || err}`;
+                        if (window.Swal) Swal.fire('Error', msg, 'error'); else alert(msg);
+                    } finally {
+                        // Lepas busy flag terakhir agar klik berikutnya baru diizinkan
+                        delete btn.dataset.busy;
+                        btn.disabled = false;
+                        btn.removeAttribute('aria-busy');
+                        btn.innerHTML = originalHtml;
+                    }
+                });
+            });
+        </script>
+        {% endblock %}
+        {% endblock %}

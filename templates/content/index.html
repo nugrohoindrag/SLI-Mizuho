@@ -1,0 +1,607 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} Dashboard {% endblock %}
+
+{% block content %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<!-- BEGIN: Content-->
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <h5 class="mb-2">Dashboard</h5>
+        <div class="content-body">
+            
+            <!-- ====================== FILTER BAR ====================== -->
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="card shadow-sm">
+                        {% if not is_notaris %}
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4>Fidusia Order Monitoring </h4>
+                            </div>
+                        </div>
+                        <div class="card-body" style="padding-top: 0;">
+                            <div class="card shadow-sm border-0" style="margin-bottom: 0;">
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-lg-3 col-md-6">
+                                            <label for="filterStart" class="form-label text-secondary fw-semibold">Dari Tanggal</label>
+                                            <input type="date" class="form-control shadow-sm" id="filterStart" placeholder="dd/mm/yyyy">
+                                        </div>
+                                        <div class="col-lg-3 col-md-6">
+                                            <label for="filterEnd" class="form-label text-secondary fw-semibold">Sampai Tanggal</label>
+                                            <input type="date" class="form-control shadow-sm" id="filterEnd" placeholder="dd/mm/yyyy">
+                                        </div>
+                                        <div class="col-lg-3 col-md-6">
+                                            <label class="form-label text-secondary fw-semibold">Cabang</label>
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary dropdown-toggle w-100 shadow-sm" type="button" id="branchDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Semua Cabang
+                                                </button>
+                                                <div class="dropdown-menu w-100" id="branchDropdownMenu" aria-labelledby="branchDropdown">
+                                                    <a class="dropdown-item" href="#" data-value="">Semua Cabang</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3 col-md-6 d-flex align-items-end">
+                                            <div class="dropdown w-100">
+                                                <button class="btn btn-success text-white dropdown-toggle w-100 shadow-sm" type="button" id="exportDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Unduh Excel
+                                                </button>
+                                                <div class="dropdown-menu w-100" aria-labelledby="exportDropdown">
+                                                    <a class="dropdown-item" id="export-excel-reguler" href="#">Excel Reguler</a>
+                                                    <a class="dropdown-item" id="export-excel-mu" href="#">Excel Multi Unit</a>
+                                                    <a class="dropdown-item" id="export-excel-perubahan" href="#">Excel Perubahan Fidusia</a>
+                                                    <a class="dropdown-item" id="export-excel-oc" href="#">Excel Over Credit</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <!-- =================== END FILTER BAR ===================== -->
+            
+            <!-- ======================== STAT CARDS ======================== -->
+            <div class="row" id="stat-cards">
+                <!-- Masuk -->
+                <div class="col-xl-4 col-lg-6 col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media">
+                                <div class="media-body text-left w-100">
+                                    <h3 class="primary" id="stat-uploaded">0 Data</h3>
+                                    <span>Data Masuk</span>
+                                    <div class="small" id="stat-uploaded-detail">
+                                        <div style="display: flex; gap: 1.2em; margin-top: 0.2em;">
+                                            <span title="Reguler" id="stat-uploaded-detail-r">R: 0</span>
+                                            <span title="Multi Unit" id="stat-uploaded-detail-mu">MU: 0</span>
+                                            <span title="Over Credit" id="stat-uploaded-detail-oc">OC: 0</span>
+                                            <span title="Perubahan Fidusia" id="stat-uploaded-detail-pf">PF: 0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="media-right media-middle">
+                                    <i class="icon-user-follow primary font-large-2 float-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Terproses -->
+                <div class="col-xl-4 col-lg-6 col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media">
+                                <div class="media-body text-left w-100">
+                                    <h3 class="danger" id="stat-processed">0 Data</h3>
+                                    <span>Data Terproses</span>
+                                    <div class="small" id="stat-processed-detail">
+                                        <div style="display: flex; gap: 1.2em; margin-top: 0.2em;">
+                                            <span title="Reguler" id="stat-processed-detail-r">R: 0</span>
+                                            <span title="Multi Unit" id="stat-processed-detail-mu">Mu: 0</span>
+                                            <span title="Over Credit" id="stat-processed-detail-oc">OC: 0</span>
+                                            <span title="Perubahan Fidusia" id="stat-processed-detail-pf">PF: 0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="media-right media-middle">
+                                    <i class="icon-social-dropbox danger font-large-2 float-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Completed -->
+                <div class="col-xl-4 col-lg-6 col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media">
+                                <div class="media-body text-left w-100">
+                                    <h3 class="success" id="stat-done">0 Data</h3>
+                                    <span>Selesai Diproses</span>
+                                    <div class="small" id="stat-done-detail">
+                                        <div style="display: flex; gap: 1.2em; margin-top: 0.2em;">
+                                            <span title="Reguler" id="stat-done-detail-r">R: 0</span>
+                                            <span title="Multi Unit" id="stat-done-detail-mu">Mu: 0</span>
+                                            <span title="Over Credit" id="stat-done-detail-oc">OC: 0</span>
+                                            <span title="Change of Fiduciary" id="stat-done-detail-pf">PF: 0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="media-right media-middle">
+                                    <i class="icon-layers success font-large-2 float-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ====================== END STAT CARDS ===================== -->
+            
+            <!-- ===================== CHART: UPLOAD & PERCENTAGE ===================== -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card box-shadow-0">
+                        <div class="card-content">
+                            <div class="row">
+                                <!-- BAR CHART -->
+                                <div class="col-xl-9 col-lg-12">
+                                    <div class="card-body" style="padding-right: 0;">
+                                        <div id="bar-chart" class="height-450"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- DONUT + PROGRESS INFO -->
+                                <div class="col-xl-3 col-lg-12">
+                                    <div class="card-body" style="padding-left: 0;">
+                                        <h4 class="card-title mt-2">Data Selesai Diproses</h4>
+                                        <div class="sales">
+                                            <!-- Reguler -->
+                                            <div class="sales-today mb-2">
+                                                <p class="m-0">Reguler
+                                                    <span class="primary float-end" id="percentage-reguler">
+                                                        <i class="feather primary"></i> 0%
+                                                    </span>
+                                                </p>
+                                                <div class="progress progress-sm mt-1 mb-0">
+                                                    <div class="progress-bar bg-primary" id="progress-reguler" style="width: 0%"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Over Credit -->
+                                            <div class="sales-yesterday mb-2">
+                                                <p class="m-0">Over Credit
+                                                    <span class="warning float-end" id="percentage-oc">
+                                                        <i class="feather warning"></i> 0%
+                                                    </span>
+                                                </p>
+                                                <div class="progress progress-sm mt-1 mb-0">
+                                                    <div class="progress-bar bg-warning" id="progress-oc" style="width: 0%"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Multi Unit -->
+                                            <div class="sales-yesterday mb-2">
+                                                <p class="m-0">Multi Unit
+                                                    <span class="info float-end" id="percentage-mu">
+                                                        <i class="feather info"></i> 0%
+                                                    </span>
+                                                </p>
+                                                <div class="progress progress-sm mt-1 mb-0">
+                                                    <div class="progress-bar bg-info" id="progress-mu" style="width: 0%"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Perubahan Fidusia -->
+                                            <div class="sales-yesterday">
+                                                <p class="m-0">Perubahan Fidusia
+                                                    <span class="danger float-end" id="percentage-change">
+                                                        <i class="feather danger"></i> 0%
+                                                    </span>
+                                                </p>
+                                                <div class="progress progress-sm mt-1 mb-0">
+                                                    <div class="progress-bar bg-danger" id="progress-change" style="width: 0%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h4 class="card-title pr-2 pt-1">Login Terakhir</h4>
+                                        <div class="table-responsive">
+                                            <table id="consumerTable" class="display table table-striped">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>User</th>
+                                                        <th>status</th>
+                                                        <th>ip_address</th>
+                                                        <th>Waktu</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for log in login_history %}
+                                                    <tr>
+                                                        <td>{{ log.user.username }}</td>
+                                                        <td>{{ log.status }}</td>
+                                                        <td>{{ log.ip_address }}</td>
+                                                        <td>{{ log.created_at|date:"Y-m-d H:i:s" }}</td>
+                                                    </tr>
+                                                    {% empty %}
+                                                    <tr>
+                                                        <td colspan="5" class="text-center">Belum ada data login.</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div> <!-- /card-body -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END: Content-->
+<script src="{% static 'js/apexcharts.js' %}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let selectedBranch = "";
+        let donutChart = null;
+        let barChart = null;
+
+        function dashboardApiUrl(path) {
+            return selectedBranch ? `${path}?branch=${encodeURIComponent(selectedBranch)}` : path;
+        }
+
+        /* ========================
+        * 1) Statistik Dashboard
+        * ======================== */
+        function loadDashboardStats() {
+        fetch(dashboardApiUrl('/api/dashboard-stats/'))
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            // Uploaded stats
+            document.getElementById('stat-uploaded').innerText = `${data.uploaded.total} Data`;
+            document.getElementById('stat-uploaded-detail-r').innerText = `R: ${data.uploaded.details.reguler}`;
+            document.getElementById('stat-uploaded-detail-mu').innerText = `MU: ${data.uploaded.details.mu}`;
+            document.getElementById('stat-uploaded-detail-oc').innerText = `OC: ${data.uploaded.details.oc}`;
+            document.getElementById('stat-uploaded-detail-pf').innerText = `PF: ${data.uploaded.details.pf}`;
+            
+            // Processed stats
+            document.getElementById('stat-processed').innerText = `${data.processed.total} Data`;
+            document.getElementById('stat-processed-detail-r').innerText = `R: ${data.processed.details.reguler}`;
+            document.getElementById('stat-processed-detail-mu').innerText = `MU: ${data.processed.details.mu}`;
+            document.getElementById('stat-processed-detail-oc').innerText = `OC: ${data.processed.details.oc}`;
+            document.getElementById('stat-processed-detail-pf').innerText = `PF: ${data.processed.details.pf}`;
+            
+            // Done stats
+            document.getElementById('stat-done').innerText = `${data.done.total} Data`;
+            document.getElementById('stat-done-detail-r').innerText = `R: ${data.done.details.reguler}`;
+            document.getElementById('stat-done-detail-mu').innerText = `MU: ${data.done.details.mu}`;
+            document.getElementById('stat-done-detail-oc').innerText = `OC: ${data.done.details.oc}`;
+            document.getElementById('stat-done-detail-pf').innerText = `PF: ${data.done.details.pf}`;
+            
+            // Progress
+            document.getElementById('percentage-reguler').innerHTML = `<i class="feather primary"></i> ${data.percent_reguler}%`;
+            document.getElementById('progress-reguler').style.width = `${data.percent_reguler}%`;
+            
+            document.getElementById('percentage-oc').innerHTML = `<i class="feather warning"></i> ${data.percent_oc}%`;
+            document.getElementById('progress-oc').style.width = `${data.percent_oc}%`;
+            
+            document.getElementById('percentage-mu').innerHTML = `<i class="feather info"></i> ${data.percent_mu}%`;
+            document.getElementById('progress-mu').style.width = `${data.percent_mu}%`;
+            
+            document.getElementById('percentage-change').innerHTML = `<i class="feather danger"></i> ${data.percent_change}%`;
+            document.getElementById('progress-change').style.width = `${data.percent_change}%`;
+            
+            // Donut chart
+            if (donutChart) {
+                donutChart.destroy();
+            }
+            donutChart = new ApexCharts(document.querySelector("#sessions-browser-donut-chart"), {
+                chart: { type: 'donut', height: 200 },
+                labels: data.browser_labels,
+                series: data.browser_series,
+                legend: { position: 'bottom' },
+                dataLabels: {
+                    enabled: true,
+                    formatter: val => val.toFixed(0) + '%'
+                }
+            });
+            donutChart.render();
+        })
+        .catch(err => console.error('Gagal ambil statistik dashboard:', err));
+        }
+        
+        /* ========================
+        * 2) Grafik Dashboard
+        * ======================== */
+        function loadDashboardGraph() {
+        fetch(dashboardApiUrl('/api/dashboard-graph/'))
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            const idFull = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
+            // Bar chart
+            const barOptions = {
+                series: [
+                {
+                    name: 'Reguler',
+                    data: data.bar_series.reguler
+                },
+                {
+                    name: 'Over Credit',
+                    data: data.bar_series.oc
+                },
+                {
+                    name: 'Multi Unit',
+                    data: data.bar_series.mu
+                },
+                {
+                    name: 'Perubahan Fidusia',
+                    data: data.bar_series.pf
+                }
+                ],
+                chart: {
+                    type: 'bar',
+                    height: 450,
+                    stacked: true,
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        borderRadius: 10,
+                        borderRadiusApplication: 'end', // 'around', 'end'
+                        borderRadiusWhenStacked: 'last', // 'all', 'last'
+                        dataLabels: {
+                            total: {
+                                enabled: true,
+                                style: {
+                                    fontSize: '13px',
+                                    fontWeight: 900
+                                }
+                            }
+                        }
+                    },
+                },
+                xaxis: {
+                    categories: data.bar_labels
+                },
+                tooltip: {
+                    x: {
+                        formatter: (_label, { dataPointIndex }) => {
+                            const iso = data.bar_dates?.[dataPointIndex];
+                            return iso
+                            ? new Date(iso).toLocaleDateString('id-ID', idFull)
+                            : _label;
+                        }
+                    },
+                    y: {
+                        formatter: val => `${val} file`
+                    }
+                }
+            };
+            if (barChart) {
+                barChart.destroy();
+            }
+            barChart = new ApexCharts(document.querySelector("#bar-chart"), barOptions);
+            barChart.render();
+        })
+        .catch(err => console.error('Gagal ambil data grafik dashboard:', err));
+        }
+
+        function refreshDashboard() {
+            loadDashboardStats();
+            loadDashboardGraph();
+        }
+
+        refreshDashboard();
+        
+        /* ========================
+        * 3) Dropdown Cabang (Bootstrap 4.1)
+        * ======================== */
+        const branchDropdown      = document.getElementById("branchDropdown");
+        const branchDropdownMenu  = document.getElementById("branchDropdownMenu");
+        
+        // Populate cabang dari API (bersihkan & pertahankan "Semua Cabang")
+        fetch("/api/branches/")
+        .then(res => res.json())
+        .then(data => {
+            // reset isi menu dengan item default
+            branchDropdownMenu.innerHTML = `<a class="dropdown-item" href="#" data-value="">Semua Cabang</a>`;
+            // tambah item dari API
+            data.forEach(branch => {
+                const item = document.createElement("a");
+                item.className = "dropdown-item";
+                item.href = "#";
+                item.dataset.value = branch.branch_code;   // ex: "20202-0005"
+                item.textContent = branch.branch_name || branch.branch_code;  // Display branch name or code if name not available
+                branchDropdownMenu.appendChild(item);
+            });
+        })
+        .catch(err => console.error("Gagal memuat cabang:", err));
+        
+        // Single listener untuk semua item di menu cabang (hindari double-binding)
+        branchDropdownMenu.addEventListener("click", function (e) {
+            const item = e.target.closest(".dropdown-item");
+            if (!item) return;
+            e.preventDefault();
+            
+            selectedBranch = item.dataset.value || "";
+            branchDropdown.textContent = item.textContent || "Semua Cabang";
+            refreshDashboard();
+        });
+        
+        
+        /* ========================
+        * 4) Validasi & Export (Refactor)
+        * ======================== */
+        
+        function validateDateRange() {
+            const startDate = document.getElementById('filterStart').value;
+            const endDate   = document.getElementById('filterEnd').value;
+            
+            if (!startDate || !endDate) {
+                Swal.fire({
+                    title: "Perhatian!",
+                    text: "Mohon isi tanggal mulai dan tanggal akhir terlebih dahulu",
+                    icon: "warning",
+                    confirmButtonText: "OK"
+                });
+                return null;
+            }
+            return { startDate, endDate };
+        }
+        
+        function setExportButtonLoading(buttonEl, isLoading) {
+            if (!buttonEl) return;
+            if (isLoading) {
+                buttonEl.setAttribute('disabled', 'disabled');
+                buttonEl.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sedang mengunduh...';
+            } else {
+                buttonEl.removeAttribute('disabled');
+                buttonEl.innerHTML = 'Unduh Excel';
+            }
+        }
+        
+        // 1 fungsi buat semua export
+        async function exportExcel({ url, query = {}, filenameFallback, button }) {
+            const range = validateDateRange();
+            if (!range) return;
+            
+            setExportButtonLoading(button, true);
+            
+            try {
+                // build query string (otomatis encode)
+                const params = new URLSearchParams({
+                    start: range.startDate,
+                    end: range.endDate,
+                    branch: selectedBranch || "",
+                    ...query,
+                });
+                
+                const res = await fetch(`${url}?${params.toString()}`, {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+                
+                const contentType = res.headers.get('Content-Type') || '';
+                if (!res.ok || contentType.includes('application/json')) {
+                    let errMsg = 'Gagal mengunduh file.';
+                    try {
+                        const err = await res.json();
+                        if (err && err.message) errMsg = err.message;
+                    } catch (_) {}
+                    await Swal.fire({ title: 'Gagal', text: errMsg, icon: 'error', confirmButtonText: 'OK' });
+                    return;
+                }
+                
+                const blob = await res.blob();
+                
+                // ambil nama file dari header kalau ada
+                const cd = res.headers.get('Content-Disposition') || '';
+                const match = cd.match(/filename="?([^"]+)"?/i);
+                const filename = match ? match[1] : `${filenameFallback}_${selectedBranch}_${range.startDate}_${range.endDate}.xlsx`;
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(link.href);
+                
+            } catch (err) {
+                await Swal.fire({ title: 'Kesalahan', text: 'Terjadi kesalahan jaringan atau server.', icon: 'error', confirmButtonText: 'OK' });
+            } finally {
+                setTimeout(() => setExportButtonLoading(button, false), 300);
+            }
+        }
+        
+        // Map tombol → endpoint & parameter
+        const exportDropdownBtn = document.getElementById('exportDropdown');
+        
+        const EXPORTS = {
+            reguler: {
+                el: document.getElementById('export-excel-reguler'),
+                url: '/api/dashboard/excel',
+                query: { type: 'reguler' },
+                filename: 'reguler'
+            },
+            mu: {
+                el: document.getElementById('export-excel-mu'),
+                url: '/api/dashboard/excel',
+                query: { type: 'mu' },
+                filename: 'multi_unit'
+            },
+            perubahan: {
+                el: document.getElementById('export-excel-perubahan'),
+                url: '/api/dashboard/excel',
+                query: { type: 'pf' },
+                filename: 'perubahan_fidusia'
+            },
+            oc: {
+                el: document.getElementById('export-excel-oc'),
+                url: '/api/dashboard/excel',
+                query: { type: 'oc' },
+                filename: 'over_credit'
+            }
+        };
+        
+        // Pasang listener generik
+        Object.values(EXPORTS).forEach(cfg => {
+            if (!cfg.el) return;
+            cfg.el.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportExcel({
+                    url: cfg.url,
+                    query: cfg.query,
+                    filenameFallback: cfg.filename,
+                    button: exportDropdownBtn
+                });
+            });
+        });
+        
+        /* ========================
+        * 5) Donut Kelengkapan Dokumen
+        * ======================== */
+        function renderDonutChart(target, labels, series) {
+            const options = {
+                chart: { type: 'donut', width: 300 },
+                labels: labels,
+                series: series,
+                colors: ['#1e88e5', '#e53935'],
+                legend: { position: 'right' },
+                dataLabels: { enabled: true, formatter: val => val.toFixed(0) + '%' },
+                responsive: [{
+                    breakpoint: 768,
+                    options: { chart: { width: '100%' }, legend: { position: 'bottom' } }
+                }]
+            };
+            new ApexCharts(document.querySelector(target), options).render();
+        }
+        
+        fetch('/api/report-kelengkapan/')
+        .then(res => res.json())
+        .then(data => {
+            renderDonutChart('#chart-ktp', ['Memiliki KTP', 'Tidak Ada'], [data.ktp.yes, data.ktp.no]);
+            renderDonutChart('#chart-kk', ['Memiliki KK', 'Tidak Ada'], [data.kk.yes, data.kk.no]);
+            renderDonutChart('#chart-perjanjian', ['Ada Perjanjian', 'Tidak Ada'], [data.perjanjian.yes, data.perjanjian.no]);
+            renderDonutChart('#chart-kuasa', ['Ada Kuasa', 'Tidak Ada'], [data.kuasa.yes, data.kuasa.no]);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+from django.apps import AppConfig
+
+class AdminUserConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'AdminUser'
+
+
+class AccountsConfig(AppConfig):
+    name = 'accounts'
+    def ready(self):
+        import AdminUser.signals

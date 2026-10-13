@@ -1,0 +1,563 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Operator - Update Data OC{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/warkah-dokument.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Over Credit</a></li>
+                            <li class="breadcrumb-item active">Update Data OC</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h4>Update Data OC</h4>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row justify-content-end g-2">
+                                    <div class="col-auto">
+                                        <form id="filterForm" enctype="multipart/form-data" class="d-flex align-items-center">
+                                            <div class="btn-group" role="group" aria-label="Tombol Aksi">
+                                                <label for="uploadExcelInput" class="btn btn-primary d-flex align-items-center gap-2 mb-0" style="cursor: pointer;"><i class="fas fa-upload"></i><span>Upload Excel</span></label>
+                                                <input type="file" id="uploadExcelInput" name="excel_file" accept=".xlsx,.xls" hidden>
+                                                <button type="button" id="btnShowHistory" class="btn btn-warning d-flex align-items-center gap-2"><i class="fas fa-history"></i><span>Riwayat Perubahan</span></button>
+                                                <button type="button" id="btnBatchPatch" class="btn btn-success d-flex align-items-center gap-2"><i class="fas fa-tasks"></i><span>Setujui Data Terpilih</span></button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                
+                                <!-- Overlay yang menutupi seluruh layar saat loading -->
+                                <div id="loading-overlay" style="display: none;position: fixed;top: 0;left: 0;width: 100vw;height: 100vh;background: rgba(255, 255, 255, 0.6);z-index: 1050; /* pastikan di atas modal tapi di bawah spinner */cursor: wait;"></div>
+                                
+                                <!-- Spinner loading (sudah kamu punya) -->
+                                <div id="loading-message" style="display: none;position: fixed;z-index: 1060;top: 50%;left: 50%;transform: translate(-50%, -50%);text-align: center;display: flex;flex-direction: column;align-items: center;">
+                                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                                    <div style="margin-top: 10px; font-weight: bold;">Loading data...</div>
+                                </div>
+                                
+                                <!-- Modal Riwayat -->
+                                <div class="modal fade" id="modalHistory" tabindex="-1" aria-labelledby="modalHistoryLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-warning text-dark">
+                                                <h5 class="modal-title" id="modalHistoryLabel"><i class="fas fa-history me-2"></i> Riwayat Perubahan</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered table-hover table-sm" id="tableHistory">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>Kategori</th>
+                                                                <th>Nomor Perjanjian</th>
+                                                                <th>Nilai Pengganti</th>
+                                                                <th>Diunggah Oleh</th>
+                                                                <th>Disetujui Oleh</th>
+                                                                <th>Dibuat Pada</th>
+                                                                <th>Diperbarui Pada</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <!-- Baris data akan dimasukkan via JavaScript -->
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- DataTable -->
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" id="temp-update-table">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width:40px; text-align:center;"><input type="checkbox" id="select-all"></th>
+                                                <th>Kategori</th>
+                                                <th>Nomor Perjanjian</th>
+                                                <th>Nilai Pengganti</th>
+                                                <th>Disetujui</th>
+                                                <th>Diunggah Oleh</th>
+                                                <th>Disetujui Oleh</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="data-body">
+                                            <!-- Data will be loaded by JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card -->
+                    </div> <!-- end col -->
+                </div> <!-- end row -->
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        let dataTable = null;
+        
+        // ✅ Ambil CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        const csrftoken = window.csrfToken;
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!/^((GET|HEAD|OPTIONS|TRACE))$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+        
+        let historyTable; // untuk instance DataTables
+        
+        $('#btnShowHistory').on('click', function () {
+            $('#loading-overlay').show();
+            $('#loading-message').show();
+            
+            $('#tableHistory tbody').empty();
+            if (historyTable) {
+                // reload server-side
+                historyTable.ajax.reload(function(){
+                    $('#loading-overlay').hide();
+                    $('#loading-message').hide();
+                    new bootstrap.Modal(document.getElementById('modalHistory')).show();
+                }, false);
+                return;
+            }
+            
+            historyTable = $('#tableHistory').DataTable({
+                processing: true,
+                serverSide: true,
+                paging: true,
+                pageLength: 10,
+                lengthChange: false,
+                order: [[6, 'desc']], // kolom updated_at (index 6 sesuai tabel Anda)
+                ajax: {
+                    url: '/api/temporary-updates-oc/?tab=history',
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                    },
+                    data: function(d){
+                        // DataTables sudah kirim draw/start/length/search/order
+                        // kita bisa tambahkan filter lain jika perlu, mis: status
+                        // d.status = $('#statusFilterHistory').val() || '';
+                    },
+                    dataSrc: function (json) {
+                        // backend kirim di key 'history'
+                        $('#loading-overlay').hide();
+                        $('#loading-message').hide();
+                        return json.history || [];
+                    },
+                    error: function () {
+                        $('#loading-overlay').hide();
+                        $('#loading-message').hide();
+                        alert('Gagal ambil data riwayat perubahan.');
+                    }
+                },
+                columns: [
+                { data: 'category' },
+                { data: 'agreement_number' },
+                { data: 'replacement_value' },
+                { data: 'uploaded_by_name', defaultContent: '-' },
+                { data: 'approved_by_name', defaultContent: '-' },
+                {
+                    data: 'created_at',
+                    render: function (val) {
+                        if (!val) return '-';
+                        return new Date(val).toLocaleString('id-ID', {
+                            year: 'numeric', month: 'short', day: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                        });
+                    }
+                },
+                {
+                    data: 'updated_at',
+                    render: function (val) {
+                        if (!val) return '-';
+                        return new Date(val).toLocaleString('id-ID', {
+                            year: 'numeric', month: 'short', day: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                        });
+                    }
+                }
+                ]
+            });
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalHistory'));
+            modal.show();
+        });
+        
+        // ✅ Load data
+        function loadData(status = '') {
+            if (dataTable) dataTable.destroy();
+            
+            dataTable = $('#temp-update-table').DataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                autoWidth: false,
+                paging: true,
+                pageLength: 10,
+                lengthChange: true,
+                order: [[2, 'desc']], // contoh: urut agreement_number desc
+                ajax: {
+                    url: "/api/temporary-updates-oc/?tab=all",
+                    type: "GET",
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                    },
+                    data: function (d) {
+                        // DataTables akan kirim draw,start,length,search,order
+                        // Tambahkan filter status sesuai kebutuhan Anda:
+                        d.status = status || '';
+                    },
+                    beforeSend: function () {
+                        $('#loading-message').show();
+                        $('#data-body').html('');
+                    },
+                    dataSrc: function (json) {
+                        // backend kirim di key 'all'
+                        return (json.all || []);
+                    },
+                    error: function () {
+                        Swal.fire("Error", "Failed to load data.", "error");
+                    },
+                    complete: function () {
+                        $('#loading-message').hide();
+                    }
+                },
+                columns: [
+                {
+                    data: null,
+                    orderable: false,
+                    className: 'text-center',
+                    render: function (data, type, row) {
+                        return `<input type="checkbox" class="row-select" value="${row.id}">`;
+                    }
+                },
+                { data: 'category' },
+                { data: 'agreement_number' },
+                { data: 'replacement_value' },
+                {
+                    data: 'is_approved',
+                    className: 'text-center',
+                    render: function (v) { return v ? '✅' : '❌'; }
+                },
+                { data: 'uploaded_by_name', defaultContent: '-' },
+                { data: 'approved_by_name', defaultContent: '-' },
+                {
+                    data: null,
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return `
+                        <button class="btn btn-sm btn-success" onclick="approveItem(${row.id})">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteItem(${row.id})">
+                            <i class="fas fa-trash-can"></i>
+                        </button>
+                    `;
+                    }
+                }
+                ],
+                columnDefs: [
+                { orderable: false, targets: 0 } // matikan sorting untuk checkbox
+                ],
+                language: {
+                    processing: "Loading...",
+                    zeroRecords: "Tidak ada data ditemukan"
+                }
+            });
+            
+            // Event Select All
+            $('#select-all').off('change').on('change', function() {
+                const checked = $(this).is(':checked');
+                $('.row-select').prop('checked', checked);
+            });
+            
+            // Jika pagination berubah, uncheck select all
+            dataTable.on('draw', function(){
+                $('#select-all').prop('checked', false);
+            });
+        }
+        
+        // Initial load
+        loadData();
+        
+        // Filter
+        $("#status-filter").on('change', function () {
+            const selected = $(this).val();
+            loadData(selected);
+        });
+        
+        // Batch PATCH
+        $('#btnBatchPatch').on('click', function() {
+            const ids = $('.row-select:checked').map(function() {
+                return parseInt($(this).val(), 10);
+            }).get();
+            
+            if (ids.length === 0) {
+                Swal.fire('Info', 'Pilih minimal satu baris terlebih dahulu.', 'info');
+                return;
+            }
+            
+            Swal.fire({
+                title: `Proses ${ids.length} data terpilih?`,
+                text: 'Semua data terpilih akan disetujui.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, proses!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+                
+                $('#loading-overlay').show();
+                $('#loading-message').show();
+                
+                $.ajax({
+                    url: '/api/temporary-updates-oc/batch/',
+                    type: 'PATCH',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        ids: ids,
+                        is_approved: true,
+                        update_status: 'approved'
+                    }),
+                    success: function(res) {
+                        const selfSkipped = res.self_skipped || 0;
+                        const updated = res.updated || 0;
+                        const skipped = res.skipped || 0;
+                        
+                        if (selfSkipped > 0 && updated === 0) {
+                            Swal.fire(
+                            'Tidak ada data yang diproses.',
+                            `Anda tidak dapat meng-approve data yang Anda upload sendiri.` + ` Total Data : ${selfSkipped}`,
+                            'error'
+                            );
+                        } else {
+                            let msg = `Updated: ${updated}, Dilewati: ${skipped}`;
+                            let icon = 'success';
+                            
+                            if (selfSkipped > 0) {
+                                msg += `\n${selfSkipped} data milik Anda sendiri tidak di-approve.`;
+                                icon = 'warning';
+                            }
+                            
+                            Swal.fire('Selesai', msg, icon);
+                        }
+                        
+                        loadData();
+                    },
+                    error: function(xhr) {
+                        const msg = xhr.responseJSON?.error || 'Gagal Memproses Semua Data.';
+                        Swal.fire('Error', msg, 'error');
+                    },
+                    complete: function() {
+                        $('#loading-overlay').hide();
+                        $('#loading-message').hide();
+                    }
+                });
+            });
+        });
+        
+        // Approve
+        window.approveItem = function (id) {
+            Swal.fire({
+                title: "Setujui Perubahan ini?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Setujui!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/api/temporary-updates-oc/${id}/`,
+                        type: "PUT",
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            is_approved: true,
+                            update_status: "approved"
+                        }),
+                        success: function () {
+                            Swal.fire("Berhasil", "Data Disetujui.", "success");
+                            loadData();
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 404) {
+                                Swal.fire("Data Tidak Ditemukan", "Data tidak ditemukan di sistem.", "error");
+                            } else {
+                                let msg = "Gagal Memproses Data.";
+                                
+                                if (xhr.responseJSON) {
+                                    if (typeof xhr.responseJSON.detail === 'string') {
+                                        msg = xhr.responseJSON.detail;
+                                    }
+                                    else if (Array.isArray(xhr.responseJSON.non_field_errors) && xhr.responseJSON.non_field_errors.length) {
+                                        msg = xhr.responseJSON.non_field_errors.join(', ');
+                                    }
+                                    else {
+                                        const keys = Object.keys(xhr.responseJSON);
+                                        if (keys.length > 0 && Array.isArray(xhr.responseJSON[keys[0]]) && xhr.responseJSON[keys[0]].length) {
+                                            msg = xhr.responseJSON[keys[0]].join(', ');
+                                        }
+                                    }
+                                }
+                                
+                                Swal.fire("Error", msg, "error");
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Delete
+        window.deleteItem = function (id) {
+            Swal.fire({
+                title: "Delete this item?",
+                text: "This action cannot be undone.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/api/temporary-updates-oc/${id}/`,
+                        type: "DELETE",
+                        success: function () {
+                            Swal.fire("Deleted!", "Item has been deleted.", "success");
+                            loadData();
+                        },
+                        error: function () {
+                            Swal.fire("Error", "Failed to delete.", "error");
+                        }
+                    });
+                }
+            });
+        }
+        
+        // ✅ Upload Excel + SweetAlert + Validasi Kolom
+        $("#uploadExcelInput").on("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+            
+            // ✅ Cek apakah XLSX sudah tersedia (menghindari error "XLSX is not defined")
+            if (typeof XLSX === 'undefined') {
+                Swal.fire("Error", "Library XLSX (SheetJS) belum dimuat. Pastikan script XLSX tersedia.", "error");
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                    
+                    if (json.length === 0) {
+                        Swal.fire("Error", "File Excel kosong.", "error");
+                        return;
+                    }
+                    
+                    const requiredHeaders = ['nomor perjanjian', 'kategori', 'nilai pengganti'];
+                    const headers = Object.keys(json[0]).map(h => h.toLowerCase());
+                    const missing = requiredHeaders.filter(col => !headers.includes(col));
+                    if (missing.length > 0) {
+                        Swal.fire("Error", `Kolom berikut tidak ditemukan: ${missing.join(", ")}`, "error");
+                        return;
+                    }
+                    
+                    const formData = new FormData();
+                    formData.append("excel_file", file);
+                    
+                    Swal.fire({
+                        title: 'Uploading...',
+                        text: 'Memproses file Excel...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+                    
+                    $.ajax({
+                        url: "/api/temporary-updates-oc/upload-excel/",
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (res) {
+                            Swal.fire("Success", res.message || "Excel berhasil diunggah.", "success");
+                            $("#uploadExcelInput").val("");
+                            if (typeof loadData === 'function') loadData();
+                        },
+                        error: function (xhr) {
+                            let msg = "Gagal mengunggah file.";
+                            if (xhr.responseJSON?.error) {
+                                msg = xhr.responseJSON.error;
+                            } else if (xhr.status === 0) {
+                                msg = "Tidak dapat terhubung ke server.";
+                            }
+                            Swal.fire("Error", msg, "error");
+                            $("#uploadExcelInput").val("");
+                        }
+                    });
+                } catch (err) {
+                    Swal.fire("Error", `Gagal membaca file: ${err.message}`, "error");
+                    $("#uploadExcelInput").val("");
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,625 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Cabang - Unggah Dokumen OC {% endblock %}
+
+{% block content %}
+
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Over Credit</a></li>
+                            <li class="breadcrumb-item active">Unggah Dokumen OC</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h4>Unggah Dokumen OC</h4>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="row g-3 align-items-end mb-3">
+                                    <!-- Date Range Filter -->
+                                    <div class="col-auto">
+                                        <label for="fromDate" class="form-label">Dari Tanggal</label>
+                                        <input type="date" class="form-control" id="fromDate" placeholder="Start Date">
+                                    </div>
+                                    
+                                    <div class="col-auto">
+                                        <label for="toDate" class="form-label">Sampai Tanggal</label>
+                                        <input type="date" class="form-control" id="toDate" placeholder="End Date">
+                                    </div>
+                                    
+                                    {% if 'Warkah' in user_roles or 'superadministrator' in user_roles %}
+                                    <div class="col-auto">
+                                        <label for="excel_file" class="form-label">Unggah File</label>
+                                        
+                                        <form id="uploadForm" onsubmit="return false;" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
+                                            
+                                            <input type="file" class="form-control" name="excel_file" id="excel_file" accept=".xlsx,.xls" style="min-width: 150px;">
+                                            <button type="button" id="btnUploadExcel" class="btn btn-primary">Unggah</button>
+                                        </form>                                        
+                                    </div>
+                                    
+                                    
+                                    <div class="col-auto ms-auto">
+                                        <label class="form-label d-block">&nbsp;</label>
+                                        <a href="#" id="btnDownloadExcel" class="btn btn-success">Unduh Excel (Hasil Proses)</a>
+                                    </div>
+                                    {% endif %}
+                                    
+                                </div>     
+                                
+                                <div id="loading-overlay" style="display: none;position: fixed;top: 0;left: 0;width: 100vw;height: 100vh;background: rgba(255, 255, 255, 0.6);z-index: 1050; /* pastikan di atas modal tapi di bawah spinner */cursor: wait;"></div>
+                                
+                                <!-- Spinner loading (sudah kamu punya) -->
+                                <div id="loading-message" style="display: none;position: fixed;z-index: 1060;top: 50%;left: 50%;transform: translate(-50%, -50%);text-align: center;display: flex;flex-direction: column;align-items: center;">
+                                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                                    <div style="margin-top: 10px; font-weight: bold;">Loading data...</div>
+                                </div>
+                                
+                                
+                                <div class="table-responsive">
+                                    <table id="consumerTable" class="display table table-striped w-100">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Kode Cabang</th>
+                                                <th>Nama Cabang</th>
+                                                <th>No Perjanjian</th>
+                                                <th>Nama Pemberi Fidusia</th>
+                                                <th>Tanggal Perjanjian</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Diisi otomatis via DataTables -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card -->
+                    </div> <!-- end col -->
+                </div> <!-- end row -->
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+
+{% block script %}
+<script>
+    $(document).ready(function () {
+        const csrftoken = "{{ csrf_token }}";
+        
+        function escapeHTML(str) {
+            if (typeof str !== 'string') str = String(str ?? '');
+            return str.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        }
+        
+        function toWebUrl(raw) {
+            if (!raw) return '';
+            let u = String(raw).trim().replace(/\\/g, '/');
+            
+            if (/^https?:\/\//i.test(u)) return u;
+            
+            if (!u.startsWith('/')) {
+                if (u.startsWith('media/')) u = '/' + u;
+                else return u;
+            }
+            
+            const [path, tail] = u.split(/([?#].*)/);
+            const parts = path.split('/');
+            const last = parts.pop();
+            if (last) parts.push(encodeURIComponent(last));
+            return parts.join('/') + (tail || '');
+        }
+        
+        function daysDiffInclusive(a, b) {
+            const d1 = new Date(a);
+            const d2 = new Date(b);
+            if (Number.isNaN(d1) || Number.isNaN(d2)) return null;
+            d1.setHours(0,0,0,0);
+            d2.setHours(0,0,0,0);
+            return Math.abs((d2 - d1) / (1000*60*60*24)) + 1;
+        }
+        
+        function showSwalError(title, text) {
+            Swal.fire({ icon:'error', title, text, confirmButtonText:'OK' });
+        }
+        
+        function isAllowedFile(file) {
+            const name = (file?.name || '').toLowerCase();
+            const type = file?.type || '';
+            const extOk  = /\.(pdf|jpg|jpeg|png)$/i.test(name);
+            const mimeOk = ['application/pdf', 'image/jpeg', 'image/png'].includes(type);
+            return extOk && mimeOk;
+        }
+        
+        function maxSizeBytesByCustomerType(customerType) {
+            const ct = (customerType || '').toString().trim().toUpperCase();
+            return (ct === 'C' || ct === 'PT' || ct === 'CORP' || ct === 'CORPORATE' || ct === 'COMPANY')
+            ? 10 * 1024 * 1024
+            : 5 * 1024 * 1024;
+        }
+        
+        function renderStatusBadge(status) {
+            switch ((status || '').toLowerCase()) {
+                case 'complete': return '<span class="badge bg-success">Complete</span>';
+                case 'revisi':   return '<span class="badge bg-danger">Revisi</span>';
+                case 'process':  return '<span class="badge bg-warning text-dark">Process</span>';
+                default:         return '<span class="badge bg-secondary">Uncomplete</span>';
+            }
+        }
+        
+        $('#uploadForm').on('submit', (e) => e.preventDefault());
+        
+        if ($.fn.DataTable.isDataTable('#consumerTable')) {
+            $('#consumerTable').DataTable().destroy();
+        }
+        
+        function daysDiffInclusive(d1, d2) {
+            const a = new Date(d1);
+            const b = new Date(d2);
+            if (Number.isNaN(a) || Number.isNaN(b)) return null;
+            a.setHours(0,0,0,0);
+            b.setHours(0,0,0,0);
+            return Math.abs((b - a) / (1000*60*60*24)) + 1;
+        }
+        
+        $('#btnDownloadExcel').on('click', function (e) {
+            e.preventDefault();
+            
+            const status   = $('#statusFilter').val() || 'Process';
+            let fromDate   = $('#fromDate').val();
+            let toDate     = $('#toDate').val();
+            
+            if (!fromDate || !toDate) {
+                Swal.fire({ icon:'warning', title:'Tanggal belum lengkap', text:'Silakan pilih From & To.' });
+                return;
+            }
+            
+            if (new Date(fromDate) > new Date(toDate)) {
+                const tmp = fromDate; fromDate = toDate; toDate = tmp;
+            }
+            
+            const diff = daysDiffInclusive(fromDate, toDate);
+            if (diff === null) {
+                Swal.fire({ icon:'error', title:'Format tanggal tidak valid', text:'Gunakan format yang konsisten (YYYY-MM-DD).' });
+                return;
+            }
+            if (diff > 7) {
+                Swal.fire({ icon:'error', title:'Rentang terlalu panjang', text:'Download Excel maksimal 7 hari (inklusif).' });
+                return;
+            }
+            
+            const params = new URLSearchParams({ status, fromDate, toDate });
+            window.location.href = `/download-template-oc?${params.toString()}`;
+        });
+        
+        $('#btnUploadExcel').on('click', function (e) {
+            e.preventDefault();
+            if ($(this).data('processing')) return;
+            
+            const file = $('#excel_file')[0].files[0];
+            if (!file) return Swal.fire('Error!', 'Please select a file first.', 'error');
+            
+            const formData = new FormData();
+            formData.append('excel_file', file);
+            
+            $(this).data('processing', true).prop('disabled', true);
+            
+            Swal.fire({ title:'Uploading...', html:'Please wait while we process the file.', allowOutsideClick:false, didOpen:Swal.showLoading });
+            
+            $.ajax({
+                url: '/api/upload-template-oc/',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: { 'X-CSRFToken': csrftoken },
+                success: (res) => {
+                    $('#btnUploadExcel').data('processing', false).prop('disabled', false);
+                    console.log("✅ Upload Success:", res);
+                    Swal.fire('Upload Success', res.detail, 'success');
+                    dataTable.ajax.reload(null, false);
+                },
+                error: (xhr) => {
+                    $('#btnUploadExcel').data('processing', false).prop('disabled', false);
+                    let msg = 'Terjadi kesalahan saat upload.';
+                    try {
+                        const j = xhr.responseJSON || JSON.parse(xhr.responseText || '{}');
+                        if (j.detail) msg = j.detail;
+                    } catch(e){}
+                    console.error('❌ Upload Failed:', xhr.status, xhr.responseText);
+                    Swal.fire('Upload Failed', `${msg} (HTTP ${xhr.status})`, 'error');
+                }
+            });
+        });
+        
+        const statusNumberToText = (n) => {
+            switch (Number(n)) {
+                case 1: return 'complete';
+                case 2: return 'process';
+                case 3: return 'revisi';
+                default: return 'uncomplete';
+            }
+        };
+        
+        let activeXHR = null;
+        
+        // === DataTable ===
+        const dataTable = $('#consumerTable').DataTable({
+            processing: true,
+            serverSide: true,
+            deferRender: true,
+            searchDelay: 400,
+            stateSave: true,
+            orderMulti: false,
+            rowId: 'id',
+            ordering: true, // aktifkan sorting
+            
+            ajax: {
+                url: '/api/consumer-documents-oc/',
+                type: 'GET',
+                xhrFields: { withCredentials: true },
+                dataSrc: 'data',
+                data: function (d) {
+                    const colIdx = d?.order?.[0]?.column ?? 0;
+                    const colDataName = d?.columns?.[colIdx]?.data ?? 'agreement_date';
+                    
+                    const params = {
+                        draw: d.draw,
+                        start: d.start,
+                        length: d.length,
+                        'search[value]': d.search?.value || '',
+                        'order[0][column]': colIdx,
+                        'order[0][dir]': d?.order?.[0]?.dir ?? 'asc',
+                        [`columns[${colIdx}][data]`]: colDataName,
+                        
+                        status:   $('#statusFilter').val() || '',
+                        fromDate: $('#fromDate').val() || '',
+                        toDate:   $('#toDate').val() || '',
+                        include_old: $('#showOld').is(':checked') ? 1 : ''
+                    };
+                    
+                    // kirim mapping semua kolom supaya backend tahu mana yang di-sort
+                    (d.columns || []).forEach((col, i) => {
+                        params[`columns[${i}][data]`] = col.data || '';
+                    });
+                    
+                    return params;
+                },
+                beforeSend: function (jqXHR) {
+                    if (activeXHR && activeXHR.readyState !== 4) activeXHR.abort();
+                    activeXHR = jqXHR;
+                    $('#loading-overlay, #loading-message').show();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (textStatus === 'abort' || jqXHR.status === 0) {
+                        return;
+                    }
+                    
+                    let msg = 'Internal Server Error.';
+                    
+                    try {
+                        const ct = jqXHR.getResponseHeader('content-type') || '';
+                        
+                        if (ct.includes('application/json') && jqXHR.responseText) {
+                            const j = JSON.parse(jqXHR.responseText);
+                            
+                            if (typeof j === 'string') msg = j;
+                            else if (j.error) msg = j.error;
+                            else if (j.detail) msg = j.detail;
+                        } 
+                        else if (jqXHR.responseText) {
+                            msg = jqXHR.responseText;
+                        }
+                    } catch (e) {
+                        console.warn('Gagal parse error response', e);
+                    }
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal filter',
+                        text: msg
+                    });
+                    
+                    console.warn('DataTables AJAX error:', {
+                        status: jqXHR.status,
+                        textStatus,
+                        errorThrown,
+                        response: jqXHR.responseText
+                    });
+                },
+                complete: function () {
+                    $('#loading-overlay, #loading-message').hide();
+                    activeXHR = null;
+                }
+            },
+            
+            columns: [
+            { data: 'branch_code',      defaultContent: '-' },
+            { data: 'branch_name',      defaultContent: '-' },
+            { data: 'agreement_number', defaultContent: '-' },
+            { data: 'consumer_name',    defaultContent: '-' },
+            { data: 'agreement_date',   defaultContent: '-' },
+            
+            // penting: pakai field nyata agar bisa di-sort
+            {
+                data: 'consumer_status',
+                defaultContent: '-',
+                render: (_data, _type, row) =>
+                renderStatusBadge(row.consumer_status || statusNumberToText(row.document_status))
+            },
+            
+            {
+                data: null,
+                orderable: false,
+                searchable: false,
+                render: (row) => {
+                    const fileUrl   = toWebUrl(row.file_url || '');
+                    const uploader  = row.modified_by || '';
+                    const notesSafe = row.notes ? String(row.notes).replace(/"/g,'&quot;').replace(/'/g,'&#39;') : '';
+                    const customerType = row.customer_type || '';
+                    return `
+          <button class="btn btn-sm btn-primary btn-upload-additional"
+              data-id="${row.id}"
+              data-branch_code="${row.branch_code || ''}"
+              data-branch_name="${row.branch_name || ''}"
+              data-agreement_number="${row.agreement_number || ''}"
+              data-consumer_name="${row.consumer_name || ''}"
+              data-agreement_date="${row.agreement_date || ''}"
+              data-notes="${notesSafe}"
+              data-uploader-name="${uploader}"
+              data-status="${row.consumer_status || ''}"
+              data-file-url="${fileUrl}"
+              data-customer_type="${customerType}">
+            <i class="fas fa-solid fa-eye"></i>
+          </button>`;
+                }
+            }
+            ],
+            
+            // nonaktifkan sort untuk kolom selain Status (index 5)
+            columnDefs: [
+            { targets: [0,1,2,3,4,6], orderable: false },
+            { targets: 5, orderable: true }
+            ],
+            
+            order: [[4, 'desc']], // default masih di tanggal
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            pageLength: 10,
+            fixedHeader: true,
+            scrollX: true,
+            language: { emptyTable: "Tidak ada data yang tersedia" }
+        });
+        
+        dataTable.on('xhr.dt', function () {
+            $('#loading-overlay, #loading-message').hide();
+        });
+        dataTable.on('processing.dt', function (_e, _settings, processing) {
+            $('#loading-overlay, #loading-message')[processing ? 'show' : 'hide']();
+        });
+        
+        $('#statusFilter, #fromDate, #toDate, #showOld').on('change', function () {
+            dataTable.ajax.reload(null, true);
+        });
+        
+        // === Handler Upload + Preview (UPDATED VALIDATION) ===
+        $(document).on('click', '.btn-upload-additional', async function () {
+            const $btn = $(this);
+            const docId = $btn.data('id');
+            const branchCode = $btn.data('branch_code');
+            const branchName = $btn.data('branch_name');
+            const agreementNumber = escapeHTML($btn.data('agreement_number'));
+            const consumerName = escapeHTML($btn.data('consumer_name'));
+            const agreementDate = escapeHTML($btn.data('agreement_date'));
+            const notes = escapeHTML($btn.data('notes'));
+            const uploaderName = $btn.data('uploaderName') || $btn.data('uploader-name') || '';
+            const status = $btn.data('status');
+            const rawFileUrl = $btn.data('fileUrl') || $btn.data('file-url') || '';
+            const fileUrl = toWebUrl(rawFileUrl);
+            
+            const customerTypeFromRow = (($btn.data('customer_type') || '').toString().trim().toUpperCase());
+            
+            const uploaderDisplay = `<strong>Diunggah oleh:</strong> ${escapeHTML(uploaderName) || '<em>Tidak diketahui</em>'}`;
+            
+            const previewBlock = fileUrl ? `
+<div class="mt-3 p-2 border rounded bg-light">
+  <h6 class="fw-bold mb-2">Hasil Upload Sebelumnya:</h6>
+  ${/\.pdf($|\?)/i.test(fileUrl)
+            ? `<iframe src="${fileUrl}" style="width:100%;height:300px;border:1px solid #ccc;border-radius:6px;"
+         onerror="this.outerHTML='<div class=&quot;text-danger small&quot;>Gagal memuat PDF (cek URL media).</div>'"></iframe>`
+            : `<img src="${fileUrl}" alt="Preview Dokumen" style="max-width:100%;border:1px solid #ccc;border-radius:6px;"
+         onerror="this.outerHTML='<div class=&quot;text-danger small&quot;>Gagal memuat gambar (cek URL media).</div>'" />`
+            }
+  <div class="mt-2">
+    <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-primary">
+      <i class="fas fa-external-link-alt"></i> Buka / Download
+    </a>
+  </div>
+</div>` : '';
+            
+            try {
+                const res = await Swal.fire({
+                    title: 'Upload Dokumen Warkah',
+                    width: 600,
+                    html: `
+<div class="container" style="max-width: 520px;">
+  <div class="mb-3 row align-items-center">
+    <label class="col-sm-4 col-form-label">No Perjanjian</label>
+    <div class="col-sm-8">
+      <input type="text" id="agreementNumber" class="form-control" value="${agreementNumber}" disabled>
+    </div>
+  </div>
+  <div class="mb-3 row align-items-center">
+    <label class="col-sm-4 col-form-label">Tanggal Perjanjian</label>
+    <div class="col-sm-8">
+      <input type="date" id="agreementDate" class="form-control" value="${agreementDate}" disabled>
+    </div>
+  </div>
+  <div class="mb-3 row align-items-center">
+    <label class="col-sm-4 col-form-label">Nama Pemberi</label>
+    <div class="col-sm-8">
+      <input type="text" id="consumerName" class="form-control" value="${consumerName}" disabled>
+    </div>
+  </div>
+                    
+  ${status && String(status).toLowerCase() === 'revisi' ? `
+    <div class="alert bg-light border border-danger rounded-3 py-2 px-3 d-flex align-items-start gap-3 mt-3">
+      <i class="fas fa-exclamation-circle text-danger fs-4"></i>
+      <div>
+        <div class="fw-semibold text-danger mb-1">Dokumen Dalam Status <b>Revisi</b></div>
+        <div class="text-muted small">Silahkan periksa ulang dan upload ulang dokumen ini sesuai catatan berikut:</div>
+        <div class="mt-2 small">
+          <strong>Catatan:</strong> ${notes || '<em>Tidak ada catatan.</em>'}<br>
+          ${uploaderDisplay}
+        </div>
+      </div>
+    </div>` : ''}
+                    
+  ${previewBlock}
+                    
+  <hr class="my-3">
+  <h6 class="text-center fw-bold">Upload File Gabungan</h6>
+  <hr class="my-3">
+  <div class="mb-3 row align-items-center">
+    <label for="warkahFile" class="col-sm-4 col-form-label">Dokumen Warkah</label>
+    <div class="col-sm-8">
+      <input type="file" id="warkahFile" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+      <small class="form-text text-muted">File diperbolehkan: PDF, JPG, PNG</small>
+      <small class="form-text text-danger"><b><i>*Maks 5 Mb</i></b></small>
+      <small class="form-text text-danger"><b><i>*PT Maks 10 Mb</i></b></small>
+    </div>
+  </div>
+</div>
+      `,
+                    focusConfirm: false,
+                    showCancelButton: true,
+                    confirmButtonText: 'Upload',
+                    cancelButtonText: 'Batal',
+                    showDenyButton: !!fileUrl,
+                    denyButtonText: 'Preview',
+                    confirmButtonColor: '#7367f0',
+                    
+                    preConfirm: async () => {
+                        const warkahFile = $('#warkahFile')[0]?.files?.[0];
+                        if (!warkahFile) {
+                            Swal.showValidationMessage('File harus dipilih.');
+                            return false;
+                        }
+                        if (!isAllowedFile(warkahFile)) {
+                            Swal.showValidationMessage('Format tidak didukung. Hanya PDF, JPG, atau PNG.');
+                            return false;
+                        }
+                        const maxSize = maxSizeBytesByCustomerType(customerTypeFromRow);
+                        if (warkahFile.size > maxSize) {
+                            const maxMB = (maxSize / (1024*1024)) | 0;
+                            Swal.showValidationMessage(`Ukuran file maksimal ${maxMB} MB.`);
+                            return false;
+                        }
+                        return { warkahFile };
+                    }
+                });
+                
+                if (!res) return;
+                
+                // PREVIEW
+                if (res.isDenied && fileUrl) {
+                    await Swal.fire({
+                        title: 'Preview Dokumen',
+                        width: 900,
+                        html: `
+<div style="max-width:860px;margin:0 auto;">
+  ${/\.pdf($|\?)/i.test(fileUrl)
+                        ? `<iframe src="${fileUrl}" style="width:100%;height:500px;border:1px solid #ccc;border-radius:6px;"></iframe>`
+                        : `<img src="${fileUrl}" alt="Preview Dokumen" style="max-width:100%;border:1px solid #ccc;border-radius:6px;" />`
+                        }
+  <div class="mt-3 d-flex gap-2">
+    <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-primary">
+      <i class="fas fa-external-link-alt"></i> Buka / Download
+    </a>
+  </div>
+</div>`,
+                        showCancelButton: true,
+                        cancelButtonText: 'Tutup'
+                    });
+                    return;
+                }
+                
+                // UPLOAD
+                if (res.isConfirmed && res.value?.warkahFile) {
+                    const { warkahFile } = res.value;
+                    const fd = new FormData();
+                    fd.append('file', warkahFile);
+                    
+                    $.ajax({
+                        url: `/api/consumer-documents-oc/${docId}/`,
+                        type: 'PATCH',
+                        headers: { 'X-CSRFToken': csrftoken },
+                        data: fd,
+                        processData: false,
+                        contentType: false,
+                        success: async (response) => {
+                            const newUrl = toWebUrl(response.file_url || '');
+                            $btn.attr('data-file-url', newUrl);
+                            $btn.attr('data-fileUrl', newUrl);
+                            
+                            await Swal.fire({
+                                icon: 'success',
+                                title: 'Preview Dokumen',
+                                width: 900,
+                                html: `
+<div style="max-width:860px;margin:0 auto;">
+  ${/\.pdf($|\?)/i.test(newUrl)
+                                ? `<iframe src="${newUrl}" style="width:100%;height:500px;border:1px solid #ccc;border-radius:6px;"></iframe>`
+                                : `<img src="${newUrl}" alt="Preview Dokumen" style="max-width:100%;border:1px solid #ccc;border-radius:6px;" />`
+                                }
+  <div class="mt-3 d-flex gap-2">
+    <a href="${newUrl}" target="_blank" class="btn btn-sm btn-primary">
+      <i class="fas fa-external-link-alt"></i> Buka / Download
+    </a>
+  </div>
+</div>`
+                            });
+                            
+                            dataTable.ajax.reload(null, false);
+                        },
+                        error: (xhr) => {
+                            let msg = 'Gagal mengupdate data.';
+                            try {
+                                const j = xhr.responseJSON || JSON.parse(xhr.responseText || '{}');
+                                if (j.detail) msg = j.detail;
+                            } catch(e){}
+                            console.error('❌ Update failed:', xhr.status, xhr.responseText);
+                            Swal.fire('Error!', `${msg} (HTTP ${xhr.status})`, 'error');
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Swal error:', e);
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

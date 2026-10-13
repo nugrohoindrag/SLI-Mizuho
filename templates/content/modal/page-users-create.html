@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} Admin-Tambah Akun {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="#">Admin</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'admin_users' %}">Pengguna</a></li>
+                            <li class="breadcrumb-item active">Tambah Akun</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <!-- users edit start -->
+            <section class="users-edit">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            <ul class="nav nav-tabs mb-2" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center active" id="account-tab" data-toggle="tab" href="#account" aria-controls="account" role="tab" aria-selected="true">
+                                        <i class="feather icon-user mr-25"></i><span class="d-none d-sm-block">Akun</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="account" aria-labelledby="account-tab" role="tabpanel">
+                                    <form id="createUserForm" novalidate>
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-12 col-sm-6">
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <label>Username</label>
+                                                        <input type="text" id="username" class="form-control" placeholder="Username" required>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <label>Nama</label>
+                                                        <input type="text" id="name" class="form-control" placeholder="Nama" required>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <label>Email</label>
+                                                        <input type="email" id="email" class="form-control" placeholder="Contoh@gmail.com" required>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <label>Alamat</label>
+                                                        <input type="text" id="address" class="form-control" placeholder="Alamat lengkap" required>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Role</label>
+                                                    <select class="form-control" id="role">
+                                                        <option value="">-- Pilih Role --</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Cabang</label>
+                                                    <select class="form-control select2 branch-multi-select" id="branch_code" multiple data-placeholder="Cari dan pilih cabang">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6">
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <label>No. KTP</label>
+                                                        <input type="number" id="national_id" class="form-control" placeholder="16 digit" maxlength="16">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Tempat, Tanggal Lahir:</label>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <input type="text" id="tempatLahir" class="form-control" placeholder="Contoh: Jakarta" required>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="date" id="tanggalLahir" class="form-control" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <label for="password">Kata Sandi</label>
+                                                        <div class="position-relative">
+                                                            <input type="password" id="password" class="form-control pe-5" placeholder="******" required>
+                                                            <i id="togglePasswordIcon"
+                                                            class="fas fa-eye-slash toggle-password"
+                                                            role="button" aria-label="Tampilkan/Sembunyikan kata sandi" tabindex="0"
+                                                            style="position:absolute;top:50%;right:15px;transform:translateY(-50%);
+                cursor:pointer;color:#6c757d;z-index:5;pointer-events:auto;"></i>
+                                                        </div>
+                                                        
+                                                        <!-- Indikator kekuatan password -->
+                                                        <div id="password-strength" class="mt-2 text-muted small d-none">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <ul class="list-unstyled mb-0">
+                                                                        <li id="len" class="text-danger mb-1">❌ Minimal 8 karakter</li>
+                                                                        <li id="upper" class="text-danger mb-1">❌ Huruf besar (A-Z)</li>
+                                                                        <li id="lower" class="text-danger mb-1">❌ Huruf kecil (a-z)</li>
+                                                                    </ul>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <ul class="list-unstyled mb-0">
+                                                                        <li id="num" class="text-danger mb-1">❌ Angka (0-9)</li>
+                                                                        <li id="sym" class="text-danger mb-1">❌ Simbol (!@#$% dll)</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <label for="confirm_password">Konfirmasi Kata Sandi</label>
+                                                        <div class="position-relative">
+                                                            <input type="password" id="confirm_password" class="form-control pe-5" placeholder="******" required>
+                                                            <i id="toggleConfirmIcon"
+                                                            class="fas fa-eye-slash toggle-password"
+                                                            role="button" aria-label="Tampilkan/Sembunyikan kata sandi" tabindex="0"
+                                                            style="position:absolute;top:50%;right:15px;transform:translateY(-50%);
+                cursor:pointer;color:#6c757d;z-index:5;pointer-events:auto;"></i>
+                                                        </div>
+                                                        <small id="confirm-error" class="text-danger d-none">❌ Kata Sandi tidak cocok</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 d-flex flex-sm-row flex-column justify-content-end mt-1">
+                                                <button type="button" id="btnSaveChanges" class="btn btn-primary glow mb-1 mb-sm-0 mr-0 mr-sm-1">Simpan Perubahan</button>
+                                                <a href="{% url 'admin_users' %}" class="btn btn-light">Cancel</a>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <!-- users edit account form ends -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- users edit ends -->
+        </div>
+    </div>
+</div>
+<!-- END: Content-->
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+
+{% block script %}
+<script>
+    $(document).ready(function () {
+        function selectedRoleName() {
+            return String($('#role option:selected').text() || '').trim().toLowerCase();
+        }
+
+        function initBranchMultiSelect(isStaffCabang = false) {
+            const $select = $('#branch_code');
+            if (!$.fn.select2 || !$select.length) return;
+            if ($select.hasClass('select2-hidden-accessible')) {
+                $select.select2('destroy');
+            }
+            $select.select2({
+                placeholder: 'Cari dan pilih cabang',
+                allowClear: true,
+                closeOnSelect: !isStaffCabang,
+                maximumSelectionLength: isStaffCabang ? 0 : 1,
+                width: '100%'
+            });
+        }
+
+        function syncBranchInputForRole() {
+            const roleName = selectedRoleName();
+            const isHo = ['ho', 'head office', 'head-office', 'head_office'].includes(roleName);
+            const isStaffCabang = roleName === 'staff_cabang';
+            const $branch = $('#branch_code');
+
+            $branch.closest('.form-group').toggle(!isHo);
+            if (isHo) $branch.val([]).trigger('change');
+            if (!isStaffCabang && ($branch.val() || []).length > 1) {
+                $branch.val([$branch.val()[0]]).trigger('change');
+            }
+            initBranchMultiSelect(isStaffCabang);
+        }
+
+        $('#role').on('change.branchScope', syncBranchInputForRole);
+        
+        // Jika ada form, cegah submit default (Enter)
+        $('#createUserForm').on('submit', function(e){ e.preventDefault(); });
+        
+        // ===== Password strength + match =====
+        function validatePasswordMatch() {
+            const password = $('#password').val();
+            const confirm  = $('#confirm_password').val();
+            
+            if (confirm === '') {
+                $('#confirm-error').addClass('d-none');
+                $('#confirm_password').removeClass('is-invalid is-valid');
+                return;
+            }
+            if (password === confirm) {
+                $('#confirm-error').addClass('d-none');
+                $('#confirm_password').removeClass('is-invalid').addClass('is-valid');
+            } else {
+                $('#confirm-error').removeClass('d-none');
+                $('#confirm_password').removeClass('is-valid').addClass('is-invalid');
+            }
+        }
+        
+        $('#confirm_password').on('input', validatePasswordMatch);
+        $('#password').on('input', validatePasswordMatch);
+        
+        $('#password').on('focus', function () { $('#password-strength').removeClass('d-none'); });
+        
+        $('#password').on('input', function () {
+            const password = $(this).val();
+            const isLengthValid = password.length >= 8;
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasLowercase = /[a-z]/.test(password);
+            const hasNumber    = /[0-9]/.test(password);
+            const hasSymbol    = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            
+            $('#len').text((isLengthValid ? '✅' : '❌') + ' Minimal 8 karakter')
+            .toggleClass('text-success', isLengthValid).toggleClass('text-danger', !isLengthValid);
+            $('#upper').text((hasUppercase ? '✅' : '❌') + ' Huruf besar (A-Z)')
+            .toggleClass('text-success', hasUppercase).toggleClass('text-danger', !hasUppercase);
+            $('#lower').text((hasLowercase ? '✅' : '❌') + ' Huruf kecil (a-z)')
+            .toggleClass('text-success', hasLowercase).toggleClass('text-danger', !hasLowercase);
+            $('#num').text((hasNumber ? '✅' : '❌') + ' Angka (0-9)')
+            .toggleClass('text-success', hasNumber).toggleClass('text-danger', !hasNumber);
+            $('#sym').text((hasSymbol ? '✅' : '❌') + ' Simbol (!@#$% dll)')
+            .toggleClass('text-success', hasSymbol).toggleClass('text-danger', !hasSymbol);
+        });
+        
+        // ===== Batasi/validasi KTP =====
+        $('#national_id').on('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 16);
+        }).on('paste', function (e) {
+            const pasteData = (e.originalEvent || e).clipboardData.getData('text');
+            const cleaned = pasteData.replace(/\D/g, '').slice(0, 16);
+            e.preventDefault(); $(this).val(cleaned);
+        });
+        
+        // ===== Load role & branch =====
+        async function loadOptions() {
+            const headers = {
+                "Authorization": "Bearer " + localStorage.getItem("access_token"),
+                "X-CSRFToken": getCSRFToken()
+            };
+            try {
+                const [rolesRes, branchesRes] = await Promise.all([
+                fetch("/api/roles/", { headers, credentials: "include" }),
+                fetch("/api/branches/", { headers, credentials: "include" })
+                ]);
+                const roles = await rolesRes.json();
+                const branches = await branchesRes.json();
+                
+                $('#role').html(`<option value="">-- Pilih Role --</option>`);
+                roles.forEach(r => $('#role').append(`<option value="${r.id}">${r.name}</option>`));
+                
+                $('#branch_code').html('');
+                branches.forEach(b => $('#branch_code').append(`<option value="${b.branch_code}">${b.branch_name}</option>`));
+                syncBranchInputForRole();
+                
+            } catch (err) {
+                console.error("❌ Gagal memuat opsi:", err);
+                Swal.fire('Error', 'Gagal mengambil data role atau cabang.', 'error');
+            }
+        }
+        loadOptions();
+        
+        // ===== Submit user baru =====
+        $('#btnSaveChanges').off('click.saveUser').on('click.saveUser', async function (e) {
+            e.preventDefault();
+            
+            const $btn = $(this);
+            if ($btn.data('submitting')) return;          // guard anti spam
+            $btn.data('submitting', true).prop('disabled', true);
+            
+            const name            = $('#name').val();
+            const email           = $('#email').val();
+            const username        = $('#username').val();
+            const password        = $('#password').val();
+            const confirmPassword = $('#confirm_password').val();
+            const national_id     = $('#national_id').val();
+            const address         = $('#address').val();
+            const birth_place     = $('#tempatLahir').val();
+            const birth_date      = $('#tanggalLahir').val();
+            const branch_codes    = $('#branch_code').val() || [];
+            const role_id_raw     = $('#role').val();
+            const role_id         = parseInt(role_id_raw);
+            
+            const fail = async (msg, icon='warning') => {
+                await Swal.fire('Gagal', msg, icon);
+                $btn.data('submitting', false).prop('disabled', false);
+            };
+            
+            if (!name.trim())                    return fail('Nama tidak boleh kosong.');
+            if (!validateName(name))             return fail('Nama hanya boleh huruf dan spasi.');
+            if (!username.trim())                return fail('Username tidak boleh kosong.');
+            if (!validateUsername(username))     return fail('Username hanya a–z, 0–9, titik (.) atau underscore (_), min 3 karakter tanpa spasi.');
+            if (!email.trim())                   return fail('Email tidak boleh kosong.');
+            if (!role_id_raw || isNaN(role_id))  return fail('Role harus dipilih.');
+            if (password !== confirmPassword)    return fail('Password dan konfirmasi tidak cocok.','error');
+            
+            const errors = [];
+            if (password.length < 8)                 errors.push("Minimal 8 karakter.");
+            if (!/[A-Z]/.test(password))             errors.push("Harus ada huruf besar (A-Z).");
+            if (!/[a-z]/.test(password))             errors.push("Harus ada huruf kecil (a-z).");
+            if (!/[0-9]/.test(password))             errors.push("Harus ada angka (0-9).");
+            if (!/[!@#$%^&*(),.?\":{}|<>]/.test(password)) errors.push("Harus ada simbol (!@#$%^&*...).");
+            if (errors.length) {
+                await Swal.fire({ icon:'error', title:'Password tidak valid', html: errors.join('<br>') });
+                $btn.data('submitting', false).prop('disabled', false);
+                return;
+            }
+            
+            if (national_id && national_id.length !== 16)
+            return fail('Nomor KTP (National ID) harus 16 digit.');
+            
+            const payload = {
+                name,
+                email: email.trim(),
+                username: username.trim(),
+                password,
+                national_id,
+                address,
+                birth_place,
+                birth_date,
+                branch_codes,
+                role_ids: [role_id]
+            };
+            
+            try {
+                const res = await fetch("/api/users/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + localStorage.getItem("access_token"),
+                        "X-CSRFToken": getCSRFToken()
+                    },
+                    credentials: "include",
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    await Swal.fire('Berhasil', 'User berhasil ditambahkan.', 'success');
+                    window.location.href = "/admin/users/";
+                    return;
+                }
+                
+                let err = {};
+                const errText = await res.text();
+                try { err = JSON.parse(errText); } catch { err.detail = errText; }
+                
+                let errorMessage = 'Gagal menyimpan data.';
+                if (err.email)           errorMessage = `Email '${email}' sudah digunakan.`;
+                else if (err.username)   errorMessage = `Username '${username}' sudah digunakan.`;
+                else if (err.national_id)errorMessage = `Nomor KTP '${national_id}' sudah digunakan.`;
+                else if (err.detail)     errorMessage = err.detail;
+                
+                await Swal.fire('Gagal', errorMessage, 'error');
+                
+            } catch (error) {
+                console.error("❌ Network Error:", error);
+                await Swal.fire('Gagal', 'Kesalahan jaringan atau server.', 'error');
+            } finally {
+                $btn.data('submitting', false).prop('disabled', false);
+            }
+        });
+        
+        // ===== Utils =====
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        }
+        function validateName(name)       { return /^[A-Za-z\s]+$/.test(name); }
+        function validateUsername(uname)  { return /^[a-zA-Z0-9._]{3,}$/.test(uname); }
+        
+        // ====== EYE: press & hold (Pointer Events) ======
+        function setEye($icon, show) {
+            if (!$icon || !$icon.length) return;
+            $icon.removeClass('fa-eye fa-eye-slash')
+            .addClass(show ? 'fa-eye' : 'fa-eye-slash');
+        }
+        
+        // Password eye
+        (function () {
+            const eye = document.getElementById('togglePasswordIcon');
+            const input = document.getElementById('password');
+            if (!eye || !input) return;
+            
+            eye.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                input.type = 'text';
+                setEye($(eye), true);
+            });
+            ['pointerup','pointerleave','pointercancel','blur'].forEach(evt => {
+                eye.addEventListener(evt, () => {
+                    input.type = 'password';
+                    setEye($(eye), false);
+                });
+            });
+        })();
+        
+        // Confirm eye
+        (function () {
+            const eye = document.getElementById('toggleConfirmIcon');
+            const input = document.getElementById('confirm_password');
+            if (!eye || !input) return;
+            
+            eye.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                input.type = 'text';
+                setEye($(eye), true);
+            });
+            ['pointerup','pointerleave','pointercancel','blur'].forEach(evt => {
+                eye.addEventListener(evt, () => {
+                    input.type = 'password';
+                    setEye($(eye), false);
+                });
+            });
+        })();
+        
+    });
+</script>
+
+{% endblock %}
+{% endblock %}

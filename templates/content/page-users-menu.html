@@ -1,0 +1,586 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Admin-Menu {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Admin</a></li>
+                            <li class="breadcrumb-item active">Menu</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <!-- Base style table -->
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h4>Menu</h4>
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+                                        <i class="feather fa-regular fa-square-plus mr-1"></i>Tambah Data
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-content collapse show">
+                                <div class="card-body card-dashboard">
+                                    <div class="table-responsive">
+                                        <table id="menuTable" class="display table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Menu Name</th>
+                                                    <th>Menu Link</th>
+                                                    <th>Menu Icon Css</th>
+                                                    <th>Menu Icon</th>
+                                                    <th>Root</th>
+                                                    <th>Permission</th>
+                                                    <th class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="viewModalLabel">Detail Menu</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <table class="table table-bordered">
+                                                    <tr><th>Id </th><td id="modalId"></td></tr>
+                                                    <tr><th>Menu Name</th><td id="modalMenuName"></td></tr>
+                                                    <tr><th>Menu Link</th><td id="modalMenuLink"></td></tr>
+                                                    <tr><th>Menu Icon Css</th><td id="modalMenuCss"></td></tr>
+                                                    <tr><th>Menu Icon</th><td id="modalMenuIcon"></td></tr>
+                                                    <tr><th>Menu Root</th><td id="modalMenuRoot"></td></tr>
+                                                    <tr><th>Permissions</th><td id="modalMenuPermissions"><span class="text-muted">-</span></td></tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Modal Edit -->
+                                <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editModalLabel">Edit Menu</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="editForm">
+                                                    <div class="row">
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="editMenuName">Menu Name:</label>
+                                                            <input type="text" class="form-control" id="editMenuName">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="editMenuLink">Menu Link:</label>
+                                                            <input type="text" class="form-control" id="editMenuLink">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="editMenuCss">Menu Icon Css:</label>
+                                                            <input type="text" class="form-control" id="editMenuCss">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="editMenuIcon">Menu Icon (HTML):</label>
+                                                            <input type="text" class="form-control" id="editMenuIcon">
+                                                            <div id="editMenuIconPreview" class="mt-1"></div>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-12 mb-2">
+                                                            <label for="editMenuParent">Menu Root (Opsional):</label>
+                                                            <select class="form-control" id="editMenuParent">
+                                                                <option value="">-- Tidak ada (Root) --</option>
+                                                                {% for r in root %}
+                                                                <option value="{{ r.id }}">{{ r.root_name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-12 mb-2 text-end">
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnEditTambahDropdown">Tambah Permission</button>
+                                                        </div>
+                                                        
+                                                        <div id="editDropdownContainer" class="row g-2">
+                                                            <!-- Dropdown permission akan ditambahkan oleh JS -->
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="mt-3 text-end">
+                                                        <button type="button" class="btn btn-primary" id="saveEditBtn">Simpan Perubahan</button>
+                                                        <a href="#" id="resetEditFormBtn" type="button" class="btn btn-secondary">Reset</a>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Modal Create -->
+                                <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="createModalLabel">Tambah Menu</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="createForm">
+                                                    <div class="row">
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createMenuName">Menu Name:</label>
+                                                            <input type="text" class="form-control" id="createMenuName" placeholder="Menu Name">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createMenuLink">Menu Link:</label>
+                                                            <input type="text" class="form-control" id="createMenuLink" placeholder="Menu Link">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createMenuCss">Menu Icon Css:</label>
+                                                            <input type="text" class="form-control" id="createMenuCss" placeholder="Contoh: fa fa-home">
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-2">
+                                                            <label for="createMenuIcon">Menu Icon (HTML):</label>
+                                                            <input type="text" class="form-control" id="createMenuIcon" placeholder="Contoh: <i class='bi bi-house'></i>">
+                                                            <div id="createMenuIconPreview" class="mt-1"></div>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-12 mb-2">
+                                                            <label for="createMenuParent">Menu Root (Opsional):</label>
+                                                            <select class="form-control" id="editMenuParent">
+                                                                <option value="">-- Tidak ada (Root) --</option>
+                                                                {% for r in root %}
+                                                                <option value="{{ r.id }}">{{ r.root_name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-12 mb-2">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label class="form-label mb-0">Permissions:</label>
+                                                                <button type="button" class="btn btn-outline-secondary btn-sm" id="btnTambahDropdown">Tambah Permission</button>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div id="dropdownContainer" class="row g-2">
+                                                            <!-- Dropdown permission diisi oleh JS -->
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="text-end mt-3">
+                                                        <button type="button" class="btn btn-primary" id="saveCreateBtn">Save</button>
+                                                        <a href="#" id="resetCreateFormBtn" type="button" class="btn btn-secondary">Reset</a>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!--/ Base style table -->
+        </div>
+    </div>
+</div>
+<!-- END: Content-->
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+{{ permissions_data|json_script:"permissions-data" }}
+<script>
+    window.ALL_PERMISSIONS = JSON.parse(document.getElementById('permissions-data').textContent);
+</script>
+
+{% block script %}
+<script>
+    // ✅ CSRF Token Helper
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    var permissionDropdownIndex = 0;
+    var PERMISSIONS = window.ALL_PERMISSIONS || [];
+    
+    // ✅ Build dropdown select permission
+    function buildPermissionDropdown(idPrefix, nameAttr, selectedId = null) {
+        let html = `
+      <div class="col-md-6 mb-2" id="${idPrefix}-${permissionDropdownIndex}">
+        <div class="input-group">
+          <select class="form-select ${nameAttr}-select" name="${nameAttr}[]">
+            <option disabled selected>Pilih Permission</option>`;
+        PERMISSIONS.forEach(p => {
+            const selected = p.id === selectedId ? 'selected' : '';
+            html += `<option value="${p.id}" ${selected}>${p.display_name}</option>`;
+        });
+        html += `
+          </select>
+          <button class="btn btn-outline-danger btnRemoveDropdown" type="button" data-id="${permissionDropdownIndex}">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>`;
+        return html;
+    }
+    
+    $(document).ready(function () {
+        const $tableBody = $('#menuTable tbody');
+        
+        // ✅ Tambah/hapus dropdown permission
+        $('#btnTambahDropdown').on('click', function () {
+            permissionDropdownIndex++;
+            $('#dropdownContainer').append(buildPermissionDropdown('dropdown-permission', 'permissions'));
+        });
+        $('#btnEditTambahDropdown').on('click', function () {
+            permissionDropdownIndex++;
+            $('#editDropdownContainer').append(buildPermissionDropdown('edit-dropdown-permission', 'edit_permissions'));
+        });
+        $(document).on('click', '.btnRemoveDropdown', function () {
+            const id = $(this).data('id');
+            $(`#dropdown-permission-${id}, #edit-dropdown-permission-${id}`).remove();
+        });
+        
+        // ✅ Preview Icon Real-time
+        $('#editMenuIcon').on('input', function () {
+            $('#editMenuIconPreview').html($(this).val());
+        });
+        
+        // ✅ Load Table (server-side DataTables)
+        function loadMenuTable() {
+            if ($.fn.DataTable.isDataTable('#menuTable')) {
+                $('#menuTable').DataTable().ajax.reload(null, false);
+                return;
+            }
+            
+            $('#menuTable').DataTable({
+                processing: true,
+                serverSide: true,            // ← batch per halaman
+                responsive: true,
+                ordering: true,
+                order: [[0, 'asc']],
+                paging: true,
+                lengthChange: true,          // ← tampilkan “Tampilkan N data”
+                pageLength: 10,
+                lengthMenu: [[5, 10, 25, 50, 100], [5, 10, 25, 50, 100]],
+                language: {
+                    search: "Cari:",
+                    lengthMenu: "Tampilkan _MENU_ data per halaman",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                    infoFiltered: "(disaring dari total _MAX_ data)",
+                    zeroRecords: "Tidak ditemukan data yang sesuai",
+                    paginate: { first: "Pertama", last: "Terakhir", next: "Selanjutnya", previous: "Sebelumnya" },
+                    processing: "Memuat..."
+                },
+                columnDefs: [
+                { targets: 6, orderable: false },
+                { targets: 3, className: 'text-center' },
+                { targets: 6, className: 'text-center' }
+                ],
+                
+                // Mapping parameter DataTables → API kamu
+                ajax: function (dt, callback) {
+                    const length = dt.length || 10;
+                    const start  = dt.start  || 0;
+                    const pageNo = Math.floor(start / length) + 1;
+                    
+                    // sorting kolom ke ?ordering=
+                    let ordering = 'name';
+                    if (dt.order && dt.order.length) {
+                        const o = dt.order[0];
+                        const colIdx = o.column;
+                        const colMap = { 0: 'name', 1: 'link', 2: 'icon_css', 4: 'menu_root' };
+                        if (colMap[colIdx]) ordering = (o.dir === 'desc' ? '-' : '') + colMap[colIdx];
+                    }
+                    
+                    const q = (dt.search && dt.search.value || '').trim();
+                    
+                    const params = new URLSearchParams({
+                        page: String(pageNo),
+                        page_size: String(length),
+                        ordering
+                    });
+                    if (q) params.set('search', q);
+                    
+                    // Gunakan endpoint list kamu
+                    fetch(`/api/menu/all/?${params.toString()}`, {
+                        method: 'GET',
+                        headers: { 'X-CSRFToken': window.csrfToken },
+                        credentials: 'include'
+                    })
+                    .then(r => r.json())
+                    .then(json => {
+                        // Terima 3 bentuk: DRF style | DataTables style | array polos
+                        let total = 0, filtered = 0, items = [];
+                        
+                        if (Array.isArray(json)) {
+                            total = filtered = json.length;
+                            items = json.slice(start, start + length);
+                        } else if (Array.isArray(json.data)) {
+                            total = json.recordsTotal || json.data.length;
+                            filtered = json.recordsFiltered ?? total;
+                            items = json.data;
+                        } else {
+                            total = json.count || 0;
+                            filtered = json.count || 0;
+                            items = json.results || [];
+                        }
+                        
+                        const rows = items.map(menu => {
+                            const permBadges = (menu.permissions || [])
+                            .map(p => `<span class="badge bg-primary me-1">${p.display_name}</span>`)
+                            .join(' ') || '<span class="text-muted">-</span>';
+                            
+                            return [
+                            menu.name || '',
+                            menu.link || '',
+                            menu.icon_css || '',
+                            menu.icon_html || '-',
+                            menu.menu_root || 'Root',
+                            permBadges,
+                            `<div class="d-flex justify-content-center gap-1">
+                   <button class="btn btn-sm btn-info btn-view" data-id="${menu.id}"><i class="fas fa-eye"></i></button>
+                   <button class="btn btn-sm btn-warning btn-edit" data-id="${menu.id}"><i class="fas fa-pen"></i></button>
+                   <button class="btn btn-sm btn-danger btn-delete" data-id="${menu.id}"><i class="fas fa-trash"></i></button>
+                 </div>`
+                                ];
+                            });
+                            
+                            callback({
+                                draw: dt.draw,
+                                recordsTotal: total,
+                                recordsFiltered: filtered,
+                                data: rows
+                            });
+                        })
+                        .catch(() => {
+                            callback({ draw: dt.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+                        });
+                    }
+                });
+            }
+            
+            // ⏬ Load data saat pertama kali
+            loadMenuTable();
+            
+            // ✅ CREATE
+            $('#saveCreateBtn').off('click').on('click', function () {
+                const selectedPermissions = [];
+                $('select[name="permissions[]"]').each(function () {
+                    if ($(this).val()) selectedPermissions.push(parseInt($(this).val()));
+                });
+                
+                const payload = {
+                    name: $('#createMenuName').val(),
+                    link: $('#createMenuLink').val(),
+                    icon_css: $('#createMenuCss').val(),
+                    icon_html: $('#createMenuIcon').val(),
+                    menu_root_id: $('#createMenuParent').val() || null,
+                    permission_ids: selectedPermissions
+                };
+                
+                $('#saveCreateBtn').prop('disabled', true);
+                
+                fetch('/api/menu/all/', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': window.csrfToken
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(async res => {
+                    if (!res.ok) {
+                        const errorData = await res.json().catch(()=>({}));
+                        let errorMsg = errorData?.name?.[0] || errorData?.detail || "Terjadi kesalahan.";
+                        throw new Error(errorMsg);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    Swal.fire('Berhasil!', data.message || 'Permission berhasil ditambahkan.', 'success');
+                    $('#createForm')[0].reset();
+                    $('#createModal').modal('hide');
+                    loadMenuTable();
+                })
+                .catch(err => Swal.fire('Gagal!', err.message, 'error'))
+                .finally(() => $('#saveCreateBtn').prop('disabled', false));
+            });
+            
+            // ✅ View Modal
+            $('#menuTable').on('click', '.btn-view', function () {
+                const id = $(this).data('id');
+                fetch(`/api/menu/${id}/`, { credentials: 'include' })
+                .then(res => res.json())
+                .then(data => {
+                    $('#modalId').text(data.id);
+                    $('#modalMenuName').text(data.name);
+                    $('#modalMenuLink').text(data.link);
+                    $('#modalMenuCss').text(data.icon_css || '-');
+                    $('#modalMenuIcon').html(data.icon_html || '-');
+                    $('#modalMenuRoot').text(data.parent || 'Root');
+                    
+                    if (data.permissions?.length) {
+                        $('#modalMenuPermissions').html(
+                        data.permissions.map(p => `<span class="badge bg-primary me-1">${p.display_name}</span>`).join(' ')
+                        );
+                    } else {
+                        $('#modalMenuPermissions').html('<span class="text-muted">-</span>');
+                    }
+                    
+                    $('#viewModal').modal('show');
+                })
+                .catch(() => Swal.fire('Gagal!', 'Gagal mengambil data.', 'error'));
+            });
+            
+            // ✅ Edit Modal
+            $('#menuTable').on('click', '.btn-edit', function () {
+                const id = $(this).data('id');
+                fetch(`/api/menu/${id}/`, { credentials: 'include' })
+                .then(res => res.json())
+                .then(data => {
+                    $('#editMenuName').val(data.name);
+                    $('#editMenuLink').val(data.link);
+                    $('#editMenuCss').val(data.icon_css);
+                    $('#editMenuIcon').val(data.icon_html);
+                    $('#editMenuParent').val(data.menu_root_id);
+                    $('#saveEditBtn').data('id', data.id);
+                    $('#editDropdownContainer').html('');
+                    
+                    (data.permissions || []).forEach(p => {
+                        permissionDropdownIndex++;
+                        $('#editDropdownContainer').append(
+                        buildPermissionDropdown('edit-dropdown-permission', 'edit_permissions', p.id)
+                        );
+                    });
+                    
+                    $('#editModal').modal('show');
+                });
+            });
+            
+            // ✅ Simpan Edit
+            $('#saveEditBtn').on('click', function () {
+                const id = $(this).data('id');
+                const selectedPermissions = [];
+                $('select[name="edit_permissions[]"]').each(function () {
+                    if ($(this).val()) selectedPermissions.push(parseInt($(this).val()));
+                });
+                
+                const payload = {
+                    name: $('#editMenuName').val(),
+                    link: $('#editMenuLink').val(),
+                    icon_css: $('#editMenuCss').val(),
+                    icon_html: $('#editMenuIcon').val(),
+                    menu_root_id: $('#editMenuParent').val() ? parseInt($('#editMenuParent').val()) : null,
+                    parent_id_write: $('#editMenuParentMenu').val() ? parseInt($('#editMenuParentMenu').val()) : null,
+                    permission_ids: selectedPermissions
+                };
+                
+                fetch(`/api/menu/${id}/`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': window.csrfToken },
+                    body: JSON.stringify(payload)
+                })
+                .then(async res => {
+                    if (!res.ok) {
+                        const errorData = await res.json().catch(()=>({}));
+                        let errorMsg = errorData?.name?.[0] || errorData?.detail || "Terjadi kesalahan.";
+                        throw new Error(errorMsg);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    Swal.fire('Berhasil!', data.message || 'Permission berhasil diperbarui.', 'success');
+                    $('#editForm')[0].reset();
+                    $('#editModal').modal('hide');
+                    loadMenuTable();
+                })
+                .catch(err => Swal.fire('Gagal!', err.message, 'error'))
+                .finally(() => $('#saveEditBtn').prop('disabled', false));
+            });
+            
+            // ✅ Delete Menu
+            $('#menuTable').on('click', '.btn-delete', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: 'Yakin ingin menghapus menu ini?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        fetch(`/api/menu/${id}/`, {
+                            method: 'DELETE',
+                            credentials: 'include',
+                            headers: { 'X-CSRFToken': window.csrfToken }
+                        })
+                        .then(() => {
+                            Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
+                            loadMenuTable(); // ← reload via ajax
+                        })
+                        .catch(() => Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus.', 'error'));
+                    }
+                });
+            });
+            
+            // ✅ Fungsi reset form
+            function resetFormFields(formId, dropdownContainerId) {
+                const form = document.querySelector(formId);
+                if (!form) return;
+                
+                form.querySelectorAll('input, select, textarea').forEach(el => {
+                    if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+                    else el.value = '';
+                });
+                
+                $(dropdownContainerId).html('');
+                permissionDropdownIndex = 0;
+                
+                if ($.fn.select2) $(form).find('select').val(null).trigger('change');
+            }
+            $('#resetCreateFormBtn').on('click', e => { e.preventDefault(); resetFormFields('#createForm', '#dropdownContainer'); });
+            $('#resetEditFormBtn').on('click',  e => { e.preventDefault(); resetFormFields('#editForm', '#editDropdownContainer'); });
+        });
+    </script>
+    
+    {% endblock %}
+    
+    {% endblock %}

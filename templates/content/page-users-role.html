@@ -1,0 +1,726 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %} Admin-Role {% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Admin</a></li>
+                            <li class="breadcrumb-item active">Role</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="base-style">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center mt-3">
+                                <h4>Role</h4>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+                                    <i class="fa-regular fa-square-plus mr-1"></i> Tambah Data
+                                </button>
+                            </div>
+                            <div class="card-content collapse show">
+                                <div class="card-body card-dashboard">
+                                    <div class="table-responsive">
+                                        <table id="roleTable" class="display table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Name</th>
+                                                    <th>Display Name</th>
+                                                    <th>Description</th>
+                                                    <th>Menu</th>
+                                                    <th>Permissions</th>
+                                                    <th>Created At</th>
+                                                    <th class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- View Modal -->
+                            <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="viewModalLabel">Detail Role</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <table class="table table-bordered">
+                                                <tr><th>ID</th><td id="modalId"></td></tr>
+                                                <tr><th>Name</th><td id="modalName"></td></tr>
+                                                <tr><th>Display Name</th><td id="modalDisplayName"></td></tr>
+                                                <tr><th>Description</th><td id="modalDescription"></td></tr>
+                                                <tr><th>Created At</th><td id="modalCreatedAt"></td></tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Edit Modal -->
+                            <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editModalLabel">Edit Role</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form id="editForm">
+                                                <div class="form-group">
+                                                    <label for="editName">Name</label>
+                                                    <input type="text" class="form-control" id="editName" name="name" placeholder="Name" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="editdisplayname">Display Name</label>
+                                                    <input type="text" class="form-control" id="editdisplayname" name="display_name" placeholder="Display Name">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="editdescription">Description</label>
+                                                    <input type="text" class="form-control" id="editdescription" name="description" placeholder="Description">
+                                                </div>
+                                                
+                                                <div class="form-group mb-3">
+                                                    <label class="form-label">Pilih Menu</label>
+                                                    
+                                                    <div class="dropdown w-100">
+                                                        <button id="editMenuDropdown" class="btn btn-light border w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            -- Pilih Menu --
+                                                        </button>
+                                                        
+                                                        <div class="dropdown-menu w-100 p-2">
+                                                            <input type="text" id="editMenuSearch" class="form-control mb-2" placeholder="Cari menu...">
+                                                            <ul id="editMenuList" class="list-unstyled mb-0"></ul>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- select asli -->
+                                                    <select id="editMenuSelect" class="d-none">
+                                                        <option value="">-- Pilih Menu --</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group mt-2">
+                                                    <button type="button" class="btn btn-info" id="loadEditMenuPermissions">
+                                                        <i class="fa fa-eye"></i> Tampilkan Permission dari Menu Ini
+                                                    </button>
+                                                </div>
+                                                
+                                                <div class="form-group mt-3">
+                                                    <label>Menu yang Dipilih</label>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-bordered" id="editSelectedMenusTable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>#</th>
+                                                                    <th>Menu Name</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr class="placeholder-row">
+                                                                    <td colspan="2" class="text-center text-muted">Belum ada menu dipilih</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="form-group mt-2">
+                                                    <label>Permissions per Menu</label>
+                                                    <input type="text" class="form-control mb-2" id="editPermissionSearch" placeholder="Cari menu...">
+                                                    <div id="editPermissionBlocks" style="max-height: 300px; overflow-y: auto;">
+                                                        <!-- JS inject -->
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-3 text-end">
+                                                    <button type="button" class="btn btn-primary" id="editSaveBtn">Simpan Perubahan</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Create Modal -->
+                            <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="createModalLabel">Tambah Role</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup" id="createModalClose"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form id="createForm">
+                                                <div class="form-group">
+                                                    <label for="createName">Name</label>
+                                                    <input type="text" class="form-control" id="createName" name="name" placeholder="Name" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="createdisplayname">Display Name</label>
+                                                    <input type="text" class="form-control" id="createdisplayname" name="display_name" placeholder="Display Name">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="createdescription">Description</label>
+                                                    <input type="text" class="form-control" id="createdescription" name="description" placeholder="Description">
+                                                </div>
+                                                
+                                                <div class="form-group mb-3">
+                                                    <label class="form-label">Pilih Menu</label>
+                                                    
+                                                    <div class="dropdown w-100">
+                                                        <button id="createMenuDropdown" class="btn btn-light border w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            -- Pilih Menu --
+                                                        </button>
+                                                        
+                                                        <div class="dropdown-menu w-100 p-2">
+                                                            <input type="text" id="createMenuSearch" class="form-control mb-2" placeholder="Cari menu...">
+                                                            <ul id="createMenuList" class="list-unstyled mb-0"></ul>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- select asli, disembunyikan -->
+                                                    <select id="createMenuSelect" class="d-none">
+                                                        <option value="">-- Pilih Menu --</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group mt-2">
+                                                    <button type="button" class="btn btn-info" id="loadCreateMenuPermissions">
+                                                        <i class="fa fa-eye"></i> Tampilkan Permission dari Menu Ini
+                                                    </button>
+                                                </div>
+                                                
+                                                <div class="form-group mt-3">
+                                                    <label>Menu yang Dipilih</label>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-bordered" id="createSelectedMenusTable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>#</th>
+                                                                    <th>Menu Name</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr class="placeholder-row">
+                                                                    <td colspan="2" class="text-center text-muted">Belum ada menu dipilih</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="form-group mt-2">
+                                                    <label>Permissions per Menu</label>
+                                                    <input type="text" class="form-control mb-2" id="createPermissionSearch" placeholder="Cari menu...">
+                                                    <div id="createPermissionBlocks" style="max-height: 300px; overflow-y: auto;">
+                                                        <!-- JS inject -->
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-3 text-end">
+                                                    <button id="createSaveBtn" type="button" class="btn btn-primary">Simpan</button>
+                                                    <button id="createResetBtn" class="btn btn-secondary">Reset</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Modals -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+<!-- END: Content-->
+
+{% block script %}
+<script>
+    (function() {
+        const apiUrlList   = '/api/admin/roles/';
+        const apiUrlDetail = '/api/roles/';
+        const apiUrlMenuPermission = (roleId, menuId) => `/api/roles/${roleId}/menu/${menuId}/`;
+        let editingId = null;
+        
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        }
+        
+        async function fetchWithAuth(url, options = {}) {
+            const defaultHeaders = { 'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/json' };
+            options.headers = { ...defaultHeaders, ...(options.headers || {}) };
+            return fetch(url, options);
+        }
+        
+        function safeField(v){ return (v!==null && v!==undefined && v!=='') ? v : '-' }
+        function safeDateDisplay(d){ return (d && d!=='null') ? d : '-' }
+        function formatPermissions(arr){ return (Array.isArray(arr) && arr.length) ? arr.map(p=>p.name||'undefined').join(', ') : '-' }
+        function formatMenus(arr){ return (Array.isArray(arr) && arr.length) ? arr.map(m=>`<span class="badge bg-info">${m.name||'undefined'}</span>`).join(' ') : '-' }
+        
+        function addPermissionBlock(menu, permissions, targetContainerId) {
+            const container = document.getElementById(targetContainerId);
+            if (document.getElementById(`permissionBlock_${menu.id}`)) {
+                Swal.fire('Info', 'Menu ini sudah dipilih.', 'info'); return;
+            }
+            const permissionBlock = document.createElement('div');
+            permissionBlock.classList.add('border','p-2','mb-2');
+            permissionBlock.id = `permissionBlock_${menu.id}`;
+            permissionBlock.innerHTML = `
+      <div class="d-flex justify-content-between align-items-center">
+        <h6>${menu.name || 'undefined'}</h6>
+        <button type="button" class="btn btn-sm btn-danger" onclick="removePermissionBlock(${menu.id}, '${targetContainerId}')">
+          <i class="fa fa-trash"></i> Hapus
+        </button>
+      </div>
+      <div class="form-check" style="max-height:200px;overflow-y:auto;">
+        ${
+            (Array.isArray(permissions) && permissions.length)
+            ? permissions.map(p => `
+              <div>
+                <input class="form-check-input" type="checkbox" value="${p.id}" id="${targetContainerId}_checkbox_${menu.id}_${p.id}" ${p.is_checked ? 'checked':''}>
+                <label class="form-check-label" for="${targetContainerId}_checkbox_${menu.id}_${p.id}">${p.name||'undefined'}</label>
+              </div>`).join('')
+            : '<div class="text-muted">Tidak ada permission tersedia.</div>'
+            }
+      </div>`;
+            container.appendChild(permissionBlock);
+            
+            const tableBody = document.querySelector(`#${targetContainerId.replace('PermissionBlocks','SelectedMenusTable')} tbody`);
+            if (tableBody.querySelector('.placeholder-row')) tableBody.innerHTML = '';
+            tableBody.insertAdjacentHTML('beforeend',
+            `<tr id="menuRow_${menu.id}"><td>${tableBody.children.length + 1}</td><td>${menu.name||'undefined'}</td></tr>`);
+        }
+        
+        async function createRole() {
+            try {
+                const name = document.getElementById('createName').value.trim();
+                const displayName = document.getElementById('createdisplayname').value.trim();
+                const description = document.getElementById('createdescription').value.trim();
+                
+                const selectedPermissionIds = [];
+                document.querySelectorAll('#createPermissionBlocks input[type="checkbox"]:checked')
+                .forEach(cb => selectedPermissionIds.push(parseInt(cb.value)));
+                
+                const payload = { name, display_name: displayName, description, permission_ids: selectedPermissionIds };
+                const res = await fetchWithAuth(apiUrlList, { method:'POST', body: JSON.stringify(payload) });
+                
+                if (res.ok) {
+                    const result = await res.json();
+                    Swal.fire('Sukses', result.message || 'Role berhasil dibuat.', 'success');
+                    document.getElementById('createModalClose')?.click();
+                    loadRoles();
+                    resetCreateForm();
+                } else {
+                    const err = await res.json().catch(()=>({}));
+                    Swal.fire('Gagal', err.message || 'Gagal membuat role.', 'error');
+                }
+            } catch (e) {
+                console.error('❌ createRole:', e);
+                Swal.fire('Error', 'Terjadi kesalahan saat membuat role.', 'error');
+            }
+        }
+        
+        function initEditMenuSearch() {
+            const searchInput = document.getElementById('editMenuSearch');
+            if (!searchInput) return;
+            searchInput.addEventListener('keyup', function(){
+                const keyword = this.value.toLowerCase();
+                $('#editMenuList .dropdown-item').each(function() {
+                    $(this).toggle($(this).text().toLowerCase().includes(keyword));
+                });
+            });
+        }
+        
+        async function updateRole() {
+            try {
+                if (!editingId) return Swal.fire('Error','Tidak ada role yang dipilih.','error');
+                
+                const name = document.getElementById('editName').value.trim();
+                const displayName = document.getElementById('editdisplayname').value.trim();
+                const description = document.getElementById('editdescription').value.trim();
+                
+                const selectedPermissionIds = [];
+                document.querySelectorAll('#editPermissionBlocks input[type="checkbox"]:checked')
+                .forEach(cb => selectedPermissionIds.push(parseInt(cb.value)));
+                
+                const payload = { name, display_name: displayName, description, permission_ids: selectedPermissionIds };
+                const res = await fetchWithAuth(apiUrlDetail + editingId + '/', { method:'PUT', body: JSON.stringify(payload) });
+                
+                let result; try { result = await res.json(); } catch { result = {}; }
+                if (res.ok) {
+                    Swal.fire('Sukses', result.message || 'Role berhasil diperbarui.', 'success').then(()=>{
+                        document.getElementById('editModalClose')?.click();
+                        loadRoles();
+                        window.location.href = '/admin/role/';
+                    });
+                } else {
+                    Swal.fire('Gagal', result.message || 'Gagal memperbarui role.', 'error');
+                }
+            } catch (e) {
+                console.error('❌ updateRole:', e);
+                Swal.fire('Error','Terjadi kesalahan saat memperbarui role.','error');
+            }
+        }
+        
+        function resetCreateForm() {
+            document.getElementById('createName').value = '';
+            document.getElementById('createdisplayname').value = '';
+            document.getElementById('createdescription').value = '';
+            document.getElementById('createMenuSelect').value = '';
+            document.getElementById('createPermissionBlocks').innerHTML = '';
+            document.querySelector('#createSelectedMenusTable tbody').innerHTML =
+            '<tr class="placeholder-row"><td colspan="2" class="text-center text-muted">Belum ada menu dipilih</td></tr>';
+        }
+        
+        // =====================  SERVER-SIDE DATATABLES  =====================
+        async function loadRoles() {
+            const $tbl = $('#roleTable');
+            if ($.fn.DataTable.isDataTable($tbl)) {
+                $tbl.DataTable().ajax.reload(null, false);
+                return;
+            }
+            
+            $tbl.DataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                ordering: true,
+                order: [[0,'asc']],
+                paging: true,
+                lengthChange: true,
+                pageLength: 10,
+                lengthMenu: [[5,10,25,50,100],[5,10,25,50,100]],
+                language: {
+                    search: "Cari:",
+                    lengthMenu: "Tampilkan _MENU_ data per halaman",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                    infoFiltered: "(disaring dari total _MAX_ data)",
+                    zeroRecords: "Tidak ditemukan data yang sesuai",
+                    paginate: { first:"Pertama", last:"Terakhir", next:"Next", previous:"Previous" },
+                    processing: "Memuat..."
+                },
+                columns: [
+                { data: 'id',            name:'id',            title:'ID' },
+                { data: 'name',          name:'name',          title:'Name' },
+                { data: 'display_name',  name:'display_name',  title:'Display Name',
+                render: (d)=> safeField(d) },
+                { data: 'description',   name:'description',   title:'Deskripsi',
+                render: (d)=> safeField(d) },
+                { data: 'menus',         orderable:false, searchable:false, title:'Menus',
+                render: (d)=> formatMenus(d) },
+                { data: 'permissions',   orderable:false, searchable:false, title:'Permissions',
+                render: (d)=> formatPermissions(d) },
+                { data: 'created_at',    name:'created_at',    title:'Dibuat',
+                render: (d)=> safeDateDisplay(d) },
+                { data: null, orderable:false, searchable:false, title:'Actions',
+                render: (row)=> `
+        <div class="text-center">
+          <button class="btn btn-sm btn-info me-1" onclick="viewRole(${row.id})"><i class="fas fa-solid fa-eye"></i></button>
+          <button class="btn btn-sm btn-warning me-1" onclick="editRole(${row.id})"><i class="fas fa-solid fa-pen"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="deleteRole(${row.id})"><i class="fas fa-solid fa-trash-can"></i></button>
+        </div>`
+            }
+            ],
+            ajax: (dt, callback) => {
+                const length = dt.length || 10;
+                const start  = dt.start  || 0;
+                const pageNo = Math.floor(start/length) + 1;
+                
+                let ordering = 'id';
+                if (dt.order && dt.order.length) {
+                    const o = dt.order[0];
+                    const colName = dt.columns[o.column].name;
+                    if (['id','name','display_name','description','created_at'].includes(colName)) {
+                        ordering = (o.dir==='desc' ? '-' : '') + colName;
+                    }
+                }
+                const q = (dt.search && dt.search.value || '').trim();
+                
+                const params = new URLSearchParams({ page:String(pageNo), page_size:String(length), ordering });
+                if (q) params.set('search', q);
+                
+                fetchWithAuth(`${apiUrlList}?${params.toString()}`, { method:'GET' })
+                .then(r => r.json())
+                .then(json => {
+                    let items = [], count = 0;
+                    if (Array.isArray(json)) { count = json.length; items = json.slice(start, start+length); }
+                    else if (Array.isArray(json.data)) { count = json.recordsTotal || json.data.length; items = json.data; }
+                    else { count = json.count || 0; items = json.results || []; }
+                    
+                    callback({
+                        draw: dt.draw,
+                        recordsTotal: count,
+                        recordsFiltered: count,
+                        data: items
+                    });
+                })
+                .catch(err => {
+                    console.error('❌ loadRoles ajax:', err);
+                    callback({ draw: dt.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+                });
+            }
+        });
+    }
+    // ====================================================================
+    
+    async function loadMenuOptions(selectId) {
+        try {
+            const res = await fetchWithAuth('/api/menu/all/');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const menus = await res.json();
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">-- Pilih Menu --</option>';
+            if (Array.isArray(menus)) {
+                menus.forEach(menu => {
+                    select.insertAdjacentHTML('beforeend', `<option value="${menu.id}">${menu.name || 'undefined'}</option>`);
+                });
+            }
+        } catch (e) { console.error('❌ loadMenuOptions:', e); }
+    }
+    
+    async function loadMenuPermissionsForEdit(menuId, roleId, targetContainerId) {
+        try {
+            const res = await fetchWithAuth(apiUrlMenuPermission(roleId, menuId));
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const permissions = await res.json();
+            
+            const resMenu = await fetchWithAuth('/api/menu/all/');
+            const menus = await resMenu.json();
+            const selectedMenu = menus.find(m => m.id == menuId);
+            if (!selectedMenu) return Swal.fire('Error','Menu tidak ditemukan.','error');
+            
+            addPermissionBlock(selectedMenu, permissions, targetContainerId);
+        } catch (e) { console.error('❌ loadMenuPermissionsForEdit:', e); }
+    }
+    
+    function removePermissionBlock(menuId, targetContainerId) {
+        Swal.fire({
+            title: 'Hapus menu ini?',
+            text: 'Semua permission dalam menu ini akan dihapus dari role.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, hapus',
+            cancelButtonText: 'Batal'
+        }).then(result => {
+            if (!result.isConfirmed) return;
+            
+            document.getElementById(`permissionBlock_${menuId}`)?.remove();
+            document.getElementById(`menuRow_${menuId}`)?.remove();
+            
+            const tableId = `#${targetContainerId.replace('PermissionBlocks','SelectedMenusTable')} tbody`;
+            const tableBody = document.querySelector(tableId);
+            
+            if (tableBody && !tableBody.querySelector('tr')) {
+                tableBody.innerHTML =
+                `<tr class="placeholder-row">
+                <td colspan="2" class="text-center text-muted">Belum ada menu dipilih</td>
+              </tr>`;
+                }
+            });
+        }
+        window.removePermissionBlock = removePermissionBlock;
+        
+        window.editRole = async function(id){
+            try{
+                const res = await fetchWithAuth(apiUrlDetail + id + '/');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const role = await res.json();
+                editingId = id;
+                
+                document.getElementById('editName').value = role.name || '';
+                document.getElementById('editdisplayname').value = role.display_name || '';
+                document.getElementById('editdescription').value = role.description || '';
+                
+                await loadMenuOptions('editMenuSelect');
+                rebuildEditMenuDropdown();
+                
+                const permissionContainer = document.getElementById('editPermissionBlocks');
+                const tableBody = document.querySelector('#editSelectedMenusTable tbody');
+                permissionContainer.innerHTML = '';
+                tableBody.innerHTML = '<tr class="placeholder-row"><td colspan="2" class="text-center text-muted">Belum ada menu dipilih</td></tr>';
+                
+                if (Array.isArray(role.menus) && role.menus.length) {
+                    tableBody.innerHTML = '';
+                    role.menus.forEach(menu => loadMenuPermissionsForEdit(menu.id, editingId, 'editPermissionBlocks'));
+                }
+                
+                new bootstrap.Modal(document.getElementById('editModal')).show();
+            }catch(e){ console.error('❌ editRole:', e); }
+        };
+        
+        window.viewRole = async function(id){
+            try{
+                const res = await fetchWithAuth(apiUrlDetail + id + '/');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const role = await res.json();
+                document.getElementById('modalId').innerText = safeField(role.id);
+                document.getElementById('modalName').innerText = safeField(role.name);
+                document.getElementById('modalDisplayName').innerText = safeField(role.display_name);
+                document.getElementById('modalDescription').innerText = safeField(role.description);
+                document.getElementById('modalCreatedAt').innerText = safeDateDisplay(role.created_at);
+                new bootstrap.Modal(document.getElementById('viewModal')).show();
+            }catch(e){ console.error('❌ viewRole:', e); }
+        };
+        
+        window.deleteRole = async function(id){
+            const confirmDelete = await Swal.fire({
+                title: 'Yakin hapus?', text:'Data role ini akan dihapus permanen.',
+                icon:'warning', showCancelButton:true, confirmButtonText:'Ya, hapus', cancelButtonText:'Batal'
+            });
+            if (!confirmDelete.isConfirmed) return;
+            try{
+                const res = await fetchWithAuth(apiUrlDetail + id + '/', { method:'DELETE' });
+                if (res.ok) { Swal.fire('Sukses','Role berhasil dihapus.','success'); loadRoles(); }
+                else {
+                    const err = await res.json().catch(()=>({}));
+                    Swal.fire('Gagal', err.error || 'Gagal menghapus role.','error');
+                }
+            }catch(e){ console.error('❌ deleteRole:', e); Swal.fire('Error','Terjadi kesalahan saat menghapus role.','error'); }
+        };
+        
+        $(function(){
+            loadRoles();
+            
+            loadMenuOptions('createMenuSelect').then(() => {
+                rebuildCreateMenuDropdown();
+                initCreateMenuSearch();
+            });
+            
+            loadMenuOptions('editMenuSelect').then(() => {
+                rebuildEditMenuDropdown();
+                initEditMenuSearch();
+            });
+            
+            $('#loadEditMenuPermissions').on('click', async ()=>{
+                const menuId = document.getElementById('editMenuSelect').value;
+                if (!editingId || !menuId) return Swal.fire('Error','Pilih menu terlebih dahulu.','warning');
+                await loadMenuPermissionsForEdit(menuId, editingId, 'editPermissionBlocks');
+            });
+            
+            $('#loadCreateMenuPermissions').on('click', async ()=>{
+                const menuId = document.getElementById('createMenuSelect').value;
+                if (!menuId) return Swal.fire('Error','Pilih menu terlebih dahulu.','warning');
+                await loadMenuPermissionsForEdit(menuId, 0, 'createPermissionBlocks');
+            });
+            
+            document.getElementById('createSaveBtn')?.addEventListener('click', async ()=>{ await createRole(); });
+            document.getElementById('editSaveBtn')?.addEventListener('click', async ()=>{ await updateRole(); });
+            document.getElementById('createResetBtn')?.addEventListener('click', ()=>{ resetCreateForm(); });
+        });
+        
+        function rebuildCreateMenuDropdown() {
+            const select = document.getElementById('createMenuSelect');
+            const list = document.getElementById('createMenuList');
+            if (!select || !list) return;
+            
+            list.innerHTML = '';
+            
+            Array.from(select.options).forEach(opt => {
+                if (!opt.value) return;
+                
+                const item = document.createElement('li');
+                item.innerHTML = `<button class="dropdown-item" type="button" data-value="${opt.value}">${opt.text}</button>`;
+                list.appendChild(item);
+            });
+            
+            $('#createMenuList .dropdown-item').off('click').on('click', function () {
+                const value = this.dataset.value;
+                const text  = this.innerText;
+                
+                $('#createMenuSelect').val(value).trigger('change');
+                $('#createMenuDropdown').text(text);
+            });
+        }
+        
+        function initCreateMenuSearch() {
+            const searchInput = document.getElementById('createMenuSearch');
+            if (!searchInput) return;
+            
+            searchInput.addEventListener('keyup', function(){
+                const keyword = this.value.toLowerCase();
+                $('#createMenuList .dropdown-item').each(function() {
+                    $(this).toggle($(this).text().toLowerCase().includes(keyword));
+                });
+            });
+        }
+        
+        function rebuildEditMenuDropdown() {
+            const select = document.getElementById('editMenuSelect');
+            const list = document.getElementById('editMenuList');
+            if (!select || !list) return;
+            
+            list.innerHTML = '';
+            
+            Array.from(select.options).forEach(opt => {
+                if (!opt.value) return;
+                
+                const item = document.createElement('li');
+                item.innerHTML = `<button class="dropdown-item" type="button" data-value="${opt.value}">${opt.text}</button>`;
+                list.appendChild(item);
+            });
+            
+            $('#editMenuList .dropdown-item').off('click').on('click', function () {
+                const value = this.dataset.value;
+                const text  = this.innerText;
+                
+                $('#editMenuSelect').val(value).trigger('change');
+                $('#editMenuDropdown').text(text);
+            });
+        }
+        
+        document.getElementById('editPermissionSearch')?.addEventListener('keyup', function(){
+            const keyword = this.value.toLowerCase();
+            
+            document
+            .querySelectorAll('#editPermissionBlocks [id^="permissionBlock_"]')
+            .forEach(block => {
+                const titleEl = block.querySelector('h6');
+                const title   = (titleEl?.innerText || '').toLowerCase();
+                
+                block.style.display = !keyword || title.includes(keyword) ? '' : 'none';
+            });
+        });
+        
+        document.getElementById('createPermissionSearch')?.addEventListener('keyup', function(){
+            const keyword = this.value.toLowerCase();
+            
+            document
+            .querySelectorAll('#createPermissionBlocks [id^="permissionBlock_"]')
+            .forEach(block => {
+                const titleEl = block.querySelector('h6');
+                const title   = (titleEl?.innerText || '').toLowerCase();
+                
+                block.style.display = !keyword || title.includes(keyword) ? '' : 'none';
+            });
+        });
+        
+    })();
+</script>
+{% endblock %}
+
+{% endblock %}

@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Operator - Activity Log MU{% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-6 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="#">Operator</a></li>
+                            <li class="breadcrumb-item active">Activity Log MU</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <!-- Upload log table -->
+            <section id="upload-log">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <h4>Activity Log MU</h4>
+                        </div>
+                        <div class="row justify-content-end align-items-end g-2">
+                            <div class="col-auto">
+                                <div class="form-group mb-0">
+                                    <label for="startDate" class="form-label small text-muted">From</label>
+                                    <input type="date" id="startDate" class="form-control form-control-sm" placeholder="Tanggal Awal">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-group mb-0">
+                                    <label for="endDate" class="form-label small text-muted">To</label>
+                                    <input type="date" id="endDate" class="form-control form-control-sm" placeholder="Tanggal Akhir">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-group mb-0">
+                                    <label for="branchName" class="form-label small text-muted">Branch</label>
+                                    <select id="branchName" class="form-control form-control-sm">
+                                        
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <button id="filterBtn" class="btn btn-primary btn-sm mt-3">Filter</button>
+                                <button id="resetFilterBtn" class="btn btn-warning btn-sm mt-3">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="loading-message" style="display: none; text-align: center; margin: 30px auto; display: flex; flex-direction: column; align-items: center;">
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                        <div style="margin-top: 10px; font-weight: bold;">Loading data...</div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="uploadLogTable" class="display table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Pengguna</th>
+                                            <th>Nama Data</th>
+                                            <th>Unduh Data</th>
+                                            <th>Status</th>
+                                            <th>Cabang</th>
+                                            <th>Waktu Unggah</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="data-body">
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<!-- END: Content-->
+
+<div class="sidenav-overlay"></div>
+<div class="drag-target"></div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function () {
+        const uploadLogTable = $('#uploadLogTable').DataTable({
+            serverSide: true,
+            processing: true,
+            responsive: true,
+            autoWidth: false,
+            pageLength: 10,
+            ajax: {
+                url: '/api/upload-log-mu/',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+                    'X-CSRFToken': getCSRFToken()
+                },
+                data: function (d) {
+                    d.start_date = $('#startDate').val();
+                    d.end_date = $('#endDate').val();
+                    d.branch_name = $('#branchName').val();
+                },
+                dataSrc: 'data',
+                error: function (xhr, error, thrown) {
+                    Swal.fire('Error', 'Gagal memuat data upload log.', 'error');
+                    console.error('❌ AJAX error:', error, thrown);
+                }
+            },
+            columns: [
+            { data: 'no', orderable: false },
+            { data: 'user_name' },
+            { data: 'filename' },
+            { data: 'download_link', orderable: false },
+            { data: 'status_badge', orderable: false },
+            { data: 'branch_name' },
+            { data: 'timestamp' }
+            ],
+            language: {
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ entri",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                infoEmpty: "Menampilkan 0 sampai 0 dari 0 entri",
+                zeroRecords: "Tidak ditemukan data yang cocok",
+                paginate: {
+                    previous: "Sebelumnya",
+                    next: "Berikutnya"
+                }
+            }
+        });
+        
+        // Tombol Filter
+        $('#filterBtn').click(function () {
+            uploadLogTable.ajax.reload();
+        });
+        
+        // Tombol Reset
+        $('#resetFilterBtn').click(function () {
+            $('#startDate').val('');
+            $('#endDate').val('');
+            $('#branchName').val('');
+            uploadLogTable.ajax.reload();
+        });
+        
+        // Load daftar branch ke dropdown
+        async function loadBranches() {
+            try {
+                const res = await fetch('/api/branches/', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    credentials: 'include'
+                });
+                
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.error(`❌ Gagal ambil branches:`, text);
+                    Swal.fire('Error', 'Gagal memuat daftar branch.', 'error');
+                    return;
+                }
+                
+                const branches = await res.json();
+                const branchSelect = $('#branchName');
+                
+                branchSelect.empty();
+                branchSelect.append(`<option value="">-- Semua Cabang --</option>`);
+                branches.forEach(branch => {
+                    branchSelect.append(`<option value="${branch.branch_name}">${branch.branch_name}</option>`);
+                });
+                
+            } catch (err) {
+                console.error('❌ Error ambil branch:', err);
+                Swal.fire('Error', 'Terjadi kesalahan saat load branch.', 'error');
+            }
+        }
+        
+        $('#filterBtn').click(function () {
+            $('#loading-message').show();
+            uploadLogTable.ajax.reload();
+        });
+        
+        $('#resetFilterBtn').click(function () {
+            $('#startDate').val('');
+            $('#endDate').val('');
+            $('#branchName').val('');
+            $('#loading-message').show();
+            uploadLogTable.ajax.reload();
+        });
+        
+        // Auto-hide spinner saat data AJAX selesai di-load
+        uploadLogTable.on('xhr.dt', function () {
+            $('#loading-message').hide();
+        });
+        
+        // Ambil CSRF Token dari cookie
+        function getCSRFToken() {
+            let token = null;
+            document.cookie.split(';').forEach(cookie => {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') token = decodeURIComponent(value);
+            });
+            return token;
+        }
+        
+        // Panggil saat load halaman
+        loadBranches();
+    });
+</script>
+{% endblock %}
