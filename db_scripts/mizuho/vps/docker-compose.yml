@@ -1,0 +1,58 @@
+# Deploy instance Mizuho di satu VPS (Postgres + gunicorn + nginx).
+# Struktur di server:
+#   /opt/efidusia-mizuho/app     -> clone repo SLI-Mizuho (build context)
+#   /opt/efidusia-mizuho/deploy  -> file ini, nginx.conf, settings_vps.py, .env (secret, tidak di repo)
+name: efidusia-mizuho
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: ../app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: EFidusia.settings_vps
+      DB_HOST: db
+      DB_PORT: "5432"
+    command: gunicorn EFidusia.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 180
+    volumes:
+      - ./settings_vps.py:/app/EFidusia/settings_vps.py:ro
+      - media:/app/media
+      # template akta selalu mengikuti repo (git pull), bukan isi volume
+      - ../app/media/templatesakta:/app/media/templatesakta:ro
+      - ../app/media/templatesakta-salinan:/app/media/templatesakta-salinan:ro
+      - ../app/media/templatesakta-mu:/app/media/templatesakta-mu:ro
+      - ../app/media/templatesakta-mu-salinan:/app/media/templatesakta-mu-salinan:ro
+      - ../app/media/templatesakta-pf:/app/media/templatesakta-pf:ro
+      - ../app/media/templatesakta-pf-salinan:/app/media/templatesakta-pf-salinan:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  media:

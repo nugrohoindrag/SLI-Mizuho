@@ -42,6 +42,7 @@ k6
 *md
 !docs/PNBP_PRODUCTION_DEPLOYMENT.md
 *sh
+!db_scripts/**/*.sh
 
 # Mizuho: rekaman meeting & file contoh klien
 *.mp4
